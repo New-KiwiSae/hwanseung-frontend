@@ -1,4 +1,19 @@
 /* Header.css */
+:root {
+    /* 환승마켓 Signature Theme */
+    --bg-color: #f4f6f8;            /* Very light gray background */
+    --form-bg: #ffffff;             /* Clean white for forms */
+    --text-main: #333333;           /* Dark gray for primary text */
+    --text-secondary: #888888;      /* Lighter text */
+    --accent-color: #00d26a;        /* Vibrant Green from mockups */
+    --accent-hover: #00c060;        /* Slightly darker green for hover */
+    --white: #ffffff;
+    
+    /* Modern, soft drop shadows */
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
 
 .header-nav {
   position: sticky;
@@ -289,6 +304,33 @@
   transform: scale(0.97);
 }
 
+.login-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--brand-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px var(--brand-soft);
+  white-space: nowrap;
+}
+
+.login-btn:hover {
+  background: var(--brand-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 210, 122, 0.25);
+}
+
+.login-btn:active {
+  transform: scale(0.97);
+}
+
 .user-avatar {
   width: 36px;
   height: 36px;
@@ -340,3 +382,72 @@
     justify-content: center;
   }
 }
+
+/* 내프로필보기 시작 */
+.user-profile-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* 드롭다운 박스 스타일 */
+.profile-dropdown {
+  position: absolute;
+  top: 100%; /* 버튼 바로 아래 */
+  right: 0;   /* 오른쪽 정렬 */
+  width: 160px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 8px 0;
+  padding-top: 10px;
+  z-index: 1000;
+  border: 1px solid #eee;
+}
+
+/* 화살표 느낌의 꼬리 (선택 사항) */
+.profile-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 15px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  transform: rotate(45deg);
+  border-left: 1px solid #eee;
+  border-top: 1px solid #eee;
+}
+
+/* 각 메뉴 아이템 */
+.dropdown-item {
+  padding: 10px 16px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.2s;
+}
+
+.dropdown-item i {
+  width: 16px;
+  color: #666;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: var(--accent-hover); /* 당근마켓 느낌의 포인트 컬러 */
+}
+
+.dropdown-item.logout-item {
+  color: #ff4d4f;
+}
+
+.profile-dropdown hr {
+  margin: 4px 0;
+  border: none;
+  border-top: 1px solid #eee;
+}
+
+/* 내프로필보기 끝 */
