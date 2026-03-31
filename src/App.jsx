@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import MainPage from './pages/MainPage';
+import ProductCreatePage from "./pages/Product/ProductCreatePage";
 import './index.css';
 
 function App() {
@@ -13,6 +14,8 @@ function App() {
       <main style={{ flexGrow: 1 }}>
         <Routes>
           <Route path="/" element={<MainPage />} />
+          <Route path="/products/create" element={<ProductCreatePage />} />
+
         </Routes>
       </main>
 
