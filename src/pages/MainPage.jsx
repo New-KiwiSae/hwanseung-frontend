@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './MainPage.css';
+import AdminChat from '../components/AdminChat';
 
 /* ── 데이터 ── */
 const categories = [
@@ -399,26 +400,27 @@ const MainPage = () => {
                         </div>
                     </div>
 
-                    <div className="trust-stats-bar">
-                        <div className="trust-stat">
-                            <span className="trust-stat-value">99.8%</span>
-                            <span className="trust-stat-label">매너 지수 만족도</span>
-                        </div>
-                        <div className="trust-stat-divider"></div>
-                        <div className="trust-stat">
-                            <span className="trust-stat-value">0.01%</span>
-                            <span className="trust-stat-label">사기 발생률</span>
-                        </div>
-                        <div className="trust-stat-divider"></div>
-                        <div className="trust-stat">
-                            <span className="trust-stat-value">2.4M</span>
-                            <span className="trust-stat-label">월간 활성 사용자</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
+          <div className="trust-stats-bar">
+            <div className="trust-stat">
+              <span className="trust-stat-value">99.8%</span>
+              <span className="trust-stat-label">매너 지수 만족도</span>
+            </div>
+            <div className="trust-stat-divider"></div>
+            <div className="trust-stat">
+              <span className="trust-stat-value">0.01%</span>
+              <span className="trust-stat-label">사기 발생률</span>
+            </div>
+            <div className="trust-stat-divider"></div>
+            <div className="trust-stat">
+              <span className="trust-stat-value">2.4M</span>
+              <span className="trust-stat-label">월간 활성 사용자</span>
+            </div>
+          </div>
         </div>
-    );
+      </section>
+      <AdminChat />
+    </div>
+  );
 };
 
 export default MainPage;
