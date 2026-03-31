@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import './Header.css';
 
 const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const searchRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -94,7 +96,7 @@ const Header = () => {
             <i className="far fa-user"></i>
           </button>
 
-          <button className="sell-btn">
+          <button className="sell-btn" onClick={() => navigate("/products/create")}>
             <i className="fas fa-plus"></i>
             <span>판매하기</span>
           </button>

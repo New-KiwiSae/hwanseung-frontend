@@ -6,9 +6,11 @@ export default function ProductCreatePage() {
         title: "",
         category: "",
         price: "",
+        location: "",
         content: "",
     });
 
+    const [imageFile, setImageFile] = useState(null);
     const [imageName, setImageName] = useState("");
 
     const handleChange = (e) => {
@@ -23,13 +25,84 @@ export default function ProductCreatePage() {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
+
+        setImageFile(file);
         setImageName(file.name);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(form);
-        alert("상품 등록 API 연결 전입니다.");
+
+        try {
+            // 🔒 나중에 이미지 업로드 기능 붙일 때 다시 사용할 FormData 방식
+            // const formData = new FormData();
+            //
+            // formData.append(
+            //     "product",
+            //     new Blob(
+            //         [
+            //             JSON.stringify({
+            //                 title: form.title,
+            //                 category: form.category,
+            //                 price: Number(form.price),
+            //                 location: form.location,
+            //                 content: form.content,
+            //             }),
+            //         ],
+            //         { type: "application/json" }
+            //     )
+            // );
+            //
+            // if (imageFile) {
+            //     formData.append("image", imageFile);
+            // }
+            //
+            // const response = await fetch("http://localhost/api/products", {
+            //     method: "POST",
+            //     body: formData,
+            // });
+
+            // ✅ 현재는 텍스트 데이터만 JSON으로 전송
+            const response = await fetch("http://localhost/api/products", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    title: form.title,
+                    category: form.category,
+                    price: Number(form.price),
+                    location: form.location,
+                    content: form.content,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.message || "상품 등록 실패");
+                return;
+            }
+
+            console.log("등록 성공:", result);
+            alert("상품이 등록되었습니다.");
+
+            // 등록 성공 후 입력값 초기화
+            setForm({
+                title: "",
+                category: "",
+                price: "",
+                location: "",
+                content: "",
+            });
+
+            // 이미지는 아직 서버로 안 보내지만, 화면상 선택 상태는 초기화
+            setImageFile(null);
+            setImageName("");
+        } catch (error) {
+            console.error(error);
+            alert("서버 오류가 발생했습니다.");
+        }
     };
 
     return (
@@ -66,7 +139,9 @@ export default function ProductCreatePage() {
                                     <strong>이미지 업로드</strong>
                                     <span>JPG, PNG 파일을 올려주세요</span>
                                     {imageName && (
-                                        <p className="image-file-name">선택 파일: {imageName}</p>
+                                        <p className="image-file-name">
+                                            선택 파일: {imageName}
+                                        </p>
                                     )}
                                 </div>
                             </label>
@@ -126,6 +201,18 @@ export default function ProductCreatePage() {
                                         <span>원</span>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label htmlFor="location">거래 지역</label>
+                                <input
+                                    id="location"
+                                    name="location"
+                                    type="text"
+                                    value={form.location}
+                                    onChange={handleChange}
+                                    placeholder="예: 서울 강남구"
+                                />
                             </div>
                         </section>
                     </div>
