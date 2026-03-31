@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ProductCreatePage.css";
 
 export default function ProductCreatePage() {
+    const navigate = useNavigate();
     const [form, setForm] = useState({
         title: "",
         category: "",
@@ -34,6 +36,9 @@ export default function ProductCreatePage() {
         e.preventDefault();
 
         try {
+
+            const accessToken = localStorage.getItem("accessToken");
+
             // 🔒 나중에 이미지 업로드 기능 붙일 때 다시 사용할 FormData 방식
             // const formData = new FormData();
             //
@@ -67,6 +72,7 @@ export default function ProductCreatePage() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": accessToken ? `Bearer ${accessToken}` : "",
                 },
                 body: JSON.stringify({
                     title: form.title,
@@ -77,28 +83,18 @@ export default function ProductCreatePage() {
                 }),
             });
 
-            const result = await response.json();
-
             if (!response.ok) {
                 alert(result.message || "상품 등록 실패");
                 return;
             }
+            
+            const result = await response.json();
 
             console.log("등록 성공:", result);
             alert("상품이 등록되었습니다.");
 
-            // 등록 성공 후 입력값 초기화
-            setForm({
-                title: "",
-                category: "",
-                price: "",
-                location: "",
-                content: "",
-            });
+            navigate("/");
 
-            // 이미지는 아직 서버로 안 보내지만, 화면상 선택 상태는 초기화
-            setImageFile(null);
-            setImageName("");
         } catch (error) {
             console.error(error);
             alert("서버 오류가 발생했습니다.");
