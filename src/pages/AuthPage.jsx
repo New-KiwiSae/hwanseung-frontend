@@ -143,7 +143,7 @@ export default function AuthPage() {
                             <a href="#" className="social-btn">K</a>
                             <a href="#" className="social-btn"><i className="fab fa-apple"></i></a>
                         </div>
-                        <span className="sub-text">아이디로 로그인하세요</span>
+                        <span className="sub-text">또는 이메일 계정으로 로그인하세요</span>
                         
                         <div className="input-group">
                             <input type="text" id="userid" placeholder="아이디" onChange={handleSignInChange} value={signInValues.userid} required />
