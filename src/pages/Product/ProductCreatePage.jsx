@@ -4,6 +4,7 @@ import "./ProductCreatePage.css";
 
 export default function ProductCreatePage() {
     const navigate = useNavigate();
+
     const [form, setForm] = useState({
         title: "",
         category: "",
@@ -12,8 +13,8 @@ export default function ProductCreatePage() {
         content: "",
     });
 
-    const [imageFile, setImageFile] = useState(null);
-    const [imageName, setImageName] = useState("");
+    const [imageFiles, setImageFiles] = useState([]);
+    const [previewUrls, setPreviewUrls] = useState([]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -25,74 +26,64 @@ export default function ProductCreatePage() {
     };
 
     const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+        const files = Array.from(e.target.files || []);
 
-        setImageFile(file);
-        setImageName(file.name);
+        if (files.length === 0) {
+            setImageFiles([]);
+            setPreviewUrls([]);
+            return;
+        }
+
+        if (files.length > 5) {
+            alert("이미지는 최대 5장까지 선택할 수 있습니다.");
+            e.target.value = "";
+            setImageFiles([]);
+            setPreviewUrls([]);
+            return;
+        }
+
+        setImageFiles(files);
+        setPreviewUrls(files.map((file) => URL.createObjectURL(file)));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-
             const accessToken = localStorage.getItem("accessToken");
 
-            // 🔒 나중에 이미지 업로드 기능 붙일 때 다시 사용할 FormData 방식
-            // const formData = new FormData();
-            //
-            // formData.append(
-            //     "product",
-            //     new Blob(
-            //         [
-            //             JSON.stringify({
-            //                 title: form.title,
-            //                 category: form.category,
-            //                 price: Number(form.price),
-            //                 location: form.location,
-            //                 content: form.content,
-            //             }),
-            //         ],
-            //         { type: "application/json" }
-            //     )
-            // );
-            //
-            // if (imageFile) {
-            //     formData.append("image", imageFile);
-            // }
-            //
-            // const response = await fetch("http://localhost/api/products", {
-            //     method: "POST",
-            //     body: formData,
-            // });
+            const formData = new FormData();
+            formData.append("title", form.title);
+            formData.append("category", form.category);
+            formData.append("price", Number(form.price));
+            formData.append("location", form.location);
+            formData.append("content", form.content);
 
-            // ✅ 현재는 텍스트 데이터만 JSON으로 전송
+            imageFiles.forEach((file) => {
+                formData.append("images", file); // ✅ 백엔드 List<MultipartFile> images 와 이름 맞춤
+            });
+
             const response = await fetch("http://localhost/api/products", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": accessToken ? `Bearer ${accessToken}` : "",
+                    Authorization: accessToken ? `Bearer ${accessToken}` : "",
                 },
-                body: JSON.stringify({
-                    title: form.title,
-                    category: form.category,
-                    price: Number(form.price),
-                    location: form.location,
-                    content: form.content,
-                }),
+                body: formData,
             });
+
+            let result = {};
+            const text = await response.text();
+            if (text) {
+                result = JSON.parse(text);
+            }
 
             if (!response.ok) {
                 alert(result.message || "상품 등록 실패");
                 return;
             }
-            
-            const result = await response.json();
 
             console.log("등록 성공:", result);
             alert("상품이 등록되었습니다.");
-
             navigate("/");
 
         } catch (error) {
@@ -120,7 +111,7 @@ export default function ProductCreatePage() {
                             <div className="section-head">
                                 <div>
                                     <h2>상품 이미지</h2>
-                                    <p>대표 이미지 1장</p>
+                                    <p>최대 5장까지 업로드 가능</p>
                                 </div>
                             </div>
 
@@ -128,16 +119,28 @@ export default function ProductCreatePage() {
                                 <input
                                     type="file"
                                     accept="image/*"
+                                    multiple
                                     onChange={handleImageChange}
                                 />
                                 <div className="image-upload-content">
                                     <div className="image-upload-plus">+</div>
                                     <strong>이미지 업로드</strong>
-                                    <span>JPG, PNG 파일을 올려주세요</span>
-                                    {imageName && (
+                                    <span>JPG, PNG 파일을 최대 5장까지 올려주세요</span>
+
+                                    {imageFiles.length > 0 && (
                                         <p className="image-file-name">
-                                            선택 파일: {imageName}
+                                            선택 파일: {imageFiles.length}장
                                         </p>
+                                    )}
+
+                                    {previewUrls.length > 0 && (
+                                        <div className="image-preview-list">
+                                            {previewUrls.map((url, index) => (
+                                                <div className="image-preview" key={index}>
+                                                    <img src={url} alt={`상품 미리보기 ${index + 1}`} />
+                                                </div>
+                                            ))}
+                                        </div>
                                     )}
                                 </div>
                             </label>
@@ -240,7 +243,11 @@ export default function ProductCreatePage() {
                     <div className="product-create-submit">
                         <p>입력한 내용을 확인한 뒤 상품을 등록해주세요.</p>
                         <div className="submit-buttons">
-                            <button type="button" className="cancel-btn">
+                            <button
+                                type="button"
+                                className="cancel-btn"
+                                onClick={() => navigate("/")}
+                            >
                                 취소
                             </button>
                             <button type="submit" className="submit-btn">

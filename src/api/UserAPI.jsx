@@ -40,7 +40,7 @@ export const fetchUser = async () => {
 
 /** 회원수정 API */
 export const updateUser = async (data) => {
-    const response = await axios.put(`/api/v1/user`, data, getHeader());
+    const response = await axios.put(`/api/user`, data, getHeader());
     return response.data;
 };
 

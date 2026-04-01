@@ -1,13 +1,17 @@
+import DaumPostcode from 'react-daum-postcode';
+import { useState, useEffect, useCallback } from "react"; // 🚩 useEffect, useCallback 추가 확인!
+import { login, signUp } from "../api/AuthAPI";
 import { useState } from "react";
 import { login, signUp, adminlogin } from "../api/AuthAPI";
 import { useNavigate } from "react-router-dom";
-import "./AuthPage.css"; // 기존 CSS 파일 임포트
+import "./AuthPage.css"; 
 
 export default function AuthPage() {
     const navigate = useNavigate();
     const [isSignUpActive, setIsSignUpActive] = useState(false);
-
-    // 1. 상태 관리 (회원가입 & 로그인 데이터 통합)
+    const [errors, setErrors] = useState({});
+    const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
+  
     const [signUpValues, setSignUpValues] = useState({
         userid: "", username: "", password: "", nickname: "",
         email: "", contact: "", zipCode: "", address: "",
@@ -19,27 +23,60 @@ export default function AuthPage() {
         password: "",
     });
 
-    // 2. 핸들러 함수
+    // 🚩 1. 유효성 검사 함수를 상단으로 올리고 useCallback으로 감쌉니다.
+    const validateSignUp = useCallback(() => {
+        const newErrors = {};
+
+        // 아이디: 값이 있을 때만 검사 (글자 수가 모자라면 즉시 에러)
+        if (signUpValues.userid && signUpValues.userid.length < 4) {
+            newErrors.userid = "아이디는 4자 이상이어야 합니다.";
+        }
+        
+        if (signUpValues.password) {
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(signUpValues.password)) {
+            newErrors.password = "대/소문자, 숫자, 특수문자 포함 8자 이상이어야 합니다.";
+        }
+    }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (signUpValues.email && !emailRegex.test(signUpValues.email)) {
+            newErrors.email = "올바른 이메일 형식이 아닙니다.";
+        }
+
+        const contactRegex = /^[0-9]{10,11}$/;
+        if (signUpValues.contact && !contactRegex.test(signUpValues.contact)) {
+            newErrors.contact = "연락처는 숫자 10~11자리여야 합니다.";
+        }
+
+        if (signUpValues.nickname && (signUpValues.nickname.length < 2 || signUpValues.nickname.length > 8)) {
+            newErrors.nickname = "닉네임은 2자에서 8자 사이로 입력해주세요.";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    }, [signUpValues]); // signUpValues가 변할 때만 함수 재생성
+
+    // 🚩 2. 실시간 감시 useEffect
+    useEffect(() => {
+        const hasValues = Object.values(signUpValues).some(val => val !== "");
+        if (!hasValues) {
+            setErrors({});
+            return;
+        }
+
+        validateSignUp();
+    }, [signUpValues, validateSignUp]); // 의존성 배열에 포함
+
+    // 핸들러 함수들
     const handleSignUpChange = (e) => {
-        const { id, value, name, type } = e.target;
-        // 라디오 버튼(성별) 처리 포함
+        const { id, value, name } = e.target;
         const targetId = id || name;
-        setSignUpValues({ ...signUpValues, [targetId]: value });
+        setSignUpValues(prev => ({ ...prev, [targetId]: value }));
     };
 
     const handleSignInChange = (e) => {
-        setSignInValues({ ...signInValues, [e.target.id]: e.target.value });
-    };
-
-    const onSignUpSubmit = async (e) => {
-        e.preventDefault();
-        signUp(signUpValues).then(() => {
-            alert("회원가입이 완료되었습니다!");
-            setIsSignUpActive(false); // 가입 후 로그인 화면으로 전환
-        }).catch((error) => {
-            console.log("회원가입 에러: ", error);
-            alert("가입 중 오류가 발생했습니다.");
-        });
+        setSignInValues(prev => ({ ...prev, [e.target.id]: e.target.value }));
     };
 
     const onSignInSubmit = async (e) => {
@@ -50,21 +87,79 @@ export default function AuthPage() {
             localStorage.setItem('refreshToken', response.data.refreshToken);
             navigate("/", { replace: true });
         }).catch((error) => {
-            console.log('Login Error: ', error);
             alert("로그인 정보가 올바르지 않습니다.");
         });
     };
 
+    const onSignUpSubmit = async (e) => {
+        e.preventDefault();
+        if (!validateSignUp()) {
+            alert("입력 정보를 다시 확인해주세요.");
+            return;
+        }
+
+        signUp(signUpValues).then(() => {
+            alert("회원가입이 완료되었습니다!");
+            setIsSignUpActive(false);
+        }).catch((error) => {
+            alert("가입 중 오류가 발생했습니다.");
+        });
+    };
+
+    const handleComplete = (data) => {
+        let fullAddress = data.address;
+        let extraAddress = '';
+
+        if (data.addressType === 'R') {
+            if (data.bname !== '') {
+                extraAddress += data.bname;
+            }
+            if (data.buildingName !== '') {
+                extraAddress += extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName;
+            }
+            fullAddress += extraAddress !== '' ? ` (${extraAddress})` : '';
+        }
+
+        // 기존 signUpValues 상태 업데이트
+        setSignUpValues({
+            ...signUpValues,
+            zipCode: data.zonecode, // 우편번호
+            address: fullAddress,   // 기본 주소
+        });
+
+        setIsPostcodeOpen(false); // 검색 완료 후 팝업 닫기
+    };
+
     return (
-        <div className="auth-page-wrapper"> {/* 감싸는 태그 추가 */}
+        <div className="auth-page-wrapper">
+            {isPostcodeOpen && (
+                <>
+                    <div className="postcode-overlay" onClick={() => setIsPostcodeOpen(false)} />
+                    <div className="postcode-modal">
+                        <div className="postcode-header">
+                            <span>주소 검색</span>
+                            <button 
+                                type="button" 
+                                className="postcode-close-btn" 
+                                onClick={() => setIsPostcodeOpen(false)}
+                            >
+                                &times;
+                            </button>
+                        </div>
+                        <DaumPostcode 
+                            onComplete={handleComplete} 
+                            style={{ width: "100%", height: "500px" }} 
+                        />
+                    </div>
+                </>
+            )}
             <div className={`container ${isSignUpActive ? "right-panel-active" : ""}`} id="container">
-                {/* 회원가입 영역 */}
                 <div className="form-container sign-up-container">
                     <form onSubmit={onSignUpSubmit} className="scrollable-form">
                         <h2>회원가입</h2>
                         <div className="social-login">
                             <a href="#" className="social-btn"><i className="fab fa-google"></i></a>
-                            <a href="#" className="social-btn"><span style={{ fontWeight: "bold" }}>K</span></a>
+                            <a href="#" className="social-btn"><b>K</b></a>
                             <a href="#" className="social-btn"><i className="fab fa-apple"></i></a>
                         </div>
                         <span className="sub-text">기본 정보 입력</span>
@@ -72,28 +167,37 @@ export default function AuthPage() {
                         <div className="input-group">
                             <input type="text" id="userid" placeholder="아이디" onChange={handleSignUpChange} value={signUpValues.userid} required />
                             <i className="fas fa-id-badge"></i>
+                            {errors.userid && <span className="error-msg">{errors.userid}</span>}
                         </div>
+
                         <div className="input-group">
                             <input type="text" id="username" placeholder="이름(실명)" onChange={handleSignUpChange} value={signUpValues.username} required />
                             <i className="fas fa-user"></i>
                         </div>
+
                         <div className="input-group">
                             <input type="password" id="password" placeholder="비밀번호" onChange={handleSignUpChange} value={signUpValues.password} required />
                             <i className="fas fa-lock"></i>
+                            {errors.password && <span className="error-msg">{errors.password}</span>}
                         </div>
+
                         <div className="input-group">
-                            <input type="text" id="nickname" placeholder="별명/닉네임" onChange={handleSignUpChange} value={signUpValues.nickname} required />
+                            <input type="text" id="nickname" placeholder="닉네임" onChange={handleSignUpChange} value={signUpValues.nickname} maxLength={8} required />
                             <i className="fas fa-smile"></i>
+                            {errors.nickname && <span className="error-msg">{errors.nickname}</span>}
                         </div>
+
                         <div className="input-group">
                             <input type="email" id="email" placeholder="이메일" onChange={handleSignUpChange} value={signUpValues.email} required />
                             <i className="fas fa-envelope"></i>
+                            {errors.email && <span className="error-msg">{errors.email}</span>}
                         </div>
                         
                         <div className="input-group with-btn">
                             <div className="input-wrapper">
                                 <input type="tel" id="contact" placeholder="연락처 (숫자만)" onChange={handleSignUpChange} value={signUpValues.contact} required />
                                 <i className="fas fa-phone"></i>
+                                {errors.contact && <span className="error-msg">{errors.contact}</span>}
                             </div>
                             <button type="button" className="btn small-btn outline-btn">본인인증</button>
                         </div>
@@ -104,7 +208,7 @@ export default function AuthPage() {
                                     <input type="text" id="zipCode" placeholder="우편번호" value={signUpValues.zipCode} readOnly required />
                                     <i className="fas fa-map-marker-alt"></i>
                                 </div>
-                                <button type="button" className="btn small-btn">주소검색</button>
+                                <button type="button" className="btn small-btn" onClick={() => setIsPostcodeOpen(true)}>주소검색</button>
                             </div>
                             <div className="input-group">
                                 <input type="text" id="address" placeholder="주소" value={signUpValues.address} readOnly required />
@@ -117,7 +221,7 @@ export default function AuthPage() {
                         </div>
 
                         <div className="input-group">
-                            <input type="date" id="birthday" onChange={handleSignUpChange} value={signUpValues.birthday} required style={{ fontFamily: 'Noto Sans KR' }} />
+                            <input type="date" id="birthday" onChange={handleSignUpChange} value={signUpValues.birthday} required />
                         </div>
 
                         <div className="gender-group">
@@ -140,7 +244,7 @@ export default function AuthPage() {
                         <h2>로그인</h2>
                         <div className="social-login">
                             <a href="#" className="social-btn"><i className="fab fa-google"></i></a>
-                            <a href="#" className="social-btn">K</a>
+                            <a href="#" className="social-btn"><b>K</b></a>
                             <a href="#" className="social-btn"><i className="fab fa-apple"></i></a>
                         </div>
                         <span className="sub-text">또는 이메일 계정으로 로그인하세요</span>
@@ -153,13 +257,12 @@ export default function AuthPage() {
                             <input type="password" id="password" placeholder="비밀번호" onChange={handleSignInChange} value={signInValues.password} required />
                             <i className="fas fa-lock"></i>
                         </div>
-                        
                         <a href="#" className="footer-link">비밀번호를 잊으셨나요?</a>
                         <button type="submit" className="btn primary-btn" style={{ marginTop: "20px" }}>로그인</button>
                     </form>
                 </div>
 
-                {/* 오버레이 (전환 애니메이션) */}
+                {/* 오버레이 */}
                 <div className="overlay-container">
                     <div className="overlay">
                         <div className="overlay-panel overlay-left">
