@@ -1,6 +1,6 @@
 import DaumPostcode from 'react-daum-postcode';
-import { useState, useEffect, useCallback } from "react";
-import { login, signUp } from "../api/AuthAPI";
+import { useState, useEffect, useCallback } from "react"; // 🚩 useEffect, useCallback 추가 확인!
+import { login, signUp } from "../../api/AuthAPI";
 import { useNavigate } from "react-router-dom";
 import axios from "axios"; 
 import "./AuthPage.css";
@@ -11,16 +11,6 @@ export default function AuthPage() {
     const [errors, setErrors] = useState({});
     const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
 
-    // --- 소셜 로그인 URL 설정 (에러 방지용 임시값) ---
-    const GOOGLE_AUTH_URL = "http://localhost:8080/oauth2/authorization/google";
-    const KAKAO_AUTH_URL = "http://localhost:8080/oauth2/authorization/kakao";
-
-    // --- 중복 체크 상태 관리 ---
-    const [isIdChecked, setIsIdChecked] = useState(false);
-    const [isNicknameChecked, setIsNicknameChecked] = useState(false);
-    const [isEmailChecked, setIsEmailChecked] = useState(false);
-
-    // --- 입력 폼 상태 관리 ---
     const [signUpValues, setSignUpValues] = useState({
         userid: "", 
         username: "", 
