@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import MainPage from './pages/MainPage';
 import ProductCreatePage from "./pages/Product/ProductCreatePage";
 import AuthPage from './pages/AuthPage.jsx';
+import AdminChatManager from './components/AdminChatManager.jsx';
 import './index.css';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route path="/products/create" element={<ProductCreatePage />} />
 
           <Route path="/login" element={<AuthPage />} />
+          <Route path="/admin/chat" element={<AdminChatManager />} />
         </Routes>
       </main>
 

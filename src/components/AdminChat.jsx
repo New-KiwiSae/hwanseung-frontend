@@ -15,7 +15,7 @@ const AdminChat = () => {
   const messagesEndRef = useRef(null);
 
   // 임시 테스트용 데이터 (추후 실제 로그인한 유저 ID로 변경하세요)
-  const currentUser = "user1"; 
+  const currentUser = localStorage.getItem("username"); 
 
   // 채팅창이 열릴 때마다 스크롤을 맨 아래로 내리기
   const scrollToBottom = () => {
@@ -31,11 +31,25 @@ const AdminChat = () => {
     if (!isOpen) {
       // 채팅창을 열 때 백엔드에 "관리자 방 번호 주세요!" 하고 요청합니다.
       try {
-        const roomRes = await axios.post('http://localhost/api/chat/room/admin', {
-          userId: currentUser
-        });
+        // 🚨 1. 로컬 스토리지에서 발급받은 토큰을 꺼냅니다. (저장하신 키 이름에 맞게 수정하세요! 예: token, jwt 등)
+        const token = localStorage.getItem("accessToken"); 
         
-        const realRoomId = roomRes.data.roomId;
+        // 🚨 2. Axios에 실어 보낼 헤더(신분증)를 미리 만듭니다.
+        const axiosConfig = {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        };
+
+        const roomRes = await axios.post('http://localhost/api/chat/room/admin', {
+        },axiosConfig);
+        
+        let realRoomId = roomRes.data.roomId;
+        // 🚨 [임시 테스트용 트릭] 만약 지금 로그인한 사람이 관리자라면?
+        if (currentUser === "admin") {
+           // 무조건 아까 복사해둔 'es'의 방 번호로 덮어씌워서 강제 입장시킵니다!
+           realRoomId = "0b4c63e1-16da-4051-abb1-302048f8f733"; 
+        }
         setRoomId(realRoomId); // 받아온 진짜 UUID 방 번호를 상태에 저장
 
         // (보너스!) 방 번호를 알았으니 이전 대화 기록도 깔끔하게 불러옵니다.
@@ -57,8 +71,13 @@ const AdminChat = () => {
 
   // 🚀 STOMP 연결 (매개변수로 realRoomId를 받도록 수정)
   const connectStomp = (currentRoomId) => {
+
+    const token = localStorage.getItem("accessToken");
     const client = new Client({
       webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
+      connectHeaders: {
+        Authorization: `Bearer ${token}` 
+      },
       onConnect: () => {
         console.log("고객센터 웹소켓 연결 성공! 방 번호:", currentRoomId);
         

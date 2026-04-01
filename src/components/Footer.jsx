@@ -1,3 +1,5 @@
+import React from 'react';
+import { Link } from 'react-router-dom'; // 🚨 리액트 라우터의 Link 기능 임포트!
 import './Footer.css';
 
 const Footer = () => {
@@ -47,6 +49,12 @@ const Footer = () => {
                 <li><a href="#">자주하는 질문</a></li>
                 <li><a href="#">1:1 문의</a></li>
                 <li><a href="#">신고안내</a></li>
+                {/* 🚨 여기에 관리자 페이지로 가는 링크를 추가했습니다! */}
+                <li>
+                  <Link to="/admin/chat" style={{ fontWeight: 'bold', color: '#007bff' }}>
+                    관리자 전용 (채팅 관리)
+                  </Link>
+                </li>
               </ul>
             </div>
             <div className="footer-link-group">
