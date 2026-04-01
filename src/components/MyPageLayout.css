@@ -1,11 +1,13 @@
 /* MyPage.css - 로그인/회원가입 페이지 스타일 동기화 버전 */
 
 .mypage-body {
-    background-color: var(--bg-color); /* #f4f6f8 */
+    background-color: var(--bg-color);
+    /* #f4f6f8 */
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* 상단 고정 */
+    align-items: flex-start;
+    /* 상단 고정 */
     padding: 40px 20px;
 }
 
@@ -21,7 +23,8 @@
 .sidebar {
     width: 280px;
     background: var(--white);
-    border-radius: 24px; /* AuthPage와 통일 */
+    border-radius: 24px;
+    /* AuthPage와 통일 */
     padding: 30px 20px;
     position: sticky;
     top: 40px;
@@ -43,7 +46,8 @@
 .sidebar-profile .avatar {
     width: 55px;
     height: 55px;
-    background: #e8f9f0; /* 로고 배경색 */
+    background: #e8f9f0;
+    /* 로고 배경색 */
     border-radius: 18px;
     display: flex;
     align-items: center;
@@ -53,26 +57,32 @@
 }
 
 .sidebar-profile .info {
-    flex: 1;              /* ⭐ 남는 가로 공간을 모두 차지함 */
+    flex: 1;
+    /* ⭐ 아바타 제외 남는 가로 공간 꽉 채우기 */
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    /* 텍스트 넘침 방지 */
 }
 
 .name-wrapper {
     display: flex;
     align-items: center;
-    width: 100%;          /* 부모인 .info의 너비를 꽉 채움 */
+    width: 100%;
+    /* 부모인 .info의 너비를 꽉 채움 */
 }
 
 .name {
     font-weight: 700;
     font-size: 18px;
-    color: var(--text-main);
     margin: 0;
+    white-space: nowrap;
+    /* 이름이 길어져도 줄바꿈 방지 */
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .edit-profile-btn {
-    margin-left: auto;    /* ⭐ 왼쪽 마진을 최대로 밀어 오른쪽 끝으로 이동 */
     background: none;
     border: 1px solid var(--accent-color);
     color: var(--accent-color);
@@ -82,14 +92,21 @@
     font-weight: 700;
     cursor: pointer;
     height: 22px;
-    white-space: nowrap;  /* 줄바꿈 방지 */
+    white-space: nowrap;
     transition: all 0.2s;
+}
+
+.edit-profile-btn-link {
+    margin-left: auto;
+    text-decoration: none;
+    display: flex;
 }
 
 .edit-profile-btn:hover {
     background-color: rgba(0, 210, 106, 0.05) !important;
-    color: var(--accent-hover) !important; 
+    color: var(--accent-hover) !important;
 }
+
 /* 페이 영역 - 주소 입력창 그룹 느낌 */
 .sidebar-pay {
     background: #fafafa;
@@ -127,7 +144,10 @@
 }
 
 /* 메뉴 네비게이션 */
-.sidebar-nav { flex: 1; }
+.sidebar-nav {
+    flex: 1;
+}
+
 .nav-label {
     font-size: 11px;
     color: var(--text-secondary);
@@ -159,7 +179,8 @@
     width: 22px;
     margin-right: 12px;
     font-size: 16px;
-    color: #ccc; /* 로그인 페이지 아이콘 기본색 */
+    color: #ccc;
+    /* 로그인 페이지 아이콘 기본색 */
     text-align: center;
 }
 
@@ -167,7 +188,18 @@
     background: rgba(0, 210, 106, 0.1) !important;
 }
 
-/* 활성화 상태 - 투명도 적용된 초록 배경 */
+.sidebar-nav a.active button {
+    background: rgba(0, 210, 106, 0.1);
+    color: var(--accent-color);
+    font-weight: 700;
+}
+
+/* 2. NavLink 자체가 active일 때 그 안의 아이콘 스타일 */
+.sidebar-nav a.active button i {
+    color: var(--accent-color);
+}
+
+/* 기존에 작성하신 button.active (직접 버튼에 클래스를 줄 경우 대비) */
 .sidebar-nav button.active {
     background: rgba(0, 210, 106, 0.1);
     color: var(--accent-color);
@@ -175,6 +207,15 @@
 }
 
 .sidebar-nav button.active i {
+    color: var(--accent-color);
+}
+
+/* 마우스 올렸을 때 (Hover) - Active 상태가 아닐 때만 적용되도록 */
+.sidebar-nav button:hover {
+    background-color: rgba(0, 210, 106, 0.04) !important;
+    color: var(--accent-color) /* 글자색은 그대로 유지 */
+}
+.sidebar-nav button:hover i {
     color: var(--accent-color);
 }
 
@@ -202,7 +243,8 @@
     overflow: hidden;
 }
 
-.dashboard-container, .content-view {
+.dashboard-container,
+.content-view {
     padding: 40px;
 }
 
