@@ -6,6 +6,7 @@ import MainPage from './pages/MainPage';
 import ProductCreatePage from "./pages/Product/ProductCreatePage";
 import AuthPage from './pages/AuthPage.jsx';
 import AdminChatManager from './components/AdminChatManager.jsx';
+import TradeChatTest from './components/TradeChatTest.jsx';
 import MyPage from './pages/MyPage';
 import Sales from './pages/Sales';
 import Purchase from './pages/Purchase';
@@ -27,6 +28,7 @@ function App() {
 
           <Route path="/login" element={<AuthPage />} />
           <Route path="/admin/chat" element={<AdminChatManager />} />
+          <Route path="/test-product" element={<TradeChatTest />} />
           <Route element={<Layout />}>
             {/* 각 독립적인 경로 설정 */}
             <Route path="/mypage" element={<MyPage />} />
