@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { fetchUser } from '../api/UserAPI';
+import { fetchUser } from '../../api/UserAPI';
 import Sidebar from './MyPageSidebar';
 import './MyPageLayout.css';
 

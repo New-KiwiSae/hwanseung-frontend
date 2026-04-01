@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchUser } from '../api/UserAPI';
+import { fetchUser } from '../../api/UserAPI';
 
 export default function MyPage() {
     return (
