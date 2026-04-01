@@ -46,5 +46,5 @@ export const updateUser = async (data) => {
 
 /** 회원탈퇴 API */
 export const deleteUser = async () => {
-    await axios.delete(`/api/v1/user`, getHeader());
+    await axios.delete(`/api/user`, getHeader());
 };
