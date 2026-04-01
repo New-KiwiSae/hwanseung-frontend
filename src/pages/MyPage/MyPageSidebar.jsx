@@ -1,8 +1,19 @@
+import React from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react'; // 🌟 useState, useEffect 추가
 import { NavLink } from 'react-router-dom';
 import axios from 'axios'; // 🌟 은행원 역할을 할 axios 추가
 
 export default function MyPageSidebar({ userInfo }) {
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("tokenType");
+        window.location.href = '/';
+    };
+
     // 1. 내 잔액을 저장할 상태(State) 창고 만들기 (기본값은 0원)
     const [balance, setBalance] = useState(0);
 
@@ -86,11 +97,9 @@ export default function MyPageSidebar({ userInfo }) {
                 </button>
             </nav>
 
-            {/* 로그아웃 */}
-            <button className="sidebar-logout" onClick={() => {
-                localStorage.removeItem('accessToken');
-                window.location.href = '/login';
-            }}>로그아웃</button>
+            <button className="sidebar-logout" onClick={handleLogout}>
+                로그아웃
+            </button>
         </aside>
     );
 }
