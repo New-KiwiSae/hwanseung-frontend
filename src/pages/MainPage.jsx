@@ -230,7 +230,7 @@ const MainPage = () => {
             ))}
           </div>
         </div>
-      </section><br/><br/><br/>
+      </section>
 
       {/* ═══ 인기 매물 그리드 ═══ */}
       <section className="products-section">
