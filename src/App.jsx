@@ -1,10 +1,15 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import Layout from './components/MyPageLayout';
 import MainPage from './pages/MainPage';
 import ProductCreatePage from "./pages/Product/ProductCreatePage";
 import AuthPage from './pages/AuthPage.jsx';
 import AdminChatManager from './components/AdminChatManager.jsx';
+import MyPage from './pages/MyPage';
+import Sales from './pages/Sales';
+import Purchase from './pages/Purchase';
+import Wishlist from './pages/Wishlist';
 import './index.css';
 
 function App() {
@@ -22,6 +27,13 @@ function App() {
 
           <Route path="/login" element={<AuthPage />} />
           <Route path="/admin/chat" element={<AdminChatManager />} />
+          <Route element={<Layout />}>
+            {/* 각 독립적인 경로 설정 */}
+            <Route path="/mypage" element={<MyPage />} />
+            <Route path="/sales" element={<Sales />} />
+            <Route path="/purchase" element={<Purchase />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+          </Route>
         </Routes>
       </main>
 
