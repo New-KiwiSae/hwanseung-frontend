@@ -7,7 +7,6 @@ import './MyPage.css';
 const MyPage = () => {
   const navigate = useNavigate();
   
-  // 🌟 1. 상태에 nickname과 address를 추가했습니다.
   const [userInfo, setUserInfo] = useState({ 
     username: '', 
     email: '', 
@@ -28,7 +27,7 @@ const MyPage = () => {
       }
 
       try {
-        const response = await axios.post('/api/v1/user', {}, {
+        const response = await axios.post('/api/user', {}, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUserInfo(response.data); 
@@ -40,7 +39,6 @@ const MyPage = () => {
     fetchUserInfo();
   }, [navigate]);
 
-  // 🌟 2. 버그 수정 완료! 반드시 'name'으로 꺼내야 합니다.
   const handleChange = (e) => {
     const { name, value } = e.target; 
     setUserInfo({ ...userInfo, [name]: value });
@@ -49,7 +47,7 @@ const MyPage = () => {
   const handleSave = async () => {
     const token = localStorage.getItem('accessToken');
     try {
-      await axios.put('/api/v1/user', userInfo, {
+      await axios.put('/api/user', userInfo, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert("성공적으로 정보가 수정되었습니다! 🎉");
@@ -149,7 +147,7 @@ const MyPage = () => {
       </div>
 
       {isPayModalOpen && (
-        <ChargePay onClose={() => setIsPayModalOpen(false)} />
+        <ChargePay onClose={() => setIsPayModalOpen(false)} userInfo={userInfo} />
       )}
     </div>
   );
