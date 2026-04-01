@@ -1,96 +1,122 @@
 import React, { useState, useEffect } from 'react';
 import { fetchUser } from '../api/UserAPI';
-import axios from 'axios'; // axios 설치 필요: npm install axios
 import './MyPage.css';
 
 export default function MyPage() {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [activeMenu, setActiveMenu] = useState('dashboard'); // 현재 보고 있는 화면 상태
 
     useEffect(() => {
-        const loadUserData = async () => {
-            try {
-                setLoading(true);
-                
-                // 1. 이미 정의된 fetchUser 함수 호출
-                const response = await fetchUser();
-                
-                // 2. 서버 응답 데이터 구조에 맞춰 저장
-                // 보통 response.data에 실제 데이터가 들어있습니다.
-                setUserInfo(response.data); 
-            } catch (err) {
-                console.error('마이페이지 정보 로드 실패:', err);
-                
-                // 에러 메시지 세분화 (401: 인증만료 등)
-                if (err.response && err.response.status === 401) {
-                    setError('세션이 만료되었습니다. 다시 로그인해주세요.');
-                } else {
-                    setError('사용자 정보를 가져오는 중 오류가 발생했습니다.');
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadUserData();
+        fetchUser().then(res => {
+            setUserInfo(res.data);
+            setLoading(false);
+        }).catch(() => setLoading(false));
     }, []);
 
-    const menuItems = [
-        { title: '구매 내역', desc: '내가 구매한 상품 확인', icon: '📦' },
-        { title: '판매 내역', desc: '내가 판매 중인 상품 관리', icon: '💰' },
-        { title: '관심 목록', desc: '찜한 아이템 모아보기', icon: '❤️' },
-        { title: '계정 설정', desc: '회원 정보 및 보안 관리', icon: '⚙️' }
-    ];
+    if (loading) return <div className="mypage-body">로딩 중...</div>;
 
-    if (loading) return <div className="mypage-container">데이터를 불러오는 중입니다...</div>;
-    if (error) return <div className="mypage-container">{error}</div>;
+    // 오른쪽 메인 영역에 렌더링될 컨텐츠 결정
+    const renderMainContent = () => {
+        switch (activeMenu) {
+            case 'sales': return <div className="content-view"><h2>판매 내역</h2><p>준비 중인 서비스입니다.</p></div>;
+            case 'purchase': return <div className="content-view"><h2>구매 내역</h2><p>준비 중인 서비스입니다.</p></div>;
+            case 'wishlist': return <div className="content-view"><h2>관심 목록</h2><p>준비 중인 서비스입니다.</p></div>;
+            case 'mypage': return <div className="content-view"><h2>마이페이지</h2><p>마이페이지</p></div>;
+            default: return <DashboardView userInfo={userInfo} />;
+        }
+    };
 
     return (
-        <div className="mypage-container">
-            <section className="profile-card">
-                <div className="profile-img-wrap">
-                    <div className="profile-image-placeholder">
-                        {userInfo?.profileImgUrl ? <img src={userInfo.profileImgUrl} alt="profile" /> : '👤'}
-                    </div>
-                    <div className="profile-edit-badge">📸</div>
-                </div>
+        <div className="mypage-body">
+            <div className="web-sidebar-layout">
 
-                <div className="profile-info">
-                    <span className="user-badge">{userInfo?.level || '그린 등급'}</span>
-                    <h2>
-                        {userInfo?.name || '사용자'} <span>님, 안녕하세요!</span>
-                    </h2>
-                    <div className="profile-meta">
-                        <span><strong>이메일</strong> {userInfo?.email}</span>
-                        <span><strong>가입일</strong> {userInfo?.createdAt || userInfo?.joinDate}</span>
-                    </div>
-                </div>
-            </section>
-
-            <div className="mypage-menu-grid">
-                {menuItems.map((item, index) => (
-                    <div key={index} className="menu-item-card">
-                        <div className="menu-item-content">
-                            <div className="menu-icon">{item.icon}</div>
-                            <div className="menu-text">
-                                <h4>{item.title}</h4>
-                                <p>{item.desc}</p>
+                {/* 왼쪽 사이드바: 프로필 + 페이 + 메뉴 */}
+                <aside className="sidebar">
+                    <div className="sidebar-profile">
+                        <div className="avatar">👤</div>
+                        <div className="info">
+                            <div className="name-wrapper">
+                                <p className="name">{userInfo?.nickname}</p>
+                                {/* 정보 수정 버튼 추가 */}
+                                <button
+                                    className="edit-profile-btn"
+                                    onClick={() => setActiveMenu('mypage')}
+                                    title="정보 수정"
+                                >
+                                    수정
+                                </button>
                             </div>
                         </div>
-                        <div className="menu-arrow">→</div>
                     </div>
-                ))}
+
+                    <div className="sidebar-pay">
+                        <p>환승Pay <b>₩ 2,450</b></p>
+                        <button onClick={() => alert('충전 페이지로 이동')}>충전</button>
+                    </div>
+
+                    <nav className="sidebar-nav">
+                        <p className="nav-label">활동 관리</p>
+                        
+                        <button className={activeMenu === 'sales' ? 'active' : ''} onClick={() => setActiveMenu('sales')}>
+                            <i className="fas fa-box-open"></i> 판매 내역
+                        </button>
+                        <button className={activeMenu === 'purchase' ? 'active' : ''} onClick={() => setActiveMenu('purchase')}>
+                            <i className="fas fa-shopping-bag"></i> 구매 내역
+                        </button>
+                        <button className={activeMenu === 'wishlist' ? 'active' : ''} onClick={() => setActiveMenu('wishlist')}>
+                            <i className="fas fa-heart"></i> 관심 목록
+                        </button>
+
+                        <p className="nav-label" style={{ marginTop: '20px' }}>고객지원</p>
+                        <button onClick={() => window.location.href = '/faq'}>
+                            <i className="fas fa-question-circle"></i> 자주 묻는 질문
+                        </button>
+                        <button onClick={() => window.location.href = '/notice'}>
+                            <i className="fas fa-bullhorn"></i> 공지사항
+                        </button>
+                    </nav>
+
+                    <button className="sidebar-logout" onClick={() => {
+                        localStorage.removeItem('accessToken');
+                        window.location.href = '/login';
+                    }}>로그아웃</button>
+                </aside>
+
+                {/* 오른쪽 메인 콘텐츠 영역 */}
+                <main className="main-viewport">
+                    {renderMainContent()}
+                </main>
+
+            </div>
+        </div>
+    );
+}
+
+// 기본 화면: 대시보드 뷰
+function DashboardView({ userInfo }) {
+    return (
+        <div className="dashboard-container">
+            <header className="dashboard-header">
+                <h1>ㅎㅅㅎ</h1>
+            </header>
+
+            <div className="stat-cards">
+                <div className="stat-card"><span>판매 중</span><strong>12</strong></div>
+                <div className="stat-card"><span>구매 완료</span><strong>48</strong></div>
+                <div className="stat-card"><span>관심 상품</span><strong>15</strong></div>
             </div>
 
-            <footer className="mypage-footer">
-                <button className="logout-button" onClick={() => {
-                    localStorage.removeItem('accessToken'); // 사용하시는 토큰 키값에 맞춰 수정
-                    window.location.href = '/login';
-                }}>
-                    로그아웃
-                </button>
-            </footer>
+            <div className="dashboard-grid">
+                <div className="grid-item">
+                    <h3>최근 거래 활동</h3>
+                    <p className="empty-text">최근 활동 내역이 없습니다.</p>
+                </div>
+                <div className="grid-item">
+                    <h3>내 동네 정보</h3>
+                    <p className="text">{userInfo?.address || '지역을 설정해주세요.'}</p>
+                </div>
+            </div>
         </div>
     );
 }
