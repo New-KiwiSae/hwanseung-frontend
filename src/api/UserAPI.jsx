@@ -21,7 +21,7 @@ const getHeader = () => {
 /** 토큰 갱신 API */
 export const refreshAccessToken = async () => {
     // getHeader()를 호출하여 최신 리프레시 토큰을 실어 보냄
-    const response = await axios.get(`/api/v1/auth/refresh`, getHeader());
+    const response = await axios.get(`/api/auth/refresh`, getHeader());
     const newAccessToken = response.data;
     localStorage.setItem('accessToken', newAccessToken);
     return newAccessToken;
@@ -33,7 +33,7 @@ export const fetchUser = async () => {
     
     console.log("보내는 헤더 정보:", config.headers.Authorization); 
     
-    const response = await axios.get(`/api/v1/user`, config);
+    const response = await axios.get(`/api/user`, config);
     console.log('fetchUser response: ', response);
     return response;
 };

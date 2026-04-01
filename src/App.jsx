@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { Routes, Route,useLocation } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import MainPage from './pages/MainPage';
@@ -17,13 +17,13 @@ function App() {
   const handleSplashFinish = useCallback(() => setShowSplash(false), []);
 
   if (showSplash) {
-      return <SplashScreen onFinish={handleSplashFinish} />;
+    return <SplashScreen onFinish={handleSplashFinish} />;
   }
 
   return (
     // 전체 레이아웃을 flex로 잡아서 컨텐츠가 적어도 Footer가 항상 바닥에 붙어있게 만듭니다.
     <div className="app-wrapper" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      
+
       {!(isAuthPage || isSidebar) && <Header />}
       <main style={{ flexGrow: 1 }}>
         <Routes>
@@ -35,7 +35,7 @@ function App() {
         </Routes>
       </main>
       {!(isAuthPage || isSidebar) && <Footer />}
-      
+
     </div>
   );
 }

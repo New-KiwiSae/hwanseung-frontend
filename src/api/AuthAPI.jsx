@@ -17,7 +17,14 @@ const getHeader = () => {
 export const login = async ({ userid, password }) => {
     // 백엔드 DTO가 userid를 사용하므로 키값을 맞췄습니다.
     const data = { userid, password }; 
-    const response = await axios.post(`/api/v1/auth/login`, data);
+    const response = await axios.post(`/api/auth/login`, data);
+    return response;
+}
+
+export const adminlogin = async ({ userid, password }) => {
+    // 백엔드 DTO가 userid를 사용하므로 키값을 맞췄습니다.
+    const data = { userid, password };   // { userid : userid, password : password }
+    const response = await axios.post(`/api/admin/login`, data);
     return response;
 }
 
@@ -25,6 +32,6 @@ export const login = async ({ userid, password }) => {
 export const signUp = async (values) => {
     // 🚩 여기 세 번째 인자에 getHeader() 같은 게 들어가 있지 않은지 확인!
     // 회원가입은 헤더 없이 깔끔하게 데이터만 보내야 합니다.
-    const response = await axios.post(`/api/v1/auth/signup`, values); 
+    const response = await axios.post(`/api/auth/signup`, values); 
     return response.data;
 }

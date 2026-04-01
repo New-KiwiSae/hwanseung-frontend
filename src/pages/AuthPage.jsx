@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { login, signUp } from "../api/AuthAPI";
+import { login, signUp, adminlogin } from "../api/AuthAPI";
 import { useNavigate } from "react-router-dom";
 import "./AuthPage.css"; // 기존 CSS 파일 임포트
 
@@ -44,7 +44,7 @@ export default function AuthPage() {
 
     const onSignInSubmit = async (e) => {
         e.preventDefault();
-        login(signInValues).then((response) => {
+        adminlogin(signInValues).then((response) => {
             localStorage.setItem('tokenType', response.data.tokenType);
             localStorage.setItem('accessToken', response.data.accessToken);
             localStorage.setItem('refreshToken', response.data.refreshToken);
