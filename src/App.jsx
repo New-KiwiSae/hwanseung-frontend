@@ -1,15 +1,15 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Layout from './components/MyPageLayout';
+import Layout from './pages/MyPage/MyPageLayout.jsx';
 import MainPage from './pages/MainPage';
 import ProductCreatePage from "./pages/Product/ProductCreatePage";
-import AuthPage from './pages/AuthPage.jsx';
-import AdminChatManager from './components/AdminChatManager.jsx';
-import MyPage from './pages/MyPage';
-import Sales from './pages/Sales';
-import Purchase from './pages/Purchase';
-import Wishlist from './pages/Wishlist';
+import AuthPage from './pages/Auth/AuthPage.jsx';
+import AdminChatManager from './pages/Chat/AdminChatManager.jsx';
+import MyPage from './pages/MyPage/MyPage.jsx';
+import Sales from './pages/MyPage/Sales';
+import Purchase from './pages/MyPage/Purchase';
+import Wishlist from './pages/MyPage/Wishlist';
 import './index.css';
 
 function App() {

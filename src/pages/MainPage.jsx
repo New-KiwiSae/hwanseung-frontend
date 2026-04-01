@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './MainPage.css';
-import AdminChat from '../components/AdminChat';
+import AdminChat from '../pages/Chat/AdminChat';
 
 /* ── 데이터 ── */
 const categories = [

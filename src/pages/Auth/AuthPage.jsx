@@ -1,6 +1,6 @@
 import DaumPostcode from 'react-daum-postcode';
 import { useState, useEffect, useCallback } from "react"; // 🚩 useEffect, useCallback 추가 확인!
-import { login, signUp } from "../api/AuthAPI";
+import { login, signUp } from "../../api/AuthAPI";
 import { useNavigate } from "react-router-dom";
 import "./AuthPage.css"; 
 
@@ -9,7 +9,7 @@ export default function AuthPage() {
     const [isSignUpActive, setIsSignUpActive] = useState(false);
     const [errors, setErrors] = useState({});
     const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
-  
+
     const [signUpValues, setSignUpValues] = useState({
         userid: "", username: "", password: "", nickname: "",
         email: "", contact: "", zipCode: "", address: "",
