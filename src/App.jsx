@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 import { useState, useCallback, useEffect } from 'react';
-=======
->>>>>>> 37a82458c312e13d5d1e1632f05ec79e7525fa55
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -19,7 +16,6 @@ import Sidebar from './components/Sidebar'
 import SplashScreen from './components/SplashScreen';
 
 function App() {
-<<<<<<< HEAD
   const location = useLocation();
   const isAuthPage = location.pathname === '/login';
   const isSidebar = location.pathname === '/sidebar';
@@ -41,21 +37,6 @@ function App() {
           <Route path="/products/create" element={<ProductCreatePage />} />
 
           <Route path="/login" element={<AuthPage />} />
-          <Route path="/sidebar" element={<Sidebar />} />
-=======
-    const location = useLocation();
-    const isAuthPage = location.pathname === '/login';
-    return (
-        // 전체 레이아웃을 flex로 잡아서 컨텐츠가 적어도 Footer가 항상 바닥에 붙어있게 만듭니다.
-        <div className="app-wrapper" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-
-            {!isAuthPage && <Header />}
-            <main style={{ flexGrow: 1 }}>
-                <Routes>
-                    <Route path="/" element={<MainPage />} />
-                    <Route path="/products/create" element={<ProductCreatePage />} />
-
-          <Route path="/login" element={<AuthPage />} />
           <Route path="/admin/chat" element={<AdminChatManager />} />
           <Route element={<Layout />}>
             {/* 각 독립적인 경로 설정 */}
@@ -64,20 +45,13 @@ function App() {
             <Route path="/purchase" element={<Purchase />} />
             <Route path="/wishlist" element={<Wishlist />} />
           </Route>
->>>>>>> 37a82458c312e13d5d1e1632f05ec79e7525fa55
+          <Route path="/sidebar" element={<Sidebar />} />
         </Routes>
       </main>
       {!(isAuthPage || isSidebar) && <Footer />}
 
-<<<<<<< HEAD
     </div>
   );
-=======
-            {!isAuthPage && <Footer />}
-
-        </div>
-    );
->>>>>>> 37a82458c312e13d5d1e1632f05ec79e7525fa55
 }
 
 export default App;
