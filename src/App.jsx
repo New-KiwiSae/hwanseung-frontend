@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import MainPage from './pages/MainPage';
 import AuthPage from './pages/AuthPage.jsx';
 import './index.css';
+import MyPage from './pages/MyPage.jsx';
 
 function App() {
   const location = useLocation();
@@ -17,6 +18,7 @@ function App() {
         <Routes>
           <Route path="/" element={<MainPage />} />
           <Route path="/login" element={<AuthPage />} />
+          <Route path={"/mypage"} element={<MyPage />} /> {/* 🌟 추가! */}
         </Routes>
       </main>
 
