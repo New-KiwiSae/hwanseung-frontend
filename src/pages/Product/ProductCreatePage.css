@@ -212,6 +212,13 @@
     font-weight: 700;
 }
 
+.price-help-text {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
 .detail-card textarea {
     min-height: 240px;
     resize: vertical;

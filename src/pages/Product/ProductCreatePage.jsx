@@ -16,6 +16,39 @@ export default function ProductCreatePage() {
     const [imageFiles, setImageFiles] = useState([]);
     const [previewUrls, setPreviewUrls] = useState([]);
 
+    const formatPriceWithComma = (value) => {
+        if (!value) return "";
+        return Number(value).toLocaleString("ko-KR");
+    };
+
+    const formatPriceToKorean = (value) => {
+        const num = Number(value);
+        if (!num) return "";
+
+        const units = [
+            { value: 100000000, label: "억" },
+            { value: 10000, label: "만" },
+        ];
+
+        let result = "";
+        let remain = num;
+
+        for (const unit of units) {
+            const unitValue = Math.floor(remain / unit.value);
+
+            if (unitValue > 0) {
+                result += `${unitValue}${unit.label} `;
+                remain %= unit.value;
+            }
+        }
+
+        if (remain > 0) {
+            result += remain.toLocaleString("ko-KR");
+        }
+
+        return result.trim() + "원";
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
 
@@ -163,6 +196,7 @@ export default function ProductCreatePage() {
                                     value={form.title}
                                     onChange={handleChange}
                                     placeholder="예: 아이폰 14 128GB 블루"
+                                    required
                                 />
                             </div>
 
@@ -174,6 +208,7 @@ export default function ProductCreatePage() {
                                         name="category"
                                         value={form.category}
                                         onChange={handleChange}
+                                        required
                                     >
                                         <option value="">카테고리 선택</option>
                                         <option value="digital">디지털기기</option>
@@ -193,12 +228,19 @@ export default function ProductCreatePage() {
                                             id="price"
                                             name="price"
                                             type="text"
-                                            value={form.price}
+                                            value={formatPriceWithComma(form.price)}
                                             onChange={handleChange}
                                             placeholder="가격 입력"
+                                            required
                                         />
                                         <span>원</span>
                                     </div>
+
+                                    {form.price && (
+                                        <p className="price-help-text">
+                                            입력 금액: {formatPriceToKorean(form.price)}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
@@ -211,6 +253,7 @@ export default function ProductCreatePage() {
                                     value={form.location}
                                     onChange={handleChange}
                                     placeholder="예: 서울 강남구"
+                                    required
                                 />
                             </div>
                         </section>
@@ -236,6 +279,7 @@ export default function ProductCreatePage() {
 - 사용감 여부
 - 하자 유무
 - 직거래 / 택배 가능 여부`}
+                                required
                             />
                         </div>
                     </section>
