@@ -1,0 +1,319 @@
+.product-create-page {
+    min-height: calc(100vh - 160px);
+    background: linear-gradient(180deg, #ffffff 0%, var(--brand-light) 100%);
+    padding: 48px 20px 80px;
+}
+
+.product-create-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+}
+
+.product-create-hero {
+    margin-bottom: 32px;
+    animation: fadeInUp 0.6s ease;
+}
+
+.product-create-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: var(--brand-soft);
+    color: var(--brand-color);
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.product-create-hero h1 {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--dark-color);
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+}
+
+.product-create-hero p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+}
+
+.product-create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.product-create-top {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+}
+
+.product-create-card {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 28px;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(17, 24, 39, 0.05);
+    animation: fadeInUp 0.7s ease;
+}
+
+.section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-head h2 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--dark-color);
+    margin-bottom: 6px;
+}
+
+.section-head p {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.image-upload-box {
+    display: block;
+    cursor: pointer;
+}
+
+.image-upload-box input {
+    display: none;
+}
+
+.image-upload-content {
+    min-height: 360px;
+    border: 2px dashed #cdeedd;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #fcfffd 0%, var(--brand-light) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+    padding: 24px;
+    transition: all 0.25s ease;
+}
+
+.image-upload-box:hover .image-upload-content {
+    border-color: var(--brand-color);
+    background: #f4fff9;
+}
+
+.image-upload-plus {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: #ffffff;
+    color: var(--brand-color);
+    font-size: 38px;
+    line-height: 68px;
+    font-weight: 500;
+    box-shadow: 0 8px 20px rgba(0, 210, 122, 0.12);
+}
+
+.image-upload-content strong {
+    font-size: 18px;
+    color: var(--dark-color);
+}
+
+.image-upload-content span {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.image-file-name {
+    margin-top: 4px;
+    font-size: 14px;
+    color: var(--brand-dark);
+    font-weight: 700;
+    word-break: break-all;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dark-color);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    border: 1px solid #e9edf2;
+    border-radius: 18px;
+    background: #ffffff;
+    padding: 16px 18px;
+    font-size: 15px;
+    color: var(--dark-color);
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #a0a7b0;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--brand-color);
+    box-shadow: 0 0 0 4px rgba(0, 210, 122, 0.1);
+}
+
+.form-row {
+    display: flex;
+    gap: 18px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.price-input-wrap {
+    position: relative;
+}
+
+.price-input-wrap input {
+    padding-right: 52px;
+}
+
+.price-input-wrap span {
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.detail-card textarea {
+    min-height: 240px;
+    resize: vertical;
+    line-height: 1.7;
+}
+
+.product-create-submit {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 22px 24px;
+    box-shadow: 0 10px 30px rgba(17, 24, 39, 0.05);
+}
+
+.product-create-submit p {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.submit-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.cancel-btn,
+.submit-btn {
+    border: none;
+    border-radius: 16px;
+    padding: 14px 22px;
+    font-size: 15px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.cancel-btn {
+    background: #f3f4f6;
+    color: var(--dark-color);
+}
+
+.cancel-btn:hover {
+    background: #e8ebef;
+}
+
+.submit-btn {
+    background: var(--brand-color);
+    color: #ffffff;
+    box-shadow: 0 10px 18px rgba(0, 210, 122, 0.18);
+}
+
+.submit-btn:hover {
+    background: var(--brand-dark);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 992px) {
+    .product-create-top {
+        grid-template-columns: 1fr;
+    }
+
+    .image-upload-content {
+        min-height: 280px;
+    }
+
+    .product-create-submit {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .submit-buttons {
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-create-page {
+        padding: 32px 16px 60px;
+    }
+
+    .product-create-hero h1 {
+        font-size: 30px;
+    }
+
+    .product-create-card {
+        padding: 22px 18px;
+        border-radius: 22px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .submit-buttons {
+        flex-direction: column;
+    }
+
+    .cancel-btn,
+    .submit-btn {
+        width: 100%;
+    }
+}
