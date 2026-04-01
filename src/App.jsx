@@ -25,17 +25,17 @@ function App() {
                     <Route path="/" element={<MainPage />} />
                     <Route path="/products/create" element={<ProductCreatePage />} />
 
-          <Route path="/login" element={<AuthPage />} />
-          <Route path="/admin/chat" element={<AdminChatManager />} />
-          <Route element={<Layout />}>
-            {/* 각 독립적인 경로 설정 */}
-            <Route path="/mypage" element={<MyPage />} />
-            <Route path="/sales" element={<Sales />} />
-            <Route path="/purchase" element={<Purchase />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-          </Route>
-        </Routes>
-      </main>
+                    <Route path="/login" element={<AuthPage />} />
+                    <Route path="/admin/chat" element={<AdminChatManager />} />
+                    <Route element={<Layout />}>
+                        {/* 각 독립적인 경로 설정 */}
+                        <Route path="/mypage" element={<MyPage />} />
+                        <Route path="/sales" element={<Sales />} />
+                        <Route path="/purchase" element={<Purchase />} />
+                        <Route path="/wishlist" element={<Wishlist />} />
+                    </Route>
+                </Routes>
+            </main>
 
             {!isAuthPage && <Footer />}
 

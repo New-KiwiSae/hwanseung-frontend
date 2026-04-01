@@ -110,30 +110,36 @@ const Header = () => {
             <button className="nav-link">내 근처</button>
             <button className="nav-link">인기매물</button>
           </div>
-{isLoggedIn && (
-  <>
-          <button className="icon-btn" title="채팅">
-            <i className="far fa-comment-dots"></i>
-          </button>
-          <button className="icon-btn" title="알림">
-            <i className="far fa-bell"></i>
-            <span className="notification-dot"></span>
-          </button>
-          <div 
+          {isLoggedIn && (
+            <>
+              <button className="icon-btn" title="채팅">
+                <i className="far fa-comment-dots"></i>
+              </button>
+              <button className="icon-btn" title="알림">
+                <i className="far fa-bell"></i>
+                <span className="notification-dot"></span>
+              </button>
+              <div
                 className="user-profile-container"
                 onMouseEnter={() => setIsProfileOpen(true)}
                 onMouseLeave={() => setIsProfileOpen(false)}
               >
-          <button className="icon-btn user-avatar" title="내 프로필">
-            <i className="far fa-user"></i>
-          </button>
-{isProfileOpen && (
+                <button className="icon-btn user-avatar" title="내 프로필">
+                  <i className="far fa-user"></i>
+                </button>
+                {isProfileOpen && (
                   <div className="profile-dropdown">
                     <div className="dropdown-item" onClick={() => navigate('/mypage')}>
                       <i className="far fa-id-card"></i> 내 정보 보기
                     </div>
-                    <div className="dropdown-item" onClick={() => navigate('/settings')}>
-                      <i className="fas fa-cog"></i> 설정
+                    <div className="dropdown-item" onClick={() => navigate('/sales')}>
+                      <i className="fas fa-box-open"></i> 판매 내역
+                    </div>
+                    <div className="dropdown-item" onClick={() => navigate('/purchase')}>
+                      <i className="fas fa-shopping-bag"></i> 구매 내역
+                    </div>
+                    <div className="dropdown-item" onClick={() => navigate('/wishlist')}>
+                      <i className="fas fa-heart"></i> 관심 목록
                     </div>
                     <hr />
                     <div className="dropdown-item logout-item" onClick={handleLogout}>
@@ -142,17 +148,17 @@ const Header = () => {
                   </div>
                 )}
               </div>
-          <button className="sell-btn" onClick={() => navigate("/products/create")}>
-            <i className="fas fa-plus"></i>
-            <span>판매하기</span>
-          </button>
+              <button className="sell-btn" onClick={() => navigate("/products/create")}>
+                <i className="fas fa-plus"></i>
+                <span>판매하기</span>
+              </button>
 
-          
-</>
+
+            </>
           )}
 
           {!isLoggedIn && (
-            <button className="login-btn" onClick={() => window.location.href='/login'}>
+            <button className="login-btn" onClick={() => window.location.href = '/login'}>
               로그인 / 회원가입
             </button>
           )}
