@@ -55,6 +55,11 @@ const Footer = () => {
                     관리자 전용 (채팅 관리)
                   </Link>
                 </li>
+                <li>
+                  <Link to="/test-product" style={{ fontWeight: 'bold', color: '#ff6f0f' }}>
+                    중고거래 (테스트)
+                  </Link>
+                </li>
               </ul>
             </div>
             <div className="footer-link-group">
