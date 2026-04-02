@@ -16,8 +16,8 @@ export default function AuthPage() {
     const [isEmailChecked, setIsEmailChecked] = useState(false);
 
     const [signUpValues, setSignUpValues] = useState({
-        userid: "",
         username: "",
+        name: "",
         password: "",
         nickname: "",
         email: "",
@@ -30,7 +30,7 @@ export default function AuthPage() {
     });
 
     const [signInValues, setSignInValues] = useState({
-        userid: "",
+        username: "",
         password: "",
     });
 
@@ -38,8 +38,8 @@ export default function AuthPage() {
     const validateSignUp = useCallback(() => {
         const newErrors = {};
 
-        if (signUpValues.userid && signUpValues.userid.length < 4) {
-            newErrors.userid = "아이디는 4자 이상이어야 합니다.";
+        if (signUpValues.username && signUpValues.username.length < 4) {
+            newErrors.username = "아이디는 4자 이상이어야 합니다.";
         }
 
         if (signUpValues.password) {
@@ -91,10 +91,10 @@ export default function AuthPage() {
             const response = await axios.get(`/api/auth/check-${type}`, { params: { [type]: value } });
 
             if (response.data.isDuplicate) {
-                alert(`이미 사용 중인 ${type === 'userid' ? '아이디' : type}입니다.`);
+                alert(`이미 사용 중인 ${type === 'username' ? '아이디' : type}입니다.`);
             } else {
-                alert(`사용 가능한 ${type === 'userid' ? '아이디' : type}입니다!`);
-                if (type === 'userid') setIsIdChecked(true);
+                alert(`사용 가능한 ${type === 'username' ? '아이디' : type}입니다!`);
+                if (type === 'username') setIsIdChecked(true);
                 if (type === 'nickname') setIsNicknameChecked(true);
                 if (type === 'email') setIsEmailChecked(true);
             }
@@ -109,7 +109,7 @@ export default function AuthPage() {
         setSignUpValues(prev => ({ ...prev, [targetId]: value }));
 
         // 값이 변경되면 중복 확인 상태 초기화 (다시 확인하도록 유도)
-        if (targetId === 'userid') setIsIdChecked(false);
+        if (targetId === 'username') setIsIdChecked(false);
         if (targetId === 'nickname') setIsNicknameChecked(false);
         if (targetId === 'email') setIsEmailChecked(false);
     };
@@ -209,14 +209,14 @@ export default function AuthPage() {
                         {/* 아이디 + 중복확인 */}
                         <div className="input-group with-btn">
                             <div className="input-wrapper">
-                                <input type="text" id="userid" placeholder="아이디" onChange={handleSignUpChange} value={signUpValues.userid} required />
+                                <input type="text" id="username" placeholder="아이디" onChange={handleSignUpChange} value={signUpValues.username} required />
                                 <i className="fas fa-id-badge"></i>
-                                {errors.userid && <span className="error-msg">{errors.userid}</span>}
+                                {errors.username && <span className="error-msg">{errors.username}</span>}
                             </div>
                             <button
                                 type="button"
                                 className={`btn small-btn ${isIdChecked ? 'success-btn' : 'outline-btn'}`}
-                                onClick={() => handleDuplicateCheck('userid', signUpValues.userid)}
+                                onClick={() => handleDuplicateCheck('username', signUpValues.username)}
                             >
                                 {isIdChecked ? "확인됨" : "중복확인"}
                             </button>
@@ -228,7 +228,7 @@ export default function AuthPage() {
                         </div>
 
                         <div className="input-group">
-                            <input type="text" id="username" placeholder="이름(실명)" onChange={handleSignUpChange} value={signUpValues.username} required />
+                            <input type="text" id="name" placeholder="이름(실명)" onChange={handleSignUpChange} value={signUpValues.name} required />
                             <i className="fas fa-user"></i>
                         </div>
 
@@ -323,7 +323,7 @@ export default function AuthPage() {
                         <span className="sub-text">또는 이메일 계정으로 로그인하세요</span>
 
                         <div className="input-group">
-                            <input type="text" id="userid" placeholder="아이디" onChange={handleSignInChange} value={signInValues.userid} required />
+                            <input type="text" id="username" placeholder="아이디" onChange={handleSignInChange} value={signInValues.username} required />
                             <i className="fas fa-id-badge"></i>
                         </div>
                         <div className="input-group">
