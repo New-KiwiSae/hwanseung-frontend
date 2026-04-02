@@ -164,7 +164,10 @@ header .imageText .profession {
 .sidebar .navLink a:hover .navText {
   color: #fff;
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 46b4e4f0aff1ea73543902861a3524bf7de955a1
 :global(body.dark) .sidebar .navLink a:hover .icon,
 :global(body.dark) .sidebar .navLink a:hover .navText {
   color: var(--text-color);
