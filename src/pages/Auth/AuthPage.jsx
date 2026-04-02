@@ -121,9 +121,9 @@ export default function AuthPage() {
     const onSignInSubmit = async (e) => {
         e.preventDefault();
         login(signInValues).then((response) => {
-            localStorage.setItem('tokenType', response.data.tokenType);
-            localStorage.setItem('accessToken', response.data.accessToken);
-            localStorage.setItem('refreshToken', response.data.refreshToken);
+            sessionStorage.setItem('tokenType', response.data.tokenType);
+            sessionStorage.setItem('accessToken', response.data.accessToken);
+            sessionStorage.setItem('refreshToken', response.data.refreshToken);
             navigate("/", { replace: true });
         }).catch(() => {
             alert("로그인 정보가 올바르지 않습니다.");

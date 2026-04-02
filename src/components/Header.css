@@ -304,6 +304,33 @@
   transform: scale(0.97);
 }
 
+.admin-btn {
+    display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--brand-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px var(--brand-soft);
+  white-space: nowrap;
+}
+
+.admin-btn:hover {
+  background: var(--brand-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 210, 122, 0.25);
+}
+
+.admin-btn:active {
+  transform: scale(0.97);
+}
+
 .login-btn {
   display: flex;
   align-items: center;
@@ -451,3 +478,30 @@
 }
 
 /* 내프로필보기 끝 */
+
+.admin-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--brand-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px var(--brand-soft);
+  white-space: nowrap;
+}
+
+.admin-btn:hover {
+  background: var(--brand-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 210, 122, 0.25);
+}
+
+.admin-btn:active {
+  transform: scale(0.97);
+}

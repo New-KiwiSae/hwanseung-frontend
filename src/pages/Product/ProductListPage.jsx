@@ -213,7 +213,8 @@ export default function ProductListPage() {
                                     <div className="product-meta">
                                         <span>{product.location}</span>
                                         <span className="dot">•</span>
-                                        <span>{product.sellerId}</span>
+                                        <span style={{ display: 'none' }}>{product.sellerId}</span>
+                                        <span>{product.sellerNickname}</span>
                                     </div>
                                 </div>
                             </Link>
