@@ -63,7 +63,7 @@ export default function ProductCreatePage() {
                 formData.append("images", file); // ✅ 백엔드 List<MultipartFile> images 와 이름 맞춤
             });
 
-            const response = await fetch("http://localhost/api/products", {
+            const response = await fetch("/api/products", {
                 method: "POST",
                 headers: {
                     Authorization: accessToken ? `Bearer ${accessToken}` : "",

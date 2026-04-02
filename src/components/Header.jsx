@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from "jwt-decode";
 import './Header.css';
 
 const Header = () => {
@@ -9,6 +10,36 @@ const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const searchRef = useRef(null);
   const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  useEffect(() => {
+    // 1. 스토리지에서 토큰 가져오기 (저장 방식에 따라 localStorage 또는 sessionStorage 등 사용)
+    const token = localStorage.getItem("accessToken"); 
+
+    if (token) {
+      try {
+        // 2. 토큰 해독
+        const decodedToken = jwtDecode(token);
+        
+        // 3. 토큰 안의 권한(Role) 값 추출 (백엔드에서 설정한 클레임 Key 값 확인 필수)
+        // Spring Security 기본 구조를 따랐다면 'ROLE_SUPER', 'ROLE_SUB' 형태일 확률이 높음
+        const userRole = decodedToken.role; // 키 이름이 다를 수 있으니 백엔드 확인 요망
+
+        // 4. 권한 검증 (SUPER, SUB, ROLE_SUPER, ROLE_SUB 모두 대응하도록 방어적 코드 작성)
+        const authorizedRoles = ["SUPER", "SUB", "ROLE_SUPER", "ROLE_SUB", "ADMIN", "ROLE_ADMIN"]; // 필요에 따라 권한 이름 추가
+        if (authorizedRoles.includes(userRole)) {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (error) {
+        console.error("유효하지 않은 토큰입니다.", error);
+        setIsAdmin(false);
+      }
+    } else {
+      setIsAdmin(false);
+    }
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -146,6 +177,11 @@ const Header = () => {
             <i className="fas fa-plus"></i>
             <span>판매하기</span>
           </button>
+
+          {isAdmin && (<button className="admin-btn" onClick={() => navigate("/admin/adminpage")}>
+            <i className="fas"></i>
+            <span>관리자 페이지</span>
+          </button>)}
 
           
 </>

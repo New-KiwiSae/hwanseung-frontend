@@ -1,8 +1,6 @@
 import DaumPostcode from 'react-daum-postcode';
 import { useState, useEffect, useCallback } from "react"; // 🚩 useEffect, useCallback 추가 확인!
 import { login, signUp } from "../api/AuthAPI";
-import { useState } from "react";
-import { login, signUp, adminlogin } from "../api/AuthAPI";
 import { useNavigate } from "react-router-dom";
 import "./AuthPage.css"; 
 
@@ -81,7 +79,7 @@ export default function AuthPage() {
 
     const onSignInSubmit = async (e) => {
         e.preventDefault();
-        adminlogin(signInValues).then((response) => {
+        login(signInValues).then((response) => {
             localStorage.setItem('tokenType', response.data.tokenType);
             localStorage.setItem('accessToken', response.data.accessToken);
             localStorage.setItem('refreshToken', response.data.refreshToken);
