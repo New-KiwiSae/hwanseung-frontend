@@ -4,9 +4,12 @@ import { login, signUp } from "../../api/AuthAPI";
 import { useNavigate } from "react-router-dom";
 import axios from "axios"; 
 import "./AuthPage.css";
+import { useUser } from "../../UserContext";
 
 export default function AuthPage() {
     const navigate = useNavigate();
+    const { fetchUser } = useUser();
+
     const [isSignUpActive, setIsSignUpActive] = useState(false);
     const [errors, setErrors] = useState({});
     const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
@@ -119,10 +122,16 @@ export default function AuthPage() {
 
     const onSignInSubmit = async (e) => {
         e.preventDefault();
-        login(signInValues).then((response) => {
+        
+        // 🌟 마법의 단어 'async'를 괄호 앞에 추가했습니다!
+        login(signInValues).then(async (response) => { 
             localStorage.setItem('tokenType', response.data.tokenType);
             localStorage.setItem('accessToken', response.data.accessToken);
             localStorage.setItem('refreshToken', response.data.refreshToken);
+
+            // 🌟 이제 안심하고 await을 쓸 수 있습니다!
+            await fetchUser(); 
+            
             navigate("/", { replace: true });
         }).catch(() => {
             alert("로그인 정보가 올바르지 않습니다.");

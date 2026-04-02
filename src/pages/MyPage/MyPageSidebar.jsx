@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'; 
 import axios from 'axios'; 
-import { NavLink, useNavigate } from 'react-router-dom'; // 🌟 useNavigate 부활!
+import { NavLink, useNavigate } from 'react-router-dom'; 
 
 export default function MyPageSidebar({ userInfo }) {
     const navigate = useNavigate();

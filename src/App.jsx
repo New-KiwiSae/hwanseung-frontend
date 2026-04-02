@@ -11,12 +11,14 @@ import Sales from './pages/MyPage/Sales';
 import Purchase from './pages/MyPage/Purchase';
 import Wishlist from './pages/MyPage/Wishlist';
 import './index.css';
+import { UserProvider } from './UserContext';
+
 
 function App() {
     const location = useLocation();
     const isAuthPage = location.pathname === '/login';
     return (
-        // 전체 레이아웃을 flex로 잡아서 컨텐츠가 적어도 Footer가 항상 바닥에 붙어있게 만듭니다.
+        <UserProvider>
         <div className="app-wrapper" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
 
             {!isAuthPage && <Header />}
@@ -40,6 +42,7 @@ function App() {
             {!isAuthPage && <Footer />}
 
         </div>
+        </UserProvider>
     );
 }
 
