@@ -1,4 +1,5 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { useState, useCallback } from 'react';
+import { Routes, Route,useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Layout from './pages/MyPage/MyPageLayout.jsx';
@@ -14,15 +15,31 @@ import Sales from './pages/MyPage/Sales';
 import Purchase from './pages/MyPage/Purchase';
 import Wishlist from './pages/MyPage/Wishlist';
 import './index.css';
+import AdminPage from './pages/Admin/AdminPage.jsx';
+import SplashScreen from './components/SplashScreen';
 
 function App() {
     const location = useLocation();
     const isAuthPage = location.pathname === '/login';
+    const isAdminPage = location.pathname === '/admin/adminpage';
+    const [showSplash, setShowSplash] = useState(() => {
+    return !sessionStorage.getItem('splashShown');
+  });
+
+    const handleSplashFinish = useCallback(() => {
+    sessionStorage.setItem('splashShown', 'true');
+    setShowSplash(false);
+    }, []);
+
+    if (showSplash) {
+        return <SplashScreen onFinish={handleSplashFinish} />;
+    }
+
     return (
         // 전체 레이아웃을 flex로 잡아서 컨텐츠가 적어도 Footer가 항상 바닥에 붙어있게 만듭니다.
         <div className="app-wrapper" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
 
-            {!isAuthPage && <Header />}
+            {!(isAuthPage || isAdminPage) && <Header />}
             <main style={{ flexGrow: 1 }}>
                 <Routes>
                     <Route path="/" element={<MainPage />} />
@@ -32,6 +49,7 @@ function App() {
 
 
                     <Route path="/login" element={<AuthPage />} />
+                    <Route path="/admin/adminpage" element={<AdminPage/>} />
                     <Route path="/admin/chat" element={<AdminChatManager />} />
                     <Route path="/test-product" element={<TradeChatTest />} />
                     <Route element={<Layout />}>
@@ -41,13 +59,12 @@ function App() {
                         <Route path="/purchase" element={<Purchase />} />
                         <Route path="/wishlist" element={<Wishlist />} />
                     </Route>
-                </Routes>
-            </main>
-
-            {!isAuthPage && <Footer />}
-
-        </div>
-    );
+        </Routes>
+      </main>
+      {!(isAuthPage || isAdminPage) && <Footer />}
+      
+    </div>
+  );
 }
 
 export default App;

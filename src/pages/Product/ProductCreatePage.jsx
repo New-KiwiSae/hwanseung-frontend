@@ -83,7 +83,7 @@ export default function ProductCreatePage() {
         e.preventDefault();
 
         try {
-            const accessToken = localStorage.getItem("accessToken");
+            const accessToken = sessionStorage.getItem("accessToken");
 
             const formData = new FormData();
             formData.append("title", form.title);
