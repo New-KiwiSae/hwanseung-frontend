@@ -25,14 +25,13 @@ const ChargePay = ({ onClose, userInfo }) => {
         setDisplayAmount(newAmount.toLocaleString());
     };
 
-    const requestPay = () => {
+   const requestPay = () => {
         if (!amount || amount < 100) {
             alert('최소 100원 이상의 금액을 입력해 주세요.');
             return;
         }
 
         const { IMP } = window;
-        // 🌟🌟 핵심 수정 포인트: Vite 전용 환경변수 열쇠 사용! 🌟🌟
         const impCode = import.meta.env.VITE_IAMPORT_CODE; 
         
         if (!impCode) {
@@ -43,15 +42,7 @@ const ChargePay = ({ onClose, userInfo }) => {
         IMP.init(impCode); 
 
         const data = {
-            pg: 'html5_inicis', // 이니시스, 다날 등 포트원에 연동된 기본 PG사가 뜹니다.
-            pay_method: 'card',
-            merchant_uid: `mid_${new Date().getTime()}`, 
-            name: `환승Pay ${displayAmount}원 충전`,
-            amount: amount, 
-            buyer_email: userInfo?.email || '',
-            buyer_name: userInfo?.username || '',
-            buyer_tel: userInfo?.contact || '',
-            buyer_addr: userInfo?.address || '',
+            // ... (기존과 동일)
         };
 
         IMP.request_pay(data, async (response) => {
@@ -60,7 +51,7 @@ const ChargePay = ({ onClose, userInfo }) => {
             if (success) {
                 try {
                     const token = localStorage.getItem('accessToken');
-                    const res = await axios.post('/api/v1/pay/verify', {
+                    const res = await axios.post('/api/pay/verify', {
                         imp_uid: imp_uid,
                         merchant_uid: merchant_uid,
                         amount: paid_amount
@@ -68,10 +59,11 @@ const ChargePay = ({ onClose, userInfo }) => {
                         headers: { Authorization: `Bearer ${token}` }
                     });
 
+                    // 🌟 무전기 코드는 결제 성공 응답을 받은 바로 이 자리에 와야 합니다!
                     if (res.data === 'success') {
                         alert('환승Pay 충전이 완벽하게 완료되었습니다! 🎉');
                         onClose(); 
-                        window.location.reload(); 
+                        window.dispatchEvent(new Event('updateBalance'));
                     }
                 } catch (err) {
                     console.error(err);

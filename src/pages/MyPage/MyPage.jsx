@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import ChargePay from '../ChargePay'; 
-import './MyPage.css'; 
+import ChargePay from '../../ChargePay'; 
+import '../../chargepay.css'; 
+import '../../pages/MyPage.css'
 
 const MyPage = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const MyPage = () => {
       }
 
       try {
-        const response = await axios.post('/api/user', {}, {
+        const response = await axios.get('/api/user', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUserInfo(response.data); 

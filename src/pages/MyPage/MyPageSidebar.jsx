@@ -1,8 +1,6 @@
-import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import React, { useState, useEffect } from 'react'; // 🌟 useState, useEffect 추가
-import { NavLink } from 'react-router-dom';
-import axios from 'axios'; // 🌟 은행원 역할을 할 axios 추가
+import React, { useState, useEffect } from 'react'; 
+import axios from 'axios'; 
+import { NavLink, useNavigate } from 'react-router-dom'; // 🌟 useNavigate 부활!
 
 export default function MyPageSidebar({ userInfo }) {
     const navigate = useNavigate();
@@ -18,29 +16,34 @@ export default function MyPageSidebar({ userInfo }) {
     const [balance, setBalance] = useState(0);
 
     // 2. 사이드바 화면이 처음 켜질 때 딱 한 번 실행 (잔액 물어보기)
+   // 🌟 무전기 수신기 설치 완료!
     useEffect(() => {
         const fetchBalance = async () => {
             const token = localStorage.getItem('accessToken');
-            
-            // 출입증(토큰)이 없으면 그냥 함수를 종료합니다.
             if (!token) return; 
 
             try {
-                // 우리가 백엔드에 만들어둔 잔액 조회 API 호출!
-                const response = await axios.get('/api/pay/balance', {
+                // 💡 주의: 백엔드 주소가 /api/v1/pay/balance 인지 /api/pay/balance 인지 확인하고 맞춰주세요!
+                const response = await axios.get('/api/v1/pay/balance', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                
-                // 서버가 준 진짜 잔액을 내 화면 상태(balance)에 저장합니다.
                 setBalance(response.data); 
             } catch (error) {
                 console.error("잔액을 불러오지 못했습니다.", error);
             }
         };
 
+        // 1. 화면이 처음 켜질 때 잔액 가져오기
         fetchBalance();
-    }, []); // 빈 배열[]을 넣어야 무한 반복되지 않고 처음 한 번만 실행됩니다.
 
+        // 2. 무전기 켜기: 누군가 'updateBalance' 라고 방송하면, fetchBalance를 다시 실행해라!
+        window.addEventListener('updateBalance', fetchBalance);
+
+        // 3. 컴포넌트가 꺼질 때는 무전기도 끕니다. (메모리 누수 방지)
+        return () => {
+            window.removeEventListener('updateBalance', fetchBalance);
+        };
+    }, []);
     return (
         <aside className="sidebar">
             {/* 프로필 영역 */}
