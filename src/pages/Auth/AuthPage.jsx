@@ -11,6 +11,10 @@ export default function AuthPage() {
     const [errors, setErrors] = useState({});
     const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
 
+    const [isIdChecked, setIsIdChecked] = useState(false);
+    const [isNicknameChecked, setIsNicknameChecked] = useState(false);
+    const [isEmailChecked, setIsEmailChecked] = useState(false);
+
     const [signUpValues, setSignUpValues] = useState({
         userid: "", 
         username: "", 
