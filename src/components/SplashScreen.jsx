@@ -5,11 +5,6 @@ function SplashScreen({ onFinish }) {
   const [progress, setProgress] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
 
-<<<<<<< HEAD
-=======
-    //onFinish => const handleSplashFinish = useCallback(() => setShowSplash(false), []);
-
->>>>>>> 46b4e4f0aff1ea73543902861a3524bf7de955a1
   const handleFinish = useCallback(() => {
     setFadeOut(true);
     setTimeout(() => onFinish(), 500);
