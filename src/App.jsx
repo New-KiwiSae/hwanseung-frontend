@@ -4,6 +4,8 @@ import Footer from './components/Footer';
 import Layout from './pages/MyPage/MyPageLayout.jsx';
 import MainPage from './pages/MainPage';
 import ProductCreatePage from "./pages/Product/ProductCreatePage";
+import ProductDetailPage from './pages/Product/ProductDetailPage.jsx';
+import ProductListPage from "./pages/Product/ProductListPage";
 import AuthPage from './pages/Auth/AuthPage.jsx';
 import AdminChatManager from './pages/Chat/AdminChatManager.jsx';
 import TradeChatTest from './pages/Chat/TradeChatTest.jsx';
@@ -25,6 +27,9 @@ function App() {
                 <Routes>
                     <Route path="/" element={<MainPage />} />
                     <Route path="/products/create" element={<ProductCreatePage />} />
+                    <Route path="/products/:productId" element={<ProductDetailPage />} />
+                    <Route path="/products" element={<ProductListPage />} />
+
 
                     <Route path="/login" element={<AuthPage />} />
                     <Route path="/admin/chat" element={<AdminChatManager />} />
