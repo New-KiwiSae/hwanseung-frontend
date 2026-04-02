@@ -1,7 +1,16 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 export default function MyPageSidebar({ userInfo }) {
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("tokenType");
+        window.location.href = '/';
+    };
+
     return (
         <aside className="sidebar">
             {/* 프로필 영역 */}
@@ -57,11 +66,9 @@ export default function MyPageSidebar({ userInfo }) {
                 </button>
             </nav>
 
-            {/* 로그아웃 */}
-            <button className="sidebar-logout" onClick={() => {
-                localStorage.removeItem('accessToken');
-                window.location.href = '/login';
-            }}>로그아웃</button>
+            <button className="sidebar-logout" onClick={handleLogout}>
+                로그아웃
+            </button>
         </aside>
     );
 }

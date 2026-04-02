@@ -8,6 +8,7 @@ import ProductDetailPage from './pages/Product/ProductDetailPage.jsx';
 import ProductListPage from "./pages/Product/ProductListPage";
 import AuthPage from './pages/Auth/AuthPage.jsx';
 import AdminChatManager from './pages/Chat/AdminChatManager.jsx';
+import TradeChatTest from './pages/Chat/TradeChatTest.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
 import Sales from './pages/MyPage/Sales';
 import Purchase from './pages/MyPage/Purchase';
@@ -30,17 +31,18 @@ function App() {
                     <Route path="/products" element={<ProductListPage />} />
 
 
-          <Route path="/login" element={<AuthPage />} />
-          <Route path="/admin/chat" element={<AdminChatManager />} />
-          <Route element={<Layout />}>
-            {/* 각 독립적인 경로 설정 */}
-            <Route path="/mypage" element={<MyPage />} />
-            <Route path="/sales" element={<Sales />} />
-            <Route path="/purchase" element={<Purchase />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-          </Route>
-        </Routes>
-      </main>
+                    <Route path="/login" element={<AuthPage />} />
+                    <Route path="/admin/chat" element={<AdminChatManager />} />
+                    <Route path="/test-product" element={<TradeChatTest />} />
+                    <Route element={<Layout />}>
+                        {/* 각 독립적인 경로 설정 */}
+                        <Route path="/mypage" element={<MyPage />} />
+                        <Route path="/sales" element={<Sales />} />
+                        <Route path="/purchase" element={<Purchase />} />
+                        <Route path="/wishlist" element={<Wishlist />} />
+                    </Route>
+                </Routes>
+            </main>
 
             {!isAuthPage && <Footer />}
 
