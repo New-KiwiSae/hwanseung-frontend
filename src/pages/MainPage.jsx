@@ -4,15 +4,28 @@ import AdminChat from '../pages/Chat/AdminChat';
 import FloatingChat from './Chat/FloatingChat';
 
 /* ── 데이터 ── */
+// 변경 후
 const categories = [
-    { icon: 'fas fa-mobile-alt', emoji: '📱', label: '디지털기기' },
-    { icon: 'fas fa-tshirt', emoji: '👕', label: '의류/잡화' },
-    { icon: 'fas fa-couch', emoji: '🛋️', label: '가구/인테리어' },
-    { icon: 'fas fa-blender', emoji: '🍳', label: '생활/가전' },
-    { icon: 'fas fa-palette', emoji: '🎨', label: '취미/도서' },
-    { icon: 'fas fa-futbol', emoji: '⚽', label: '스포츠/레저' },
-    { icon: 'fas fa-ticket-alt', emoji: '🎫', label: '티켓/교환권' },
-    { icon: 'fas fa-ellipsis-h', emoji: '✨', label: '전체보기' },
+  { emoji: '📱', label: '디지털기기' },
+  { emoji: '👕', label: '의류/잡화' },
+  { emoji: '🛋️', label: '가구/인테리어' },
+  { emoji: '🍳', label: '생활/가전' },
+  { emoji: '🎨', label: '취미/도서' },
+  { emoji: '⚽', label: '스포츠/레저' },
+  { emoji: '🎫', label: '티켓/교환권' },
+  { emoji: '✨', label: '전체보기' },
+];
+
+// 확장 시 보여줄 추가 카테고리 (빈칸 8개)
+const extraCategories = [
+  { emoji: '', label: '' },
+  { emoji: '', label: '' },
+  { emoji: '', label: '' },
+  { emoji: '', label: '' },
+  { emoji: '', label: '' },
+  { emoji: '', label: '' },
+  { emoji: '', label: '' },
+  { emoji: '', label: '' },
 ];
 
 const products = [
@@ -74,6 +87,7 @@ const MainPage = () => {
     const cardsRef = useRef([]);
     const statsRef = useRef(null);
     const liveFeedIndex = useRef(3);
+    const [showAllCategories, setShowAllCategories] = useState(false);
 
     // 숫자 롤링
     const statValues = stats.map(s => useCountUp(s.value, 2200, statsVisible));
@@ -203,20 +217,42 @@ const MainPage = () => {
             </section>
 
             {/* ═══ Category Quick Menu ═══ */}
-            <section className="category-section">
-                <div className="container">
-                    <div className="category-grid">
-                        {categories.map((cat, idx) => (
-                            <a href="#" key={idx} className="category-item">
-                                <div className="category-icon-wrap">
-                                    <i className={cat.icon}></i>
-                                </div>
-                                <span className="category-label">{cat.label}</span>
-                            </a>
-                        ))}
-                    </div>
-                </div>
-            </section>
+                        <section className="category-section">
+  <div className="container">
+    <div className="category-grid">
+      {categories.map((cat, idx) => (
+        <a href="#" key={idx}
+          className="category-item"
+          onClick={(e) => {
+            if (cat.label === '전체보기') {
+              e.preventDefault();
+              setShowAllCategories(prev => !prev);
+            }
+          }}
+        >
+          <div className="category-icon-wrap">
+            <span className="category-emoji">{cat.emoji}</span>
+          </div>
+          <span className="category-label">
+            {cat.label === '전체보기'
+              ? (showAllCategories ? '접기' : '전체보기')
+              : cat.label}
+          </span>
+        </a>
+      ))}
+
+      {/* 확장된 추가 카테고리 */}
+      {showAllCategories && extraCategories.map((cat, idx) => (
+        <a href="#" key={`extra-${idx}`} className="category-item">
+          <div className="category-icon-wrap">
+            <span className="category-emoji">{cat.emoji}</span>
+          </div>
+          <span className="category-label">{cat.label}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
 
             {/* ═══ 실시간 환승 피드 (마퀴) ═══ */}
             <section className="live-marquee-section">
@@ -232,7 +268,7 @@ const MainPage = () => {
                         ))}
                     </div>
                 </div>
-            </section><br /><br /><br />
+            </section>
 
             {/* ═══ 인기 매물 그리드 ═══ */}
             <section className="products-section">

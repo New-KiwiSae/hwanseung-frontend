@@ -8,7 +8,7 @@ const getHeader = () => {
         withCredentials: true,
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `${localStorage.getItem("tokenType")} ${localStorage.getItem("accessToken")}`,
+            'Authorization': `${sessionStorage.getItem("tokenType")} ${sessionStorage.getItem("accessToken")}`,
         }
     };
 };
