@@ -2,7 +2,7 @@ import DaumPostcode from 'react-daum-postcode';
 import { useState, useEffect, useCallback } from "react"; // 🚩 useEffect, useCallback 추가 확인!
 import { login, signUp } from "../../api/AuthAPI";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; 
+import axios from "axios";
 import "./AuthPage.css";
 
 export default function AuthPage() {
@@ -11,17 +11,21 @@ export default function AuthPage() {
     const [errors, setErrors] = useState({});
     const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
 
+    const [isIdChecked, setIsIdChecked] = useState(false);
+    const [isNicknameChecked, setIsNicknameChecked] = useState(false);
+    const [isEmailChecked, setIsEmailChecked] = useState(false);
+
     const [signUpValues, setSignUpValues] = useState({
-        userid: "", 
-        username: "", 
-        password: "", 
+        userid: "",
+        username: "",
+        password: "",
         nickname: "",
-        email: "", 
-        contact: "", 
-        zipCode: "", 
+        email: "",
+        contact: "",
+        zipCode: "",
         address: "",
-        detailAddress: "", 
-        birthday: "", 
+        detailAddress: "",
+        birthday: "",
         gender: "MALE",
     });
 
@@ -85,7 +89,7 @@ export default function AuthPage() {
         try {
             // 백엔드 API 호출 (설계된 엔드포인트에 맞춰 수정)
             const response = await axios.get(`/api/auth/check-${type}`, { params: { [type]: value } });
-            
+
             if (response.data.isDuplicate) {
                 alert(`이미 사용 중인 ${type === 'userid' ? '아이디' : type}입니다.`);
             } else {
@@ -103,7 +107,7 @@ export default function AuthPage() {
         const { id, value, name } = e.target;
         const targetId = id || name;
         setSignUpValues(prev => ({ ...prev, [targetId]: value }));
-        
+
         // 값이 변경되면 중복 확인 상태 초기화 (다시 확인하도록 유도)
         if (targetId === 'userid') setIsIdChecked(false);
         if (targetId === 'nickname') setIsNicknameChecked(false);
@@ -128,15 +132,21 @@ export default function AuthPage() {
 
     const onSignUpSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!validateSignUp()) {
             alert("입력 정보를 다시 확인해주세요.");
             return;
         }
 
-        // 중복 확인 필수 체크
-        if (!isIdChecked || !isNicknameChecked || !isEmailChecked) {
-            alert("아이디, 닉네임, 이메일 중복 확인을 모두 완료해주세요.");
+        // 아이디, 닉네임은 필수이므로 체크
+        if (!isIdChecked || !isNicknameChecked) {
+            alert("아이디와 닉네임 중복 확인을 완료해주세요.");
+            return;
+        }
+
+        // 이메일은 입력했을 때만 중복 확인 체크
+        if (signUpValues.email && !isEmailChecked) {
+            alert("입력하신 이메일의 중복 확인을 완료해주세요.");
             return;
         }
 
@@ -184,7 +194,7 @@ export default function AuthPage() {
             )}
 
             <div className={`container ${isSignUpActive ? "right-panel-active" : ""}`} id="container">
-                
+
                 {/* 회원가입 영역 */}
                 <div className="form-container sign-up-container">
                     <form onSubmit={onSignUpSubmit} className="scrollable-form">
@@ -203,13 +213,18 @@ export default function AuthPage() {
                                 <i className="fas fa-id-badge"></i>
                                 {errors.userid && <span className="error-msg">{errors.userid}</span>}
                             </div>
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 className={`btn small-btn ${isIdChecked ? 'success-btn' : 'outline-btn'}`}
                                 onClick={() => handleDuplicateCheck('userid', signUpValues.userid)}
                             >
                                 {isIdChecked ? "확인됨" : "중복확인"}
                             </button>
+                        </div>
+                        <div className="input-group">
+                            <input type="password" id="password" placeholder="비밀번호" onChange={handleSignUpChange} value={signUpValues.password} required />
+                            <i className="fas fa-lock"></i>
+                            {errors.password && <span className="error-msg">{errors.password}</span>}
                         </div>
 
                         <div className="input-group">
@@ -217,11 +232,6 @@ export default function AuthPage() {
                             <i className="fas fa-user"></i>
                         </div>
 
-                        <div className="input-group">
-                            <input type="password" id="password" placeholder="비밀번호" onChange={handleSignUpChange} value={signUpValues.password} required />
-                            <i className="fas fa-lock"></i>
-                            {errors.password && <span className="error-msg">{errors.password}</span>}
-                        </div>
 
                         {/* 닉네임 + 중복확인 */}
                         <div className="input-group with-btn">
@@ -230,31 +240,14 @@ export default function AuthPage() {
                                 <i className="fas fa-smile"></i>
                                 {errors.nickname && <span className="error-msg">{errors.nickname}</span>}
                             </div>
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 className={`btn small-btn ${isNicknameChecked ? 'success-btn' : 'outline-btn'}`}
                                 onClick={() => handleDuplicateCheck('nickname', signUpValues.nickname)}
                             >
                                 {isNicknameChecked ? "확인됨" : "중복확인"}
                             </button>
                         </div>
-
-                        {/* 이메일 + 중복확인 */}
-                        <div className="input-group with-btn">
-                            <div className="input-wrapper">
-                                <input type="email" id="email" placeholder="이메일" onChange={handleSignUpChange} value={signUpValues.email} required />
-                                <i className="fas fa-envelope"></i>
-                                {errors.email && <span className="error-msg">{errors.email}</span>}
-                            </div>
-                            <button 
-                                type="button" 
-                                className={`btn small-btn ${isEmailChecked ? 'success-btn' : 'outline-btn'}`}
-                                onClick={() => handleDuplicateCheck('email', signUpValues.email)}
-                            >
-                                {isEmailChecked ? "확인됨" : "중복확인"}
-                            </button>
-                        </div>
-
                         <div className="input-group with-btn">
                             <div className="input-wrapper">
                                 <input type="tel" id="contact" placeholder="연락처 (숫자만)" onChange={handleSignUpChange} value={signUpValues.contact} required />
@@ -264,26 +257,44 @@ export default function AuthPage() {
                             <button type="button" className="btn small-btn outline-btn">본인인증</button>
                         </div>
 
+                        {/* 이메일 + 중복확인 */}
+                        <div className="input-group with-btn">
+                            <div className="input-wrapper">
+                                <input type="email" id="email" placeholder="이메일" onChange={handleSignUpChange} value={signUpValues.email} />
+                                <i className="fas fa-envelope"></i>
+                                {errors.email && <span className="error-msg">{errors.email}</span>}
+                            </div>
+                            <button
+                                type="button"
+                                className={`btn small-btn ${isEmailChecked ? 'success-btn' : 'outline-btn'}`}
+                                onClick={() => handleDuplicateCheck('email', signUpValues.email)}
+                            >
+                                {isEmailChecked ? "확인됨" : "중복확인"}
+                            </button>
+                        </div>
+
+                        <span className="sub-text">선택 정보 입력</span>
+
                         <div className="address-group">
                             <div className="input-group with-btn">
                                 <div className="input-wrapper">
-                                    <input type="text" id="zipCode" placeholder="우편번호" value={signUpValues.zipCode} readOnly required />
+                                    <input type="text" id="zipCode" placeholder="우편번호" value={signUpValues.zipCode} readOnly />
                                     <i className="fas fa-map-marker-alt"></i>
                                 </div>
                                 <button type="button" className="btn small-btn" onClick={() => setIsPostcodeOpen(true)}>주소검색</button>
                             </div>
                             <div className="input-group">
-                                <input type="text" id="address" placeholder="주소" value={signUpValues.address} readOnly required />
+                                <input type="text" id="address" placeholder="주소" value={signUpValues.address} readOnly />
                                 <i className="fas fa-home"></i>
                             </div>
                             <div className="input-group">
-                                <input type="text" id="detailAddress" placeholder="상세주소" onChange={handleSignUpChange} value={signUpValues.detailAddress} required />
+                                <input type="text" id="detailAddress" placeholder="상세주소" onChange={handleSignUpChange} value={signUpValues.detailAddress} />
                                 <i className="fas fa-building"></i>
                             </div>
                         </div>
 
                         <div className="input-group">
-                            <input type="date" id="birthday" onChange={handleSignUpChange} value={signUpValues.birthday} required />
+                            <input type="date" id="birthday" onChange={handleSignUpChange} value={signUpValues.birthday} />
                         </div>
 
                         <div className="gender-group">
