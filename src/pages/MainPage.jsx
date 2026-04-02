@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import './MainPage.css';
 import AdminChat from '../pages/Chat/AdminChat';
 import FloatingChat from './Chat/FloatingChat';
+import { useNavigate } from 'react-router-dom';
+
 
 /* ── 데이터 ── */
 const categories = [
@@ -74,6 +76,7 @@ const MainPage = () => {
     const cardsRef = useRef([]);
     const statsRef = useRef(null);
     const liveFeedIndex = useRef(3);
+     const navigate = useNavigate();
 
     // 숫자 롤링
     const statValues = stats.map(s => useCountUp(s.value, 2200, statsVisible));
@@ -157,7 +160,7 @@ const MainPage = () => {
                             환승페이로 사기 걱정 없이 안전하게 거래하세요.
                         </p>
                         <div className="hero-buttons">
-                            <button className="btn-primary">
+                            <button className="btn-primary" onClick={() => navigate("/products")}>
                                 <i className="fas fa-arrow-right"></i>
                                 거래 시작하기
                             </button>

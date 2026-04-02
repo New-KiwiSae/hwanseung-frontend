@@ -105,7 +105,7 @@ export default function ProductListPage() {
                 <section className="product-list-toolbar">
                     <div className="toolbar-left">
                         <input
-                            type="text"
+                            type="search"
                             placeholder="상품명이나 지역으로 검색"
                             value={keyword}
                             onChange={(e) => setKeyword(e.target.value)}
@@ -113,16 +113,30 @@ export default function ProductListPage() {
                         />
                     </div>
 
-                    <div className="toolbar-right">
-                        <select
-                            className="product-sort-select"
-                            value={sortType}
-                            onChange={(e) => setSortType(e.target.value)}
+                    <div className="toolbar-right sort-button-group">
+                        <button
+                            type="button"
+                            className={sortType === "latest" ? "sort-btn active" : "sort-btn"}
+                            onClick={() => setSortType("latest")}
                         >
-                            <option value="latest">최신순</option>
-                            <option value="priceAsc">가격 낮은순</option>
-                            <option value="priceDesc">가격 높은순</option>
-                        </select>
+                            최신순
+                        </button>
+
+                        <button
+                            type="button"
+                            className={sortType === "priceAsc" ? "sort-btn active" : "sort-btn"}
+                            onClick={() => setSortType("priceAsc")}
+                        >
+                            낮은가격
+                        </button>
+
+                        <button
+                            type="button"
+                            className={sortType === "priceDesc" ? "sort-btn active" : "sort-btn"}
+                            onClick={() => setSortType("priceDesc")}
+                        >
+                            높은가격
+                        </button>
                     </div>
                 </section>
 
