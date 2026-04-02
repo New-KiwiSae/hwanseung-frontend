@@ -14,7 +14,7 @@ export default defineConfig({
         target: 'http://localhost:80',
         changeOrigin: true
       }
-    
+    }
   }
 }
 });
