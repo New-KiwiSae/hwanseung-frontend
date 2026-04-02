@@ -154,7 +154,8 @@ export default function ProductDetailPage() {
                         <div className="detail-info-list">
                             <div className="detail-info-item">
                                 <span className="label">판매자</span>
-                                <span className="value">{product.sellerId}</span>
+                                <span style={{ display: 'none' }} className="value">{product.sellerId}</span>
+                                <span className="value">{product.sellerNickname}</span>
                             </div>
 
                             <div className="detail-info-item">
