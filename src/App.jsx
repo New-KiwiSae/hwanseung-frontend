@@ -18,6 +18,7 @@ import Wishlist from './pages/MyPage/Wishlist';
 import './index.css';
 import AdminPage from './pages/Admin/AdminPage.jsx';
 import SplashScreen from './components/SplashScreen';
+import FloatingChat from './pages/Chat/FloatingChat.jsx';
 
 
 function App() {
@@ -65,6 +66,8 @@ function App() {
         </Routes>
       </main>
       {!(isAuthPage || isAdminPage) && <Footer />}
+
+      {!(isAuthPage || isAdminPage) && <FloatingChat />}
       
     </div>
   );

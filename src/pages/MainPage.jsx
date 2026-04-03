@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './MainPage.css';
-import AdminChat from '../pages/Chat/AdminChat';
-import FloatingChat from './Chat/FloatingChat';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -460,8 +458,6 @@ const MainPage = () => {
                     </div>
                 </div>
             </section>
-            {/* <AdminChat /> */}
-            <FloatingChat />
         </div>
     );
 };
