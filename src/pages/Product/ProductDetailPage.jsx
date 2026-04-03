@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import "./ProductDetailPage.css";
 
 function formatPrice(price) {
@@ -25,33 +26,164 @@ export default function ProductDetailPage() {
     const [error, setError] = useState("");
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-    useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                setLoading(true);
-                setError("");
+    // 로그인 사용자 ID
+    // 토큰에서 로그인한 사용자 ID 꺼내기
+    function getUserIdFromToken() {
+        const token = sessionStorage.getItem("accessToken");
+        if (!token) return null;
 
-                const response = await fetch(`/api/products/${productId}`, {
-                    method: "GET",
-                });
+        try {
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            return payload.sub;
+        } catch (e) {
+            console.error("토큰 파싱 실패", e);
+            return null;
+        }
+    }
+
+    const loginUserId = getUserIdFromToken();
+
+    // 사용자 비교
+    const isSeller = loginUserId && product?.sellerId === loginUserId;
+
+    useEffect(() => {
+        const fetchProductDetail = async () => {
+            try {
+                const response = await fetch(`/api/products/${productId}`);
 
                 if (!response.ok) {
-                    throw new Error("상품 상세 정보를 불러오지 못했습니다.");
+                    throw new Error("삭제되었거나 존재하지 않는 상품입니다.");
                 }
 
                 const data = await response.json();
                 setProduct(data);
-                setSelectedImageIndex(0);
-            } catch (err) {
-                console.error("상품 상세 조회 실패:", err);
-                setError("상품 상세 정보를 불러오는 중 오류가 발생했습니다.");
+            } catch (error) {
+                console.error("상품 상세 조회 실패:", error);
+
+                alert("삭제되었거나 존재하지 않는 상품입니다.");
+                navigate("/products", { replace: true });
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchProduct();
-    }, [productId]);
+        fetchProductDetail();
+    }, [productId, navigate]);
+
+    // 삭제 함수
+    const handleDelete = async () => {
+        const confirmed = window.confirm("정말 삭제하시겠습니까?");
+        if (!confirmed) return;
+
+        try {
+            const token = sessionStorage.getItem("accessToken");
+
+            const response = await fetch(`/api/products/${productId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const text = await response.text();
+            let result = {};
+
+            if (text) {
+                result = JSON.parse(text);
+            }
+
+            if (!response.ok) {
+                throw new Error(result.message || "상품 삭제 실패");
+            }
+
+            alert("상품이 삭제되었습니다.");
+            navigate("/products");
+        } catch (err) {
+            console.error("삭제 실패:", err);
+            alert(err.message || "삭제 중 오류 발생");
+        }
+    };
+
+    // 판매완료 함수
+    const handleSoldOut = async () => {
+        const confirmed = window.confirm("판매완료 처리하시겠습니까?");
+        if (!confirmed) return;
+
+        try {
+            const token = sessionStorage.getItem("accessToken");
+
+            const response = await fetch(`/api/products/${productId}/sold-out`, {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const text = await response.text();
+            let result = {};
+
+            if (text) {
+                result = JSON.parse(text);
+            }
+
+            if (!response.ok) {
+                throw new Error(result.message || "판매완료 처리 실패");
+            }
+
+            alert(result.message || "판매완료 처리되었습니다.");
+
+            setProduct((prev) => ({
+                ...prev,
+                saleStatus: "SOLD_OUT",
+            }));
+        } catch (err) {
+            console.error("판매완료 처리 실패:", err);
+            alert(err.message || "판매완료 처리 중 오류 발생");
+        }
+    };
+
+
+    const currentUser = sessionStorage.getItem("username");
+
+    // 🚀 [추가] 채팅방 생성 및 열기 함수
+    const startChat = async () => {
+        // 1. 내 물건에 내가 채팅 거는 것 방지!
+        if (currentUser === product.sellerId) {
+            alert("본인이 등록한 상품에는 채팅을 걸 수 없습니다.");
+            return;
+        }
+
+        const currentToken = sessionStorage.getItem("accessToken");
+
+        console.log("🔥 채팅할 때 쏘는 토큰:", currentToken);
+
+        try {
+            // 2. 백엔드에 중고거래 방 생성 (또는 기존 방 조회) 요청
+            const res = await axios.post('http://localhost/api/chat/room/trade', {
+                itemId: product.productId, // 백엔드는 itemId를 기다립니다
+                sellerId: product.sellerId
+            }, {
+                headers: { Authorization: `Bearer ${currentToken}` }
+            });
+
+            const realRoomId = res.data.roomId;
+
+            // 3. 플로팅 채팅창(FloatingChat)에게 "방 열어!" 하고 이벤트 발송!
+            window.dispatchEvent(new CustomEvent('openTradeChat', {
+                detail: {
+                    roomId: realRoomId,
+                    buyerId: product.sellerNickname, // 대화 상대방 이름 표시용
+                    sellerId: product.sellerId,
+                    itemName: product.title        // 어떤 물건인지 표시용
+                }
+            }));
+
+        } catch (error) {
+            console.error("채팅방 생성/입장 실패:", error);
+            alert("채팅방을 여는 데 실패했습니다. 다시 시도해주세요.");
+        }
+    };
+
 
     const productImages = product?.productImages || [];
     const hasImages = productImages.length > 0;
@@ -113,6 +245,10 @@ export default function ProductDetailPage() {
                                     <span>환승마켓</span>
                                 </div>
                             )}
+
+                            {product.saleStatus === "SOLD_OUT" && (
+                                <div className="product-soldout-overlay">판매완료</div>
+                            )}
                         </div>
 
                         {hasImages && (
@@ -144,7 +280,12 @@ export default function ProductDetailPage() {
                             <span className="detail-chip">
                                 {categoryMap[product.category] || product.category}
                             </span>
+
                             <span className="detail-chip outline">{product.location}</span>
+
+                            {product.saleStatus === "SOLD_OUT" && (
+                                <span className="detail-chip soldout">판매완료</span>
+                            )}
                         </div>
 
                         <h1 className="detail-title">{product.title}</h1>
@@ -154,7 +295,10 @@ export default function ProductDetailPage() {
                         <div className="detail-info-list">
                             <div className="detail-info-item">
                                 <span className="label">판매자</span>
-                                <span className="value">{product.sellerId}</span>
+                                <span style={{ display: "none" }} className="value">
+                                    {product.sellerId}
+                                </span>
+                                <span className="value">{product.sellerNickname}</span>
                             </div>
 
                             <div className="detail-info-item">
@@ -175,8 +319,12 @@ export default function ProductDetailPage() {
                                 찜하기
                             </button>
 
-                            <button type="button" className="btn-chat">
-                                채팅하기
+                            <button
+                                type="button"
+                                className="btn-chat" onClick={startChat}
+                                disabled={product.saleStatus === "SOLD_OUT"}
+                            >
+                                {product.saleStatus === "SOLD_OUT" ? "판매완료" : "채팅하기"}
                             </button>
                         </div>
 
@@ -185,6 +333,41 @@ export default function ProductDetailPage() {
                                 목록 보기
                             </Link>
                         </div>
+
+                        {isSeller && (
+                            
+                            <div className="detail-owner-buttons">
+
+                                {product.saleStatus === "SALE" && (
+                                    <button
+                                        type="button"
+                                        className="btn-soldout"
+                                        onClick={handleSoldOut}
+                                    >
+                                        판매완료
+                                    </button>
+                                )}
+
+                                <button
+                                    type="button"
+                                    className="btn-edit"
+                                    onClick={() =>
+                                        navigate(`/products/${product.productId}/edit`)
+                                    }
+                                >
+                                    수정
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    className="btn-delete"
+                                    onClick={handleDelete}
+                                >
+                                    삭제
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </section>
 

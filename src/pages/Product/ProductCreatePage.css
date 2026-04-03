@@ -223,6 +223,7 @@
     min-height: 240px;
     resize: vertical;
     line-height: 1.7;
+    resize: none;
 }
 
 .product-create-submit {

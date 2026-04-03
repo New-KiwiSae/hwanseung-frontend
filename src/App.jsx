@@ -7,6 +7,7 @@ import MainPage from './pages/MainPage';
 import ProductCreatePage from "./pages/Product/ProductCreatePage";
 import ProductDetailPage from './pages/Product/ProductDetailPage.jsx';
 import ProductListPage from "./pages/Product/ProductListPage";
+import ProductEditPage from "./pages/Product/ProductEditPage";
 import AuthPage from './pages/Auth/AuthPage.jsx';
 import TradeChatTest from './pages/Chat/TradeChatTest.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
@@ -15,6 +16,8 @@ import Purchase from './pages/MyPage/Purchase';
 import Wishlist from './pages/MyPage/Wishlist';
 import './index.css';
 import SplashScreen from './components/SplashScreen';
+import FloatingChat from './pages/Chat/FloatingChat.jsx';
+
 
 import AdminLayout from './pages/Admin/AdminLayout.jsx';
 import AdminDashBoard from './pages/Admin/AdminDashBoard.jsx';
@@ -55,6 +58,9 @@ function App() {
                     <Route path="/products/create" element={<ProductCreatePage />} />
                     <Route path="/products/:productId" element={<ProductDetailPage />} />
                     <Route path="/products" element={<ProductListPage />} />
+                    <Route path="/products/:productId/edit" element={<ProductEditPage />} />
+
+
                     <Route path="/login" element={<AuthPage />} />
                     <Route path="/test-product" element={<TradeChatTest />} />
 
@@ -79,11 +85,14 @@ function App() {
                         <Route path="/purchase" element={<Purchase />} />
                         <Route path="/wishlist" element={<Wishlist />} />
                     </Route>
-                </Routes>
-            </main>
-            {!(isAuthPage || isAdminPage) && <Footer />}
-        </div>
-    );
+        </Routes>
+      </main>
+      {!(isAuthPage || isAdminPage) && <Footer />}
+
+      {!(isAuthPage || isAdminPage) && <FloatingChat />}
+      
+    </div>
+  );
 }
 
 export default App;
