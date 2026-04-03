@@ -121,23 +121,32 @@ export default function AuthPage() {
         setSignInValues(prev => ({ ...prev, [e.target.id]: e.target.value }));
     };
 
-    const onSignInSubmit = async (e) => {
-        e.preventDefault();
+   const onSignInSubmit = async (e) => {
+    
+    e.preventDefault();
+    
+    try {
+        // 1. 로그인 요청이 완료될 때까지 확실히 기다립니다 (await)
+        const response = await login(signInValues);
         
-        // 🌟 마법의 단어 'async'를 괄호 앞에 추가했습니다!
-        login(signInValues).then(async (response) => { 
-            localStorage.setItem('tokenType', response.data.tokenType);
-            localStorage.setItem('accessToken', response.data.accessToken);
-            localStorage.setItem('refreshToken', response.data.refreshToken);
+        // 2. 성공하면 토큰을 저장합니다.
+        sessionStorage.setItem('tokenType', response.data.tokenType);
+        sessionStorage.setItem('accessToken', response.data.accessToken);
+        sessionStorage.setItem('refreshToken', response.data.refreshToken);
 
-            // 🌟 이제 안심하고 await을 쓸 수 있습니다!
-            await fetchUser(); 
-            
-            navigate("/", { replace: true });
-        }).catch(() => {
-            alert("로그인 정보가 올바르지 않습니다.");
-        });
-    };
+        window.location.href = "/";
+        // 3. 내 정보를 가져오는 요청이 '완전히 끝날 때까지' 기다립니다 (await)
+        // await fetchUser(); 
+        
+        // 4. 정보 세팅이 모두 끝난 후 안전하게 페이지를 이동합니다.
+        navigate("/", { replace: true });
+
+    } catch (error) {
+        // 에러 처리
+        alert("로그인 정보가 올바르지 않습니다.");
+        console.error(error);
+    }
+};
 
     const onSignUpSubmit = async (e) => {
         e.preventDefault();

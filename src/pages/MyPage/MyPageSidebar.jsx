@@ -19,7 +19,7 @@ export default function MyPageSidebar({ userInfo }) {
    // 🌟 무전기 수신기 설치 완료!
     useEffect(() => {
         const fetchBalance = async () => {
-            const token = localStorage.getItem('accessToken');
+            const token = sessionStorage.getItem('accessToken');
             if (!token) return; 
 
             try {

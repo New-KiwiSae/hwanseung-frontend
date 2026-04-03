@@ -22,6 +22,43 @@ const Header = () => {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
 
+// 🌟 1. "내 근처" 버튼 클릭 시 실행될 위치 추적 함수 추가!
+  const handleNearMeClick = () => {
+    // 브라우저가 위치 정보를 지원하는지 확인
+    if (navigator.geolocation) {
+      // 위치 권한을 요청하고 현재 위도/경도를 가져옵니다.
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;   // 위도 (예: 37.xxx)
+          const lng = position.coords.longitude;  // 경도 (예: 127.xxx)
+
+          // 🌟 네이버 지도 URL 만들기
+          // 1) c=${lng},${lat},15 : 내 위치를 중심으로 줌 레벨 15(대략 반경 1km) 설정
+          // 2) 길찾기 패널을 바로 열고 싶다면 네이버 길찾기 URL 조합을 사용합니다.
+          const naverMapUrl = `https://map.naver.com/v5/?c=${lng},${lat},15,0,0,0,dh`;
+          
+          // 새 창으로 네이버 지도 열기
+          window.open(naverMapUrl, '_blank');
+        },
+        (error) => {
+          // 유저가 "차단"을 눌렀거나, GPS를 못 잡을 때의 예외 처리
+          console.error("위치 정보 에러:", error);
+          alert("위치 정보를 가져올 수 없습니다. 브라우저의 위치 권한 설정을 허용해 주세요.");
+        },
+        {
+          enableHighAccuracy: true, // 배터리를 더 쓰더라도 정확한 위치를 잡도록 요청
+          timeout: 5000,            // 5초 안에 못 잡으면 포기
+          maximumAge: 0             // 옛날에 저장된 위치 말고 항상 최신 위치 요청
+        }
+      );
+    } else {
+      alert("이 브라우저에서는 위치 정보(Geolocation)를 지원하지 않습니다.");
+    }
+  };
+
+
+
+
   // 🌟 4. 권한 체크 로직: 토큰 주머니를 localStorage로 통일!
   useEffect(() => {
     const token = localStorage.getItem("accessToken"); // 변경: sessionStorage -> localStorage
@@ -76,9 +113,9 @@ const Header = () => {
 
   // 🌟 5. 로그아웃 로직 수정: localStorage 삭제 및 전역 창고 비우기!
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("tokenType");
+    sessionStorage.removeItem("accessToken");
+    sessionStorage.removeItem("refreshToken");
+    sessionStorage.removeItem("tokenType");
     setUserInfo(null); // 전역 창고를 텅 비웁니다.
     navigate('/'); 
   };

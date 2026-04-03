@@ -50,7 +50,7 @@ const ChargePay = ({ onClose, userInfo }) => {
 
             if (success) {
                 try {
-                    const token = localStorage.getItem('accessToken');
+                    const token = sessionStorage.getItem('accessToken');
                     const res = await axios.post('/api/pay/verify', {
                         imp_uid: imp_uid,
                         merchant_uid: merchant_uid,

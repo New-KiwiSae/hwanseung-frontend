@@ -9,7 +9,7 @@ export const UserProvider = ({ children }) => {
 
     // 🌟 앱이 켜질 때 딱 한 번 실행되는 '신원 확인' 로직
     const fetchUser = async () => {
-        const token = localStorage.getItem('accessToken');
+        const token = sessionStorage.getItem('accessToken');
         if (!token) {
             setIsLoading(false);
             return;
@@ -24,7 +24,7 @@ export const UserProvider = ({ children }) => {
         } catch (error) {
             console.error("사용자 정보를 불러오는데 실패했습니다.", error);
             // 토큰이 만료되었거나 오류나면 로그아웃 처리
-            localStorage.clear();
+            sessionStorage.clear();
         } finally {
             setIsLoading(false);
         }

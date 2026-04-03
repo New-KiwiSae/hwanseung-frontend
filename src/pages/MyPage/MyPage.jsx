@@ -36,7 +36,7 @@ const MyPage = () => {
   };
 
   const handleSave = async () => {
-    const token = localStorage.getItem('accessToken');
+    const token = sessionStorage.getItem('accessToken');
     try {
       await axios.put('/api/user', editData, {
         headers: { Authorization: `Bearer ${token}` }
