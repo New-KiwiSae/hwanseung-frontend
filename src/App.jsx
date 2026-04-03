@@ -30,6 +30,7 @@ import AdminProducts from './pages/Admin/AdminProducts.jsx';
 import AdminTransactions from './pages/Admin/AdminTransactions.jsx';
 import AdminCategories from './pages/Admin/AdminCategories.jsx';
 import AdminChatManage from './pages/Admin/AdminChatManage.jsx';
+import AdminChatManager from './pages/Chat/AdminChatManager.jsx';
 import AdminAnnouncements from './pages/Admin/AdminAnnouncements.jsx';
 
 function App() {
@@ -62,7 +63,6 @@ function App() {
 
 
                     <Route path="/login" element={<AuthPage />} />
-                    <Route path="/test-product" element={<TradeChatTest />} />
 
                     <Route path="/admin" element={<AdminLayout />}>
                         <Route index element={<AdminDashBoard />} />
@@ -73,7 +73,8 @@ function App() {
                         <Route path="categories" element={<AdminCategories />} />
                         <Route path="users" element={<AdminUsers />} />
                         <Route path="reports" element={<AdminReports />} />
-                        <Route path="chat" element={<AdminChatManage />} />
+                        <Route path="chat" element={<AdminChatManager />} />
+                        {/* <Route path="chat" element={<AdminChatManage />} /> */}
                         <Route path="notifications" element={<AdminNotifications />} />
                         <Route path="announcements" element={<AdminAnnouncements />} />
                         <Route path="inquiries" element={<AdminInquiries />} />
