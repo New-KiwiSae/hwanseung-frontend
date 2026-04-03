@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 import './Header.css';
-import { jwtDecode } from "jwt-decode";
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!sessionStorage.getItem("accessToken"));
@@ -224,7 +223,7 @@ const Header = () => {
                 <span>판매하기</span>
               </button>
 
-              {isAdmin && (<button className="admin-btn" onClick={() => navigate("/admin/adminpage")}>
+              {isAdmin && (<button className="admin-btn" onClick={() => navigate("/admin/dashboard")}>
               <i className="fas"></i>
               <span>관리자 페이지</span>
               </button>)}
