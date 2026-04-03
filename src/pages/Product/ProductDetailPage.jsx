@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import "./ProductDetailPage.css";
 
 function formatPrice(price) {
@@ -141,6 +142,49 @@ export default function ProductDetailPage() {
         }
     };
 
+
+    const currentUser = sessionStorage.getItem("username");
+
+    // 🚀 [추가] 채팅방 생성 및 열기 함수
+    const startChat = async () => {
+        // 1. 내 물건에 내가 채팅 거는 것 방지!
+        if (currentUser === product.sellerId) {
+            alert("본인이 등록한 상품에는 채팅을 걸 수 없습니다.");
+            return;
+        }
+
+        const currentToken = sessionStorage.getItem("accessToken");
+
+        console.log("🔥 채팅할 때 쏘는 토큰:", currentToken);
+
+        try {
+            // 2. 백엔드에 중고거래 방 생성 (또는 기존 방 조회) 요청
+            const res = await axios.post('http://localhost/api/chat/room/trade', {
+                itemId: product.productId, // 백엔드는 itemId를 기다립니다
+                sellerId: product.sellerId
+            }, {
+                headers: { Authorization: `Bearer ${currentToken}` }
+            });
+
+            const realRoomId = res.data.roomId;
+
+            // 3. 플로팅 채팅창(FloatingChat)에게 "방 열어!" 하고 이벤트 발송!
+            window.dispatchEvent(new CustomEvent('openTradeChat', {
+                detail: {
+                    roomId: realRoomId,
+                    buyerId: product.sellerNickname, // 대화 상대방 이름 표시용
+                    sellerId: product.sellerId,
+                    itemName: product.title        // 어떤 물건인지 표시용
+                }
+            }));
+
+        } catch (error) {
+            console.error("채팅방 생성/입장 실패:", error);
+            alert("채팅방을 여는 데 실패했습니다. 다시 시도해주세요.");
+        }
+    };
+
+
     const productImages = product?.productImages || [];
     const hasImages = productImages.length > 0;
     const selectedImage =
@@ -277,7 +321,7 @@ export default function ProductDetailPage() {
 
                             <button
                                 type="button"
-                                className="btn-chat"
+                                className="btn-chat" onClick={startChat}
                                 disabled={product.saleStatus === "SOLD_OUT"}
                             >
                                 {product.saleStatus === "SOLD_OUT" ? "판매완료" : "채팅하기"}

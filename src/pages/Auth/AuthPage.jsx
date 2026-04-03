@@ -124,6 +124,8 @@ export default function AuthPage() {
             sessionStorage.setItem('tokenType', response.data.tokenType);
             sessionStorage.setItem('accessToken', response.data.accessToken);
             sessionStorage.setItem('refreshToken', response.data.refreshToken);
+
+            sessionStorage.setItem('username', signInValues.username);
             navigate("/", { replace: true });
         }).catch(() => {
             alert("로그인 정보가 올바르지 않습니다.");
