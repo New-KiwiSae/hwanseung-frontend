@@ -160,7 +160,7 @@ const FloatingChat = () => {
       const imageUrl = uploadRes.data; 
 
       if (stompClient.current?.connected && activeRoom) {
-        const messageData = { roomId: activeRoom.roomId, senderId: currentUser, content: imageUrl };
+        const messageData = { roomId: activeRoom.roomId, sender: currentUser, senderId: currentUser, content: imageUrl };
         stompClient.current.publish({ destination: '/pub/chat/message', body: JSON.stringify(messageData) });
       }
     } catch (error) {
