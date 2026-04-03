@@ -1,11 +1,11 @@
 import axios from "axios";
 
 /** * 최신 토큰을 포함한 헤더를 반환하는 함수
- * 호출될 때마다 localStorage에서 최신 값을 읽어옵니다.
+ * 호출될 때마다 sessionStorage에서 최신 값을 읽어옵니다.
  */
 const getHeader = () => {
-    const accessToken = localStorage.getItem("accessToken");
-    const refreshToken = localStorage.getItem("refreshToken");
+    const accessToken = sessionStorage.getItem("accessToken");
+    const refreshToken = sessionStorage.getItem("refreshToken");
 
     return {
         withCredentials: true,
@@ -23,7 +23,7 @@ export const refreshAccessToken = async () => {
     // getHeader()를 호출하여 최신 리프레시 토큰을 실어 보냄
     const response = await axios.get(`/api/auth/refresh`, getHeader());
     const newAccessToken = response.data;
-    localStorage.setItem('accessToken', newAccessToken);
+    sessionStorage.setItem('accessToken', newAccessToken);
     return newAccessToken;
 };
 

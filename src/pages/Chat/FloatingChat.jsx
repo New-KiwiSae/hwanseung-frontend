@@ -21,7 +21,7 @@ const FloatingChat = () => {
   const messagesEndRef = useRef(null);
 
   const currentUser = "es"; 
-  const token = localStorage.getItem("accessToken");
+  const token = sessionStorage.getItem("accessToken");
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

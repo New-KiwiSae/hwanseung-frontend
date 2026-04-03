@@ -6,9 +6,9 @@ export default function MyPageSidebar({ userInfo }) {
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("tokenType");
+        sessionStorage.removeItem("accessToken");
+        sessionStorage.removeItem("refreshToken");
+        sessionStorage.removeItem("tokenType");
         window.location.href = '/';
     };
 

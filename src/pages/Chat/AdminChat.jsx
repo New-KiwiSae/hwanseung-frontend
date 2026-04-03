@@ -15,7 +15,7 @@ const AdminChat = () => {
   const messagesEndRef = useRef(null);
 
   // 임시 테스트용 데이터 (추후 실제 로그인한 유저 ID로 변경하세요)
-  const currentUser = localStorage.getItem("username"); 
+  const currentUser = sessionStorage.getItem("username"); 
 
   // 채팅창이 열릴 때마다 스크롤을 맨 아래로 내리기
   const scrollToBottom = () => {
@@ -32,7 +32,7 @@ const AdminChat = () => {
       // 채팅창을 열 때 백엔드에 "관리자 방 번호 주세요!" 하고 요청합니다.
       try {
         // 🚨 1. 로컬 스토리지에서 발급받은 토큰을 꺼냅니다. (저장하신 키 이름에 맞게 수정하세요! 예: token, jwt 등)
-        const token = localStorage.getItem("accessToken"); 
+        const token = sessionStorage.getItem("accessToken"); 
         
         // 🚨 2. Axios에 실어 보낼 헤더(신분증)를 미리 만듭니다.
         const axiosConfig = {
@@ -72,7 +72,7 @@ const AdminChat = () => {
   // 🚀 STOMP 연결 (매개변수로 realRoomId를 받도록 수정)
   const connectStomp = (currentRoomId) => {
 
-    const token = localStorage.getItem("accessToken");
+    const token = sessionStorage.getItem("accessToken");
     const client = new Client({
       webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
       connectHeaders: {

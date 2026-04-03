@@ -13,8 +13,8 @@ const AdminChatManager = () => {
   const messagesEndRef = useRef(null);
 
   // 관리자 권한 확인용 토큰 및 아이디
-  const currentUser = localStorage.getItem("username") || "admin"; 
-  const token = localStorage.getItem("accessToken");
+  const currentUser = sessionStorage.getItem("username") || "admin"; 
+  const token = sessionStorage.getItem("accessToken");
 
   // 1. 관리자가 '문의 내역' 탭에 들어오면 전체 방 목록을 불러옵니다.
   useEffect(() => {

@@ -21,8 +21,8 @@ const TradeChatTest = () => {
   const stompClient = useRef(null);
   const messagesEndRef = useRef(null);
 
-  const currentUser = localStorage.getItem("username"); 
-  const token = localStorage.getItem("accessToken");
+  const currentUser = sessionStorage.getItem("username"); 
+  const token = sessionStorage.getItem("accessToken");
 
   // 스크롤 이동
   useEffect(() => {
