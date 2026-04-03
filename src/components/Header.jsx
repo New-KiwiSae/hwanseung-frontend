@@ -3,36 +3,34 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 import './Header.css';
 
+// 🌟 1. 우리가 만든 전역 창고 도구를 가져옵니다.
+import { useUser } from '../UserContext'; // (경로가 ../contexts/UserContext 인지 확인해주세요!)
+
 const Header = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!sessionStorage.getItem("accessToken"));
+  // 🌟 2. 창고에서 내 정보(userInfo)와 정보 변경 함수(setUserInfo)를 꺼내옵니다.
+  const { userInfo, setUserInfo } = useUser();
+  
+  // 🌟 3. 핵심! 로그인 상태는 "창고에 내 정보가 있나?" 하나로 완벽하게 판단 끝!
+  const isLoggedIn = !!userInfo; 
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  
-  // 🚨 프로필 드롭다운 상태
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  
-  // 🚨 1. 채팅 드롭다운 상태 추가!
   const [isChatOpen, setIsChatOpen] = useState(false); 
 
   const searchRef = useRef(null);
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // 🌟 4. 권한 체크 로직: 토큰 주머니를 localStorage로 통일!
   useEffect(() => {
-    // 1. 스토리지에서 토큰 가져오기 (저장 방식에 따라 sessionStorage 또는 sessionStorage 등 사용)
-    const token = sessionStorage.getItem("accessToken"); 
+    const token = localStorage.getItem("accessToken"); // 변경: sessionStorage -> localStorage
 
     if (token) {
       try {
-        // 2. 토큰 해독
         const decodedToken = jwtDecode(token);
-        
-        // 3. 토큰 안의 권한(Role) 값 추출 (백엔드에서 설정한 클레임 Key 값 확인 필수)
-        // Spring Security 기본 구조를 따랐다면 'ROLE_SUPER', 'ROLE_SUB' 형태일 확률이 높음
-        const userRole = decodedToken.role; // 키 이름이 다를 수 있으니 백엔드 확인 요망
-
-        // 4. 권한 검증 (SUPER, SUB, ROLE_SUPER, ROLE_SUB 모두 대응하도록 방어적 코드 작성)
-        const authorizedRoles = ["SUPER", "SUB", "ROLE_SUPER", "ROLE_SUB", "ADMIN", "ROLE_ADMIN"]; // 필요에 따라 권한 이름 추가
+        const userRole = decodedToken.role; 
+        const authorizedRoles = ["SUPER", "SUB", "ROLE_SUPER", "ROLE_SUB", "ADMIN", "ROLE_ADMIN"];
         if (authorizedRoles.includes(userRole)) {
           setIsAdmin(true);
         } else {
@@ -45,15 +43,14 @@ const Header = () => {
     } else {
       setIsAdmin(false);
     }
-  }, []);
+  }, [userInfo]); // userInfo가 바뀔 때(로그인/로그아웃)마다 다시 체크하도록 설정
 
-  // 📦 2. 가짜 채팅방 데이터 (나중에 백엔드 API로 불러올 부분입니다)
+  // 📦 가짜 채팅방 데이터 
   const [chatRooms, setChatRooms] = useState([
     { roomId: "1", buyerId: "apple_lover", itemName: "아이폰 15 Pro", unreadCount: 2, lastMessage: "네고 가능한가요?" },
     { roomId: "2", buyerId: "camp_master", itemName: "캠핑 의자", unreadCount: 0, lastMessage: "내일 거래 가능합니다!" }
   ]);
 
-  // 안 읽은 메시지가 하나라도 있는지 계산
   const hasUnreadChats = chatRooms.some(room => room.unreadCount > 0);
 
   useEffect(() => {
@@ -74,29 +71,21 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    const checkLogin = () => {
-      setIsLoggedIn(!!sessionStorage.getItem("accessToken"));
-    };
-    window.addEventListener('storage', checkLogin);
-    return () => window.removeEventListener('storage', checkLogin);
-  }, []);
-
   const recentSearches = ['아이폰 15 Pro', '캠핑 의자', '맥북 에어 M2'];
   const trendingKeywords = ['자전거', '플레이스테이션 5', '에어팟 맥스'];
 
+  // 🌟 5. 로그아웃 로직 수정: localStorage 삭제 및 전역 창고 비우기!
   const handleLogout = () => {
-    sessionStorage.removeItem("accessToken");
-    sessionStorage.removeItem("refreshToken");
-    sessionStorage.removeItem("tokenType");
-    setIsLoggedIn(false);
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("tokenType");
+    setUserInfo(null); // 전역 창고를 텅 비웁니다.
     navigate('/'); 
   };
 
-  // 🚀 3. 채팅 목록 클릭 시 이동할 함수
   const handleChatClick = (roomId) => {
-    setIsChatOpen(false); // 드롭다운 닫기
-    navigate(`/chat/${roomId}`); // 나중에 만들 전체 채팅 페이지로 이동!
+    setIsChatOpen(false); 
+    navigate(`/chat/${roomId}`); 
   };
 
   return (
@@ -110,9 +99,8 @@ const Header = () => {
           <span><span className="logo-brand">환승</span>마켓</span>
         </a>
 
-        {/* 검색 영역 (기존과 동일) */}
+        {/* 검색 영역 */}
         <div className="search-area" ref={searchRef}>
-          {/* ... 기존 검색 영역 코드 동일 ... */}
           <div className={`search-input-wrapper ${isSearchOpen ? 'active' : ''}`}>
             <i className="fas fa-search search-icon"></i>
             <input
@@ -123,7 +111,7 @@ const Header = () => {
           </div>
           {isSearchOpen && (
              <div className="search-dropdown">
-               {/* ... 기존 코드가 길어서 생략했습니다. 그대로 두시면 됩니다! ... */}
+               {/* 💡 기존 검색 드롭다운 내용 유지 */}
              </div>
           )}
         </div>
@@ -135,27 +123,26 @@ const Header = () => {
             <button className="nav-link">인기매물</button>
           </div>
           
+          {/* 🌟 isLoggedIn이 true일 때 (로그인 완료) 보여줄 버튼들 */}
           {isLoggedIn && (
             <>
-              {/* 🚨 4. 채팅 아이콘 영역 변경! (마우스 호버 시 드롭다운 열림) */}
+              {/* 채팅 영역 */}
               <div 
-                className="user-profile-container" // 프로필 컨테이너 CSS 재활용
+                className="user-profile-container" 
                 onMouseEnter={() => setIsChatOpen(true)}
                 onMouseLeave={() => setIsChatOpen(false)}
               >
                 <button className="icon-btn" title="채팅">
                   <i className="far fa-comment-dots"></i>
-                  {/* 안 읽은 메시지가 있으면 빨간 점 표시 */}
                   {hasUnreadChats && <span className="notification-dot"></span>}
                 </button>
 
                 {/* 채팅 드롭다운 창 */}
                 {isChatOpen && (
-                  <div className="profile-dropdown" style={{ width: '280px', right: '-80px' }}> {/* 위치/너비 살짝 조정 */}
+                  <div className="profile-dropdown" style={{ width: '280px', right: '-80px' }}>
                     <div style={{ padding: '10px 15px', fontWeight: 'bold', borderBottom: '1px solid #eee' }}>
                       채팅 알림
                     </div>
-                    
                     {chatRooms.length === 0 ? (
                       <div className="dropdown-item" style={{ justifyContent: 'center', color: 'gray' }}>
                         진행 중인 채팅이 없습니다.
@@ -190,23 +177,29 @@ const Header = () => {
                 )}
               </div>
 
-              {/* 알림 버튼 (기존) */}
+              {/* 알림 버튼 */}
               <button className="icon-btn" title="알림">
                 <i className="far fa-bell"></i>
                 <span className="notification-dot"></span>
               </button>
 
-              {/* 프로필 버튼 (기존) */}
+              {/* 프로필 버튼 */}
               <div
                 className="user-profile-container"
                 onMouseEnter={() => setIsProfileOpen(true)}
                 onMouseLeave={() => setIsProfileOpen(false)}
               >
                 <button className="icon-btn user-avatar" title="내 프로필">
-                  <i className="far fa-user"></i>
+                  {/* 🌟 닉네임의 첫 글자를 보여주면 더 예쁩니다! */}
+                  <i className="far fa-user"></i> 
                 </button>
                 {isProfileOpen && (
                   <div className="profile-dropdown">
+                    {/* 🌟 내 닉네임을 상단에 띄워줍니다! */}
+                    <div className="dropdown-item" style={{ fontWeight: 'bold', color: '#ff6f0f' }}>
+                      {userInfo.nickname || userInfo.username}님 환영합니다!
+                    </div>
+                    <hr style={{ margin: '5px 0' }} />
                     <div className="dropdown-item" onClick={() => navigate('/mypage')}><i className="far fa-id-card"></i> 내 정보 보기</div>
                     <div className="dropdown-item" onClick={() => navigate('/sales')}><i className="fas fa-box-open"></i> 판매 내역</div>
                     <div className="dropdown-item" onClick={() => navigate('/purchase')}><i className="fas fa-shopping-bag"></i> 구매 내역</div>
@@ -217,21 +210,24 @@ const Header = () => {
                 )}
               </div>
 
-              {/* 판매 버튼 (기존) */}
+              {/* 판매 버튼 */}
               <button className="sell-btn" onClick={() => navigate("/products/create")}>
                 <i className="fas fa-plus"></i>
                 <span>판매하기</span>
               </button>
 
-              {isAdmin && (<button className="admin-btn" onClick={() => navigate("/admin/adminpage")}>
-              <i className="fas"></i>
-              <span>관리자 페이지</span>
-              </button>)}
+              {isAdmin && (
+                <button className="admin-btn" onClick={() => navigate("/admin/adminpage")}>
+                  <i className="fas fa-cog"></i>
+                  <span>관리자 페이지</span>
+                </button>
+              )}
             </>
           )}
 
+          {/* 🌟 isLoggedIn이 false일 때 (비로그인) 보여줄 로그인 버튼 */}
           {!isLoggedIn && (
-            <button className="login-btn" onClick={() => window.location.href = '/login'}>
+            <button className="login-btn" onClick={() => navigate('/login')}>
               로그인 / 회원가입
             </button>
           )}

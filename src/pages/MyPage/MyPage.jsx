@@ -11,22 +11,18 @@ import { useUser } from '../../UserContext';
 const MyPage = () => {
   const navigate = useNavigate();
   
-  // 🌟 2. 창고에서 내 정보(userInfo)와 재요청 함수(fetchUser), 로딩 상태를 꺼내옵니다.
   const { userInfo, isLoading, fetchUser } = useUser();
   
-  // 수정 모드일 때 임시로 타이핑할 공간 (기존 데이터를 덮어쓰지 않기 위함)
   const [editData, setEditData] = useState({});
   const [isEditing, setIsEditing] = useState(false); 
   const [isPayModalOpen, setIsPayModalOpen] = useState(false); 
 
-  // 🌟 3. 창고에서 userInfo가 도착하면, 수정 창(editData)에도 미리 세팅해 줍니다.
   useEffect(() => {
     if (userInfo) {
       setEditData(userInfo);
     }
   }, [userInfo]);
 
-  // 비로그인 사용자 튕겨내기 로직 (로딩이 끝났는데도 정보가 없으면 튕겨냅니다)
   useEffect(() => {
     if (!isLoading && !userInfo) {
       alert("로그인이 필요한 서비스입니다.");
@@ -47,7 +43,6 @@ const MyPage = () => {
       });
       alert("성공적으로 정보가 수정되었습니다! 🎉");
       
-      // 🌟 4. 수정을 완료했으니, 창고 관리자에게 "서버에서 최신 정보 다시 가져와 줘!" 라고 부탁합니다.
       await fetchUser(); 
       setIsEditing(false); 
     } catch (error) {
@@ -56,9 +51,8 @@ const MyPage = () => {
     }
   };
 
-  // 🌟 5. 로딩 중이거나 정보가 없을 때 껍데기 화면이 보이지 않도록 막아줍니다.
   if (isLoading) return <div className="mypage-container" style={{ padding: '50px', textAlign: 'center' }}>정보를 불러오는 중입니다...</div>;
-  if (!userInfo) return null; // 위에서 로그인 화면으로 튕겨냈으니 여긴 null
+  if (!userInfo) return null; 
 
   return (
     <div className="mypage-container">
@@ -75,20 +69,27 @@ const MyPage = () => {
           
           <div className="info-list">
             
+            {/* 🌟 1. 아이디 영역 추가 (수정 불가, username 연결) */}
             <div className="info-item">
-              <label>아이디(이메일)</label>
+              <label>아이디</label>
+              <span className="info-value" style={{ fontWeight: 'bold', color: '#555' }}>
+                {userInfo.username}
+              </span>
+            </div>
+
+            {/* 🌟 2. 이메일 영역 (수정 불가 유지) */}
+            <div className="info-item">
+              <label>이메일</label>
               <span className="info-value email-value">{userInfo.email}</span>
             </div>
 
-            <div className="info-item">
+            {/* 🌟 3. 이름(실명) 영역 (name 연결로 변경) */}
+          <div className="info-item">
               <label>이름</label>
-              {isEditing ? (
-                // 🌟 수정 중일 때는 editData(임시 공간)와 연결
-                <input type="text" name="username" value={editData.username || ''} onChange={handleChange} className="edit-input" />
-              ) : (
-                // 🌟 읽기 모드일 때는 userInfo(진짜 내 정보)와 연결
-                <span className="info-value">{userInfo.username}</span>
-              )}
+              {/* input 창을 아예 없애고, 아이디처럼 텍스트로만 보여줍니다. */}
+              <span className="info-value" style={{ fontWeight: 'bold', color: '#555' }}>
+                {userInfo.name}
+              </span>
             </div>
 
             <div className="info-item">
@@ -127,7 +128,7 @@ const MyPage = () => {
               <button className="btn-save" onClick={handleSave}><i className="fas fa-check"></i> 저장하기</button>
               <button className="btn-cancel" onClick={() => {
                 setIsEditing(false);
-                setEditData(userInfo); // 취소 누르면 임시 공간을 다시 원래 데이터로 돌려놓음
+                setEditData(userInfo); 
               }}>취소</button>
             </>
           ) : (
