@@ -18,7 +18,7 @@ import './index.css';
 import AdminPage from './pages/Admin/AdminPage.jsx';
 import SplashScreen from './components/SplashScreen';
 import { UserProvider } from './UserContext';
-
+import NearMePage from '../NearMePage.jsx';
 
 function App() {
     const location = useLocation();
@@ -45,6 +45,7 @@ function App() {
             <main style={{ flexGrow: 1 }}>
                 <Routes>
                     <Route path="/" element={<MainPage />} />
+                    <Route path="/near-me" element={<NearMePage />} />
                     <Route path="/products/create" element={<ProductCreatePage />} />
                     <Route path="/products/:productId" element={<ProductDetailPage />} />
                     <Route path="/products" element={<ProductListPage />} />
