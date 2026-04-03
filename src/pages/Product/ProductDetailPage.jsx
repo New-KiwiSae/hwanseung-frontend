@@ -25,33 +25,121 @@ export default function ProductDetailPage() {
     const [error, setError] = useState("");
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-    useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                setLoading(true);
-                setError("");
+    // 로그인 사용자 ID
+    // 토큰에서 로그인한 사용자 ID 꺼내기
+    function getUserIdFromToken() {
+        const token = sessionStorage.getItem("accessToken");
+        if (!token) return null;
 
-                const response = await fetch(`/api/products/${productId}`, {
-                    method: "GET",
-                });
+        try {
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            return payload.sub;
+        } catch (e) {
+            console.error("토큰 파싱 실패", e);
+            return null;
+        }
+    }
+
+    const loginUserId = getUserIdFromToken();
+
+    // 사용자 비교
+    const isSeller = loginUserId && product?.sellerId === loginUserId;
+
+    useEffect(() => {
+        const fetchProductDetail = async () => {
+            try {
+                const response = await fetch(`/api/products/${productId}`);
 
                 if (!response.ok) {
-                    throw new Error("상품 상세 정보를 불러오지 못했습니다.");
+                    throw new Error("삭제되었거나 존재하지 않는 상품입니다.");
                 }
 
                 const data = await response.json();
                 setProduct(data);
-                setSelectedImageIndex(0);
-            } catch (err) {
-                console.error("상품 상세 조회 실패:", err);
-                setError("상품 상세 정보를 불러오는 중 오류가 발생했습니다.");
+            } catch (error) {
+                console.error("상품 상세 조회 실패:", error);
+
+                alert("삭제되었거나 존재하지 않는 상품입니다.");
+                navigate("/products", { replace: true });
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchProduct();
-    }, [productId]);
+        fetchProductDetail();
+    }, [productId, navigate]);
+
+    // 삭제 함수
+    const handleDelete = async () => {
+        const confirmed = window.confirm("정말 삭제하시겠습니까?");
+        if (!confirmed) return;
+
+        try {
+            const token = sessionStorage.getItem("accessToken");
+
+            const response = await fetch(`/api/products/${productId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const text = await response.text();
+            let result = {};
+
+            if (text) {
+                result = JSON.parse(text);
+            }
+
+            if (!response.ok) {
+                throw new Error(result.message || "상품 삭제 실패");
+            }
+
+            alert("상품이 삭제되었습니다.");
+            navigate("/products");
+        } catch (err) {
+            console.error("삭제 실패:", err);
+            alert(err.message || "삭제 중 오류 발생");
+        }
+    };
+
+    // 판매완료 함수
+    const handleSoldOut = async () => {
+        const confirmed = window.confirm("판매완료 처리하시겠습니까?");
+        if (!confirmed) return;
+
+        try {
+            const token = sessionStorage.getItem("accessToken");
+
+            const response = await fetch(`/api/products/${productId}/sold-out`, {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const text = await response.text();
+            let result = {};
+
+            if (text) {
+                result = JSON.parse(text);
+            }
+
+            if (!response.ok) {
+                throw new Error(result.message || "판매완료 처리 실패");
+            }
+
+            alert(result.message || "판매완료 처리되었습니다.");
+
+            setProduct((prev) => ({
+                ...prev,
+                saleStatus: "SOLD_OUT",
+            }));
+        } catch (err) {
+            console.error("판매완료 처리 실패:", err);
+            alert(err.message || "판매완료 처리 중 오류 발생");
+        }
+    };
 
     const productImages = product?.productImages || [];
     const hasImages = productImages.length > 0;
@@ -113,6 +201,10 @@ export default function ProductDetailPage() {
                                     <span>환승마켓</span>
                                 </div>
                             )}
+
+                            {product.saleStatus === "SOLD_OUT" && (
+                                <div className="product-soldout-overlay">판매완료</div>
+                            )}
                         </div>
 
                         {hasImages && (
@@ -144,7 +236,12 @@ export default function ProductDetailPage() {
                             <span className="detail-chip">
                                 {categoryMap[product.category] || product.category}
                             </span>
+
                             <span className="detail-chip outline">{product.location}</span>
+
+                            {product.saleStatus === "SOLD_OUT" && (
+                                <span className="detail-chip soldout">판매완료</span>
+                            )}
                         </div>
 
                         <h1 className="detail-title">{product.title}</h1>
@@ -154,7 +251,9 @@ export default function ProductDetailPage() {
                         <div className="detail-info-list">
                             <div className="detail-info-item">
                                 <span className="label">판매자</span>
-                                <span style={{ display: 'none' }} className="value">{product.sellerId}</span>
+                                <span style={{ display: "none" }} className="value">
+                                    {product.sellerId}
+                                </span>
                                 <span className="value">{product.sellerNickname}</span>
                             </div>
 
@@ -176,8 +275,12 @@ export default function ProductDetailPage() {
                                 찜하기
                             </button>
 
-                            <button type="button" className="btn-chat">
-                                채팅하기
+                            <button
+                                type="button"
+                                className="btn-chat"
+                                disabled={product.saleStatus === "SOLD_OUT"}
+                            >
+                                {product.saleStatus === "SOLD_OUT" ? "판매완료" : "채팅하기"}
                             </button>
                         </div>
 
@@ -186,6 +289,41 @@ export default function ProductDetailPage() {
                                 목록 보기
                             </Link>
                         </div>
+
+                        {isSeller && (
+                            
+                            <div className="detail-owner-buttons">
+
+                                {product.saleStatus === "SALE" && (
+                                    <button
+                                        type="button"
+                                        className="btn-soldout"
+                                        onClick={handleSoldOut}
+                                    >
+                                        판매완료
+                                    </button>
+                                )}
+
+                                <button
+                                    type="button"
+                                    className="btn-edit"
+                                    onClick={() =>
+                                        navigate(`/products/${product.productId}/edit`)
+                                    }
+                                >
+                                    수정
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    className="btn-delete"
+                                    onClick={handleDelete}
+                                >
+                                    삭제
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </section>
 

@@ -7,6 +7,7 @@ import MainPage from './pages/MainPage';
 import ProductCreatePage from "./pages/Product/ProductCreatePage";
 import ProductDetailPage from './pages/Product/ProductDetailPage.jsx';
 import ProductListPage from "./pages/Product/ProductListPage";
+import ProductEditPage from "./pages/Product/ProductEditPage";
 import AuthPage from './pages/Auth/AuthPage.jsx';
 import AdminChatManager from './pages/Chat/AdminChatManager.jsx';
 import TradeChatTest from './pages/Chat/TradeChatTest.jsx';
@@ -17,6 +18,7 @@ import Wishlist from './pages/MyPage/Wishlist';
 import './index.css';
 import AdminPage from './pages/Admin/AdminPage.jsx';
 import SplashScreen from './components/SplashScreen';
+
 
 function App() {
     const location = useLocation();
@@ -46,6 +48,7 @@ function App() {
                     <Route path="/products/create" element={<ProductCreatePage />} />
                     <Route path="/products/:productId" element={<ProductDetailPage />} />
                     <Route path="/products" element={<ProductListPage />} />
+                    <Route path="/products/:productId/edit" element={<ProductEditPage />} />
 
 
                     <Route path="/login" element={<AuthPage />} />
