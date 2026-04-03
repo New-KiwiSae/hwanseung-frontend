@@ -454,6 +454,24 @@
     color: #111827;
 }
 
+/* 본인껀 찜 불가능 */
+.btn-like:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border-color: #e5e7eb;
+    /* cursor: not-allowed; */
+    box-shadow: none;
+}
+
+.btn-like:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-like:disabled .like-icon {
+    color: #d1d5db;
+}
+
 @media (max-width: 992px) {
     .product-detail-main {
         grid-template-columns: 1fr;

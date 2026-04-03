@@ -412,6 +412,7 @@ export default function ProductDetailPage() {
                                 type="button"
                                 className={`btn-like ${likeInfo.liked ? "active" : ""}`}
                                 onClick={handleLikeToggle}
+                                disabled={isSeller}
                             >
                                 {likeInfo.liked ? (
                                     <FaHeart className="like-icon active" />
