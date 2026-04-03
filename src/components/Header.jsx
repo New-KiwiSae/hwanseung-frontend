@@ -223,7 +223,7 @@ const Header = () => {
                 <span>판매하기</span>
               </button>
 
-              {isAdmin && (<button className="admin-btn" onClick={() => navigate("/admin/adminpage")}>
+              {isAdmin && (<button className="admin-btn" onClick={() => navigate("/admin/dashboard")}>
               <i className="fas"></i>
               <span>관리자 페이지</span>
               </button>)}

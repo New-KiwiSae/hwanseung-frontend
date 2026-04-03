@@ -320,8 +320,8 @@ export default function ProductDetailPage() {
                             </button>
 
                             <button
-                                type="button" onClick={startChat}
-                                className="btn-chat"
+                                type="button"
+                                className="btn-chat" onClick={startChat}
                                 disabled={product.saleStatus === "SOLD_OUT"}
                             >
                                 {product.saleStatus === "SOLD_OUT" ? "판매완료" : "채팅하기"}
