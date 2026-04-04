@@ -6,8 +6,6 @@ import './Header.css';
 // 🌟 1. 우리가 만든 전역 창고 도구를 가져옵니다.
 import { useUser } from '../UserContext';
 
-// 👇 여기에 있던 isZoomed와 handleZoomToggle을 아래 Header 안으로 옮겼습니다!
-
 const Header = () => {
   // 🌟 2. 창고에서 내 정보(userInfo)와 정보 변경 함수(setUserInfo)를 꺼내옵니다.
   const { userInfo, setUserInfo } = useUser();
@@ -20,23 +18,32 @@ const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false); 
 
-  // ✅ 컴포넌트 내부로 안전하게 이사 온 상태와 함수!
-  const [isZoomed, setIsZoomed] = useState(false);
+  // ✅ 화면 점진적 확대/축소 상태 (기본 1.0 = 100%)
+  const [zoomLevel, setZoomLevel] = useState(1.0);
 
-  const handleZoomToggle = () => {
-    setIsZoomed(!isZoomed); // 상태를 반대로 뒤집음
-    
-    if (!isZoomed) {
-      document.body.style.zoom = "1.15"; 
-    } else {
-      document.body.style.zoom = "1.0"; 
+  // ➕ 확대 버튼을 눌렀을 때 (최대 1.5까지)
+  const handleZoomIn = () => {
+    if (zoomLevel < 1.5) {
+      // 💡 컴퓨터의 소수점 계산 오차를 막기 위해 Math.round를 사용합니다.
+      const nextZoom = Math.round((zoomLevel + 0.1) * 10) / 10;
+      setZoomLevel(nextZoom);
+      document.body.style.zoom = nextZoom.toString();
     }
   };
 
+  // ➖ 축소 버튼을 눌렀을 때 (최소 1.0까지)
+  const handleZoomOut = () => {
+    if (zoomLevel > 1.0) {
+      const nextZoom = Math.round((zoomLevel - 0.1) * 10) / 10;
+      setZoomLevel(nextZoom);
+      document.body.style.zoom = nextZoom.toString();
+    }
+  };
   const searchRef = useRef(null);
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // 🌟 내 근처 클릭 로직
   const handleNearMeClick = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -60,9 +67,9 @@ const Header = () => {
     }
   };
 
-  // 🌟 4. 권한 체크 로직: 토큰 주머니를 localStorage로 통일!
+  // 🌟 4. 권한 체크 로직
   useEffect(() => {
-    const token = localStorage.getItem("accessToken"); 
+    const token = sessionStorage.getItem("accessToken"); 
 
     if (token) {
       try {
@@ -109,8 +116,7 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 🌟 5. 로그아웃 로직 수정: sessionStorage 삭제 및 전역 창고 비우기!
-  // (이전 대화에서 맞췄던 sessionStorage로 수정해두었습니다!)
+  // 🌟 5. 로그아웃 로직
   const handleLogout = () => {
     sessionStorage.removeItem("accessToken");
     sessionStorage.removeItem("refreshToken");
@@ -147,7 +153,7 @@ const Header = () => {
           </div>
           {isSearchOpen && (
              <div className="search-dropdown">
-               {/* 💡 기존 검색 드롭다운 내용 유지 */}
+               {/* 💡 기존 검색 드롭다운 내용 (생략됨) */}
              </div>
           )}
         </div>
@@ -155,15 +161,13 @@ const Header = () => {
         {/* 액션 버튼 */}
         <div className="header-actions">
           <div className="nav-links">
-            {/* 🌟 '내 근처' 버튼 */}
             <button className="nav-link" onClick={handleNearMeClick}>내 근처</button>
             <button className="nav-link">인기매물</button>
           </div>
           
-          {/* 🌟 isLoggedIn이 true일 때 (로그인 완료) 보여줄 버튼들 */}
           {isLoggedIn && (
             <>
-              {/* 채팅 영역 (생략) */}
+              {/* ✅ 채팅 영역 (복구 완료!) */}
               <div 
                 className="user-profile-container" 
                 onMouseEnter={() => setIsChatOpen(true)}
@@ -173,7 +177,43 @@ const Header = () => {
                   <i className="far fa-comment-dots"></i>
                   {hasUnreadChats && <span className="notification-dot"></span>}
                 </button>
-                {/* ... 채팅 드롭다운 ... */}
+                {isChatOpen && (
+                  <div className="profile-dropdown" style={{ width: '280px', right: '-80px' }}>
+                    <div style={{ padding: '10px 15px', fontWeight: 'bold', borderBottom: '1px solid #eee' }}>
+                      채팅 알림
+                    </div>
+                    {chatRooms.length === 0 ? (
+                      <div className="dropdown-item" style={{ justifyContent: 'center', color: 'gray' }}>
+                        진행 중인 채팅이 없습니다.
+                      </div>
+                    ) : (
+                      chatRooms.map((room) => (
+                        <div 
+                          key={room.roomId} 
+                          className="dropdown-item" 
+                          onClick={() => handleChatClick(room.roomId)}
+                          style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '10px 15px' }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '5px' }}>
+                            <span style={{ fontWeight: 'bold', fontSize: '0.9em' }}>{room.buyerId}</span>
+                            {room.unreadCount > 0 && (
+                              <span style={{ backgroundColor: '#ff6f0f', color: 'white', borderRadius: '10px', padding: '2px 6px', fontSize: '0.7em', fontWeight: 'bold' }}>
+                                {room.unreadCount}
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '0.8em', color: '#666', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            [{room.itemName}] {room.lastMessage}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                    <hr style={{ margin: 0 }} />
+                    <div className="dropdown-item" style={{ justifyContent: 'center', color: '#007bff', fontWeight: 'bold' }} onClick={() => navigate('/chat')}>
+                      모든 채팅 보기
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* 알림 버튼 */}
@@ -182,12 +222,27 @@ const Header = () => {
                 <span className="notification-dot"></span>
               </button>
 
-              {/* 🌟 화면 확대/축소 버튼 */}
-              <button className="icon-btn" title="화면 확대/축소" onClick={handleZoomToggle}>
-                <i className={`fas ${isZoomed ? 'fa-search-minus' : 'fa-search-plus'}`}></i>
-              </button>
+             {/* 🌟 화면 축소 / 확대 버튼 그룹 */}
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <button 
+                  className="icon-btn" 
+                  title="화면 축소" 
+                  onClick={handleZoomOut}
+                  style={{ opacity: zoomLevel <= 1.0 ? 0.3 : 1 }} // 최소 크기일 땐 흐리게!
+                >
+                  <i className="fas fa-search-minus"></i>
+                </button>
+                <button 
+                  className="icon-btn" 
+                  title="화면 확대" 
+                  onClick={handleZoomIn}
+                  style={{ opacity: zoomLevel >= 1.5 ? 0.3 : 1 }} // 최대 크기일 땐 흐리게!
+                >
+                  <i className="fas fa-search-plus"></i>
+                </button>
+              </div>
 
-              {/* 프로필 버튼 */}
+              {/* ✅ 프로필 버튼 (복구 완료!) */}
               <div
                 className="user-profile-container"
                 onMouseEnter={() => setIsProfileOpen(true)}
@@ -196,7 +251,20 @@ const Header = () => {
                 <button className="icon-btn user-avatar" title="내 프로필">
                   <i className="far fa-user"></i> 
                 </button>
-                {/* ... 프로필 드롭다운 ... */}
+                {isProfileOpen && (
+                  <div className="profile-dropdown">
+                    <div className="dropdown-item" style={{ fontWeight: 'bold', color: '#ff6f0f' }}>
+                      {userInfo.nickname || userInfo.username}님 환영합니다!
+                    </div>
+                    <hr style={{ margin: '5px 0' }} />
+                    <div className="dropdown-item" onClick={() => navigate('/mypage')}><i className="far fa-id-card"></i> 내 정보 보기</div>
+                    <div className="dropdown-item" onClick={() => navigate('/sales')}><i className="fas fa-box-open"></i> 판매 내역</div>
+                    <div className="dropdown-item" onClick={() => navigate('/purchase')}><i className="fas fa-shopping-bag"></i> 구매 내역</div>
+                    <div className="dropdown-item" onClick={() => navigate('/wishlist')}><i className="fas fa-heart"></i> 관심 목록</div>
+                    <hr />
+                    <div className="dropdown-item logout-item" onClick={handleLogout}><i className="fas fa-sign-out-alt"></i> 로그아웃</div>
+                  </div>
+                )}
               </div>
 
               {/* 판매 버튼 */}
@@ -214,7 +282,6 @@ const Header = () => {
             </>
           )}
 
-          {/* 🌟 isLoggedIn이 false일 때 (비로그인) 보여줄 로그인 버튼 */}
           {!isLoggedIn && (
             <button className="login-btn" onClick={() => navigate('/login')}>
               로그인 / 회원가입
