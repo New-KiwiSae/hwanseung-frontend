@@ -17,7 +17,8 @@ import Wishlist from './pages/MyPage/Wishlist';
 import './index.css';
 import SplashScreen from './components/SplashScreen';
 import FloatingChat from './pages/Chat/FloatingChat.jsx';
-
+import NearMePage from '../NearMePage.jsx';
+import { UserProvider } from './UserContext';
 
 import AdminLayout from './pages/Admin/AdminLayout.jsx';
 import AdminDashBoard from './pages/Admin/AdminDashBoard.jsx';
