@@ -3,7 +3,12 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import axios from 'axios';
 
+import { useUser } from '../../UserContext';
+
 const FloatingChat = () => {
+
+  const { userInfo } = useUser();
+
   const [isOpen, setIsOpen] = useState(false); 
   const [activeRoom, setActiveRoom] = useState(null); 
 
@@ -16,31 +21,80 @@ const FloatingChat = () => {
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null); 
 
+  // 🚨 1. 알림만 전담해서 듣는 두 번째 STOMP 클라이언트 (배경에서 계속 켜져 있음)
+  const notiStompClient = useRef(null);
+
   const token = sessionStorage.getItem("accessToken");
-  const currentUser = sessionStorage.getItem("username") || "알수없음";
+  // const currentUser = sessionStorage.getItem("username") || "알수없음";
+  const currentUser = userInfo?.username || userInfo?.userId || sessionStorage.getItem("username");
+
+  // ========================================================
+  // 🚨 [여기에 탐지기 4줄 추가!]
+  console.log("🔥 1. 현재 토큰 있나요?:", !!token);
+  console.log("🔥 2. 창고(userInfo) 정보:", userInfo);
+  console.log("🔥 3. 계산된 내 아이디(currentUser):", currentUser);
+  // ========================================================
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, activeRoom]);
 
-  // 🌟 수정된 백그라운드 갱신 로직 (Polling)
+  // ========================================================
+  // 🚨 2. [핵심] 처음에 알림 채널에 연결해서 귀를 열어둡니다!
+  // ========================================================
   useEffect(() => {
-    if (!token) return;
-
-    // 1. 처음 컴포넌트가 켜질 때 한 번 가져옵니다.
     fetchMyChatRooms();
 
-    // 2. 채팅창이 열려있든 닫혀있든 5초마다 백엔드에 안 읽은 메시지 개수를 물어봅니다!
-    const interval = setInterval(() => {
-      // 단, 내가 지금 특정 방(activeRoom)에서 실시간으로 대화 중일 때는 
-      // 굳이 전체 목록을 새로고침해서 화면을 깜빡거리게 할 필요가 없으므로 막아줍니다.
-      if (!activeRoom) {
-        fetchMyChatRooms();
-      }
-    }, 3000); // 3000ms = 3초
+    // 플로팅 아이콘 전용 "알림 수신기" 연결
+    const client = new Client({
+      webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
+      connectHeaders: { Authorization: `Bearer ${token}` },
+      onConnect: () => {
+        // 내 알림 전용 주파수에 귀를 엽니다.
+        client.subscribe(`/sub/user/${currentUser}/notification`, (message) => {
+          const newNoti = JSON.parse(message.body);
+          
+          // 오직 "채팅" 알림일 때만 빨간 점을 올립니다!
+          if (newNoti.type === 'CHAT') {
+            // const incomingRoomId = newNoti.relatedItemId.toString();
+            const incomingRoomId = newNoti.relatedStringId;
 
-    return () => clearInterval(interval); // 컴포넌트가 꺼지면 타이머 청소
-  }, [token, activeRoom]); // token이나 activeRoom이 바뀔 때마다 타이머 재설정
+            setChatRooms((prevRooms) => {
+              // 꼼수: 최신 activeRoom 상태 확인
+              let currentActiveRoomId = null;
+              setActiveRoom(current => {
+                 currentActiveRoomId = current?.roomId;
+                 return current;
+              });
+
+              // 내가 이미 그 방 안에서 채팅을 보고 있다면 알림 숫자 안 올림!
+              if (currentActiveRoomId === incomingRoomId) {
+                return prevRooms; 
+              }
+
+              // 안 보고 있는 방이라면 뱃지 올리기!
+              const roomExists = prevRooms.find(r => r.roomId === incomingRoomId);
+              if (roomExists) {
+                const updatedRoom = { ...roomExists, unreadCount: roomExists.unreadCount + 1, lastMessage: newNoti.content };
+                return [updatedRoom, ...prevRooms.filter(r => r.roomId !== incomingRoomId)]; // 맨 위로 끌어올림
+              } else {
+                fetchMyChatRooms(); // 처음 말 거는 사람이면 목록 새로 불러오기
+                return prevRooms;
+              }
+            });
+          }
+        });
+      }
+    });
+
+    client.activate();
+    notiStompClient.current = client;
+
+    return () => {
+      if (notiStompClient.current) notiStompClient.current.deactivate();
+    };
+  }, [token, currentUser]);
+  // ========================================================
 
   const fetchMyChatRooms = async () => {
     if (!token) return;
@@ -104,6 +158,10 @@ const FloatingChat = () => {
   const enterRoom = async (room) => {
     setActiveRoom(room); 
     setMessages([]); 
+
+    // 🚨 3. 방에 들어갔을 때, 화면에서 안 읽은 메시지 숫자를 즉시 0으로 폭파!
+    setChatRooms(prev => prev.map(r => r.roomId === room.roomId ? { ...r, unreadCount: 0 } : r));
+    
     try {
       const historyRes = await axios.get(`http://localhost/api/chat/room/${room.roomId}/messages`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -151,9 +209,25 @@ const FloatingChat = () => {
     stompClient.current = client;
   };
 
+  // ========================================================
+  // 🚨 4. [핵심] 메시지 쏠 때, 상대방 아이디(receiverId) 묶어 보내기!
+  // ========================================================
   const sendMessage = () => {
     if (inputMessage.trim() !== '' && stompClient.current?.connected && activeRoom) {
-      const messageData = { roomId: activeRoom.roomId, sender: currentUser, senderId: currentUser, content: inputMessage };
+      
+      const opponentId = getOpponentName(activeRoom); // 상대방 아이디 알아내기
+
+      const messageData = { 
+        roomId: activeRoom.roomId, 
+        sender: currentUser, 
+        senderId: currentUser, 
+        content: inputMessage,
+        receiverId: opponentId === "환승마켓 고객센터" ? "admin" : opponentId // 🚨 백엔드 DTO에 추가한 바로 그 녀석!
+      };
+
+      // 🚨 [탐지기 1번] 백엔드로 쏘기 직전에 데이터 확인! (F12 콘솔창 확인)
+      console.log("🔥 [탐지기 1번] 백엔드로 보낼 데이터:", messageData);
+      
       stompClient.current.publish({ destination: '/pub/chat/message', body: JSON.stringify(messageData) });
       setInputMessage('');
     }

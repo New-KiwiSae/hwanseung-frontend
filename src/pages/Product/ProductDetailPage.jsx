@@ -4,6 +4,8 @@ import axios from "axios";
 import "./ProductDetailPage.css";
 import { FiHeart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
+import { Client } from '@stomp/stompjs'; 
+import SockJS from 'sockjs-client';
 
 function formatPrice(price) {
     return Number(price || 0).toLocaleString();
@@ -148,12 +150,37 @@ export default function ProductDetailPage() {
 
             const realRoomId = res.data.roomId;
 
+            // ========================================================
+            // 🚨 [추가] "채팅하기" 누르는 즉시 상대방에게 STOMP 알림 발사!
+            // ========================================================
+            const tempClient = new Client({
+                webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
+                connectHeaders: { Authorization: `Bearer ${currentToken}` },
+                onConnect: () => {
+                    const messageData = { 
+                        roomId: realRoomId, 
+                        sender: currentUser, 
+                        senderId: currentUser, 
+                        content: `${currentUser}님이 [${product.title}] 상품에 대해 채팅을 시작했습니다!`, // 알림 내용
+                        receiverId: product.sellerId 
+                    };
+                    
+                    // 메시지를 쏘고!
+                    tempClient.publish({ destination: '/pub/chat/message', body: JSON.stringify(messageData) });
+                    
+                    // 목적을 달성했으니 0.5초 뒤에 쿨하게 연결 끊기!
+                    setTimeout(() => tempClient.deactivate(), 500); 
+                }
+            });
+            tempClient.activate();
+            // ========================================================
+
             // 3. 플로팅 채팅창(FloatingChat)에게 "방 열어!" 하고 이벤트 발송!
             window.dispatchEvent(
                 new CustomEvent("openTradeChat", {
                     detail: {
                         roomId: realRoomId,
-                        buyerId: product.sellerNickname,
+                        buyerId: currentUser,
                         sellerId: product.sellerId,
                         itemName: product.title,
                     },
