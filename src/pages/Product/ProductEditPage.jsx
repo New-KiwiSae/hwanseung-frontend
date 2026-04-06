@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./ProductCreatePage.css";
+import { useUser } from "../../UserContext";
+
+
+
 
 export default function ProductEditPage() {
+    
     const navigate = useNavigate();
     const { productId } = useParams();
+
+const { userInfo } = useUser(); // 🌟 유저 정보 꺼내기
+    const mapRef = useRef(null);    // 🌟 지도를 담을 도화지
 
     const [form, setForm] = useState({
         title: "",
@@ -87,6 +95,64 @@ export default function ProductEditPage() {
 
         fetchProduct();
     }, [productId, navigate]);
+
+useEffect(() => {
+        // 🌟 1번 직원이 로딩을 안 끝냈으면 돌아가서 대기!
+        if (loading || !window.kakao || !window.kakao.maps) return;
+
+        window.kakao.maps.load(() => {
+            const mapContainer = mapRef.current;
+            if (!mapContainer) return;
+
+           const geocoder = new window.kakao.maps.services.Geocoder();
+            
+            // 💡 우선순위: 1.기존 상품위치 -> 2.가입주소 -> 3.기본값(안양시 등)
+            const initialAddress = form.location || userInfo?.address || "경기도 안양시";
+
+            // 처음 시작할 때 주소를 좌표로 바꿔서 지도를 띄웁니다.
+            geocoder.addressSearch(initialAddress, (result, status) => {
+                let coords;
+                if (status === window.kakao.maps.services.Status.OK) {
+                    coords = new window.kakao.maps.LatLng(result[0].y, result[0].x);
+                } else {
+                    // 주소 검색 실패 시 기본 좌표
+                    coords = new window.kakao.maps.LatLng(37.3943, 126.9568); 
+                }
+
+                const map = new window.kakao.maps.Map(mapContainer, {
+                    center: coords,
+                    level: 4 // 확대 정도
+                });
+
+                const marker = new window.kakao.maps.Marker({
+                    position: coords,
+                    map: map
+                });
+
+                // 만약 상품에 위치가 없었다면, 기본 주소를 form에 채워줍니다.
+                if (!form.location && userInfo?.address) {
+                    setForm(prev => ({ ...prev, location: userInfo.address }));
+                }
+
+                // 🌟 핵심: 지도를 '클릭'했을 때 발생하는 이벤트!
+                window.kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+                    const clickedLatLng = mouseEvent.latLng;
+                    marker.setPosition(clickedLatLng); // 핀을 클릭한 곳으로 이동!
+
+                    // 클릭한 곳의 좌표를 다시 '동네 이름'으로 번역합니다. (리버스 지오코딩)
+                    geocoder.coord2RegionCode(clickedLatLng.getLng(), clickedLatLng.getLat(), (regionResult, regionStatus) => {
+                        if (regionStatus === window.kakao.maps.services.Status.OK) {
+                            // 여러 지역 정보 중 '행정동(H)'이나 '법정동(B)' 이름을 가져옵니다.
+                            const addressName = regionResult[0].address_name; 
+                            
+                            // 찾아낸 주소 글자를 form의 location에 쏙 넣어줍니다!
+                            setForm(prev => ({ ...prev, location: addressName }));
+                        }
+                        });
+                });
+            });
+        });
+    }, [loading]); // 🌟 1번 직원이 loading을 false로 바꾸면 그때 딱 한 번 출동!
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -213,14 +279,32 @@ export default function ProductEditPage() {
                             </div>
 
                             <div className="form-group">
-                                <label htmlFor="location">거래 지역</label>
+                                <label htmlFor="location">거래 희망 장소</label>
+                                <p style={{ fontSize: '13px', color: '#888', marginBottom: '10px' }}>
+                                    지도를 클릭해서 정확한 거래 장소를 콕 찍어주세요!
+                                </p>
+
+                                {/* 🌟 지도가 그려질 도화지 */}
+                                <div 
+                                    ref={mapRef} 
+                                    style={{ 
+                                        width: '100%', 
+                                        height: '250px', 
+                                        borderRadius: '12px',
+                                        marginBottom: '10px',
+                                        border: '1px solid #ddd'
+                                    }} 
+                                />
+
+                                {/* 🌟 지도에서 선택된 동네가 텍스트로 보여지는 곳 (직접 입력 금지) */}
                                 <input
                                     id="location"
                                     name="location"
                                     type="text"
                                     value={form.location}
-                                    onChange={handleChange}
-                                    placeholder="예: 서울 강남구"
+                                    readOnly // 지도 클릭으로만 바뀌도록 막아둡니다.
+                                    style={{ backgroundColor: '#f9f9f9', cursor: 'default' }}
+                                    placeholder="지도를 클릭하면 주소가 자동으로 입력됩니다."
                                     required
                                 />
                             </div>

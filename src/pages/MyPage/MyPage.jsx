@@ -35,6 +35,68 @@ const MyPage = () => {
     setEditData({ ...editData, [name]: value });
   };
 
+const handleNeighborhoodAuth = () => {
+        // 1. 브라우저가 GPS를 지원하는지 확인
+        if (!navigator.geolocation) {
+            alert("이 브라우저에서는 위치 정보를 지원하지 않습니다.");
+            return;
+        }
+
+        alert("현재 위치를 확인 중입니다. 잠시만 기다려주세요...");
+
+        // 2. 현재 내 위치(GPS) 가져오기
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                // 🌟 핵심 해결 로직: 카카오 지도가 "완전히 조립될 때까지" 기다립니다!
+                window.kakao.maps.load(() => {
+                    
+                    // 이제 조립이 끝났으니 Geocoder 부품을 안전하게 꺼낼 수 있습니다.
+                    const geocoder = new window.kakao.maps.services.Geocoder();
+                    
+                    // 3. 카카오 지도 API로 좌표 -> 동네 이름 변환 (리버스 지오코딩)
+                    geocoder.coord2RegionCode(lng, lat, async (result, status) => {
+                        if (status === window.kakao.maps.services.Status.OK) {
+                            const myNeighborhood = result[0].region_3depth_name; 
+
+                            try {
+                                const token = sessionStorage.getItem('accessToken');
+                                
+                                // 4. 백엔드에 동네 이름 저장 요청
+                                await axios.put(`/api/user`, {
+                                    ...userInfo, // 기존 유저 정보가 날아가지 않게 같이 담아줍니다.
+    neighborhood: myNeighborhood,
+    isNeighborhoodAuthenticated: true
+}, {
+    headers: { Authorization: `Bearer ${token}` }
+});
+
+                                alert(`🎉 성공! [${myNeighborhood}] 동네 인증이 완료되었습니다.`);
+                                
+                                // 정보가 바뀌었으니 최신 정보로 새로고침!
+                                if (fetchUser) fetchUser(); 
+                                
+                            } catch (error) {
+                                console.error("인증 실패:", error);
+                                alert("인증 정보를 서버에 저장하는데 실패했습니다.");
+                            }
+                        } else {
+                            alert("해당 좌표의 동네 이름을 찾을 수 없습니다.");
+                        }
+                    });
+                }); // 🌟 load 괄호 닫기
+            },
+            (error) => {
+                console.error("GPS 에러:", error);
+                alert("위치 권한을 허용해주셔야 동네 인증이 가능합니다.");
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        );
+    };
+
+
   const handleSave = async () => {
     const token = sessionStorage.getItem('accessToken');
     try {
@@ -117,6 +179,26 @@ const MyPage = () => {
               ) : (
                 <span className="info-value">{userInfo.address || '주소가 등록되지 않았습니다.'}</span>
               )}
+            </div>
+
+            {/* 🌟 3단계: 여기에 동네 인증 버튼 영역을 새로 추가합니다! 🌟 */}
+            <div className="info-item">
+              <label>동네 인증</label>
+              <div className="auth-badge-area">
+                {userInfo.isNeighborhoodAuthenticated ? (
+                  <span className="auth-badge success" style={{ padding: '6px 10px', background: '#00d26a', color: 'white', borderRadius: '12px', fontSize: '13px', display: 'inline-block' }}>
+                    <i className="fas fa-check-circle"></i> {userInfo.neighborhood} 인증됨
+                  </span>
+                ) : (
+                  <button 
+                    onClick={handleNeighborhoodAuth} 
+                    className="auth-btn"
+                    style={{ padding: '6px 12px', background: '#ff6f0f', color: 'white', border: 'none', borderRadius: '12px', fontSize: '13px', cursor: 'pointer', fontWeight: 'bold' }}
+                  >
+                    <i className="fas fa-map-marker-alt"></i> 내 동네 인증하기
+                  </button>
+                )}
+              </div>
             </div>
 
           </div>

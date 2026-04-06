@@ -43,8 +43,50 @@ const Header = () => {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // 🌟 내 근처 클릭 로직
+ // 🌟 내 근처 클릭 로직 (지오코딩 + load 신호 추가)
   const handleNearMeClick = () => {
+    // 1️⃣ 만약 로그인한 유저 정보에 '주소(address)'가 있다면?
+    if (userInfo && userInfo.address) {
+      const { kakao } = window;
+      
+      if (!kakao || !kakao.maps) {
+        alert("카카오 지도 스크립트를 불러오지 못했습니다.");
+        return;
+      }
+
+      // 🌟 핵심 해결 포인트: 카카오 지도가 준비될 때까지 기다렸다가 실행합니다!
+      kakao.maps.load(() => {
+        // 혹시 index.html에 &libraries=services 를 깜빡하셨을 경우를 대비한 방어 로직
+        if (!kakao.maps.services) {
+          console.error("주소 변환 라이브러리(services)가 없습니다. index.html을 확인하세요.");
+          fallbackToBrowserLocation();
+          return;
+        }
+
+        // 주소-좌표 변환 객체를 생성합니다.
+        const geocoder = new kakao.maps.services.Geocoder();
+
+        // 내 주소를 넣어서 좌표를 찾습니다.
+        geocoder.addressSearch(userInfo.address, (result, status) => {
+          if (status === kakao.maps.services.Status.OK) {
+            const lat = result[0].y; // 위도
+            const lng = result[0].x; // 경도
+            navigate(`/near-me?lat=${lat}&lng=${lng}`);
+          } else {
+            console.warn("주소 변환 실패, 브라우저 GPS를 사용합니다.");
+            fallbackToBrowserLocation();
+          }
+        });
+      });
+    } 
+    // 2️⃣ 주소가 없거나 비로그인 상태라면? (기존 브라우저 GPS 사용)
+    else {
+      fallbackToBrowserLocation();
+    }
+  };
+
+  // 🌟 (도우미 함수) 기존 브라우저 GPS 위치 찾기
+  const fallbackToBrowserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -54,13 +96,9 @@ const Header = () => {
         },
         (error) => {
           console.error("위치 정보 에러:", error);
-          alert("주변 매물을 보려면 위치 권한 허용이 필요합니다.");
+          alert("위치 권한을 허용하시거나, 마이페이지에서 주소를 등록해 주세요.");
         },
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0
-        }
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
     } else {
       alert("이 브라우저에서는 위치 정보(Geolocation)를 지원하지 않습니다.");
