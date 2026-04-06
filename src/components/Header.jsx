@@ -3,36 +3,117 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 import './Header.css';
 
+// 🌟 1. 우리가 만든 전역 창고 도구를 가져옵니다.
+import { useUser } from '../UserContext';
+
 const Header = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!sessionStorage.getItem("accessToken"));
+  // 🌟 2. 창고에서 내 정보(userInfo)와 정보 변경 함수(setUserInfo)를 꺼내옵니다.
+  const { userInfo, setUserInfo } = useUser();
+  
+  // 🌟 3. 핵심! 로그인 상태는 "창고에 내 정보가 있나?" 하나로 완벽하게 판단 끝!
+  const isLoggedIn = !!userInfo; 
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  
-  // 🚨 프로필 드롭다운 상태
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  
-  // 🚨 1. 채팅 드롭다운 상태 추가!
   const [isChatOpen, setIsChatOpen] = useState(false); 
 
+  // ✅ 화면 점진적 확대/축소 상태 (기본 1.0 = 100%)
+  const [zoomLevel, setZoomLevel] = useState(1.0);
+
+  // ➕ 확대 버튼을 눌렀을 때 (최대 1.5까지)
+  const handleZoomIn = () => {
+    if (zoomLevel < 1.5) {
+      // 💡 컴퓨터의 소수점 계산 오차를 막기 위해 Math.round를 사용합니다.
+      const nextZoom = Math.round((zoomLevel + 0.1) * 10) / 10;
+      setZoomLevel(nextZoom);
+      document.body.style.zoom = nextZoom.toString();
+    }
+  };
+
+  // ➖ 축소 버튼을 눌렀을 때 (최소 1.0까지)
+  const handleZoomOut = () => {
+    if (zoomLevel > 1.0) {
+      const nextZoom = Math.round((zoomLevel - 0.1) * 10) / 10;
+      setZoomLevel(nextZoom);
+      document.body.style.zoom = nextZoom.toString();
+    }
+  };
   const searchRef = useRef(null);
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
 
+ // 🌟 내 근처 클릭 로직 (지오코딩 + load 신호 추가)
+  const handleNearMeClick = () => {
+    // 1️⃣ 만약 로그인한 유저 정보에 '주소(address)'가 있다면?
+    if (userInfo && userInfo.address) {
+      const { kakao } = window;
+      
+      if (!kakao || !kakao.maps) {
+        alert("카카오 지도 스크립트를 불러오지 못했습니다.");
+        return;
+      }
+
+      // 🌟 핵심 해결 포인트: 카카오 지도가 준비될 때까지 기다렸다가 실행합니다!
+      kakao.maps.load(() => {
+        // 혹시 index.html에 &libraries=services 를 깜빡하셨을 경우를 대비한 방어 로직
+        if (!kakao.maps.services) {
+          console.error("주소 변환 라이브러리(services)가 없습니다. index.html을 확인하세요.");
+          fallbackToBrowserLocation();
+          return;
+        }
+
+        // 주소-좌표 변환 객체를 생성합니다.
+        const geocoder = new kakao.maps.services.Geocoder();
+
+        // 내 주소를 넣어서 좌표를 찾습니다.
+        geocoder.addressSearch(userInfo.address, (result, status) => {
+          if (status === kakao.maps.services.Status.OK) {
+            const lat = result[0].y; // 위도
+            const lng = result[0].x; // 경도
+            navigate(`/near-me?lat=${lat}&lng=${lng}`);
+          } else {
+            console.warn("주소 변환 실패, 브라우저 GPS를 사용합니다.");
+            fallbackToBrowserLocation();
+          }
+        });
+      });
+    } 
+    // 2️⃣ 주소가 없거나 비로그인 상태라면? (기존 브라우저 GPS 사용)
+    else {
+      fallbackToBrowserLocation();
+    }
+  };
+
+  // 🌟 (도우미 함수) 기존 브라우저 GPS 위치 찾기
+  const fallbackToBrowserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;   
+          const lng = position.coords.longitude;  
+          navigate(`/near-me?lat=${lat}&lng=${lng}`);
+        },
+        (error) => {
+          console.error("위치 정보 에러:", error);
+          alert("위치 권한을 허용하시거나, 마이페이지에서 주소를 등록해 주세요.");
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+    } else {
+      alert("이 브라우저에서는 위치 정보(Geolocation)를 지원하지 않습니다.");
+    }
+  };
+
+  // 🌟 4. 권한 체크 로직
   useEffect(() => {
-    // 1. 스토리지에서 토큰 가져오기 (저장 방식에 따라 sessionStorage 또는 sessionStorage 등 사용)
     const token = sessionStorage.getItem("accessToken"); 
 
     if (token) {
       try {
-        // 2. 토큰 해독
         const decodedToken = jwtDecode(token);
-        
-        // 3. 토큰 안의 권한(Role) 값 추출 (백엔드에서 설정한 클레임 Key 값 확인 필수)
-        // Spring Security 기본 구조를 따랐다면 'ROLE_SUPER', 'ROLE_SUB' 형태일 확률이 높음
-        const userRole = decodedToken.role; // 키 이름이 다를 수 있으니 백엔드 확인 요망
-
-        // 4. 권한 검증 (SUPER, SUB, ROLE_SUPER, ROLE_SUB 모두 대응하도록 방어적 코드 작성)
-        const authorizedRoles = ["SUPER", "SUB", "ROLE_SUPER", "ROLE_SUB", "ADMIN", "ROLE_ADMIN"]; // 필요에 따라 권한 이름 추가
+        const userRole = decodedToken.role; 
+        const authorizedRoles = ["SUPER", "SUB", "ROLE_SUPER", "ROLE_SUB", "ADMIN", "ROLE_ADMIN"];
         if (authorizedRoles.includes(userRole)) {
           setIsAdmin(true);
         } else {
@@ -45,15 +126,14 @@ const Header = () => {
     } else {
       setIsAdmin(false);
     }
-  }, []);
+  }, [userInfo]);
 
-  // 📦 2. 가짜 채팅방 데이터 (나중에 백엔드 API로 불러올 부분입니다)
+  // 📦 가짜 채팅방 데이터 
   const [chatRooms, setChatRooms] = useState([
     { roomId: "1", buyerId: "apple_lover", itemName: "아이폰 15 Pro", unreadCount: 2, lastMessage: "네고 가능한가요?" },
     { roomId: "2", buyerId: "camp_master", itemName: "캠핑 의자", unreadCount: 0, lastMessage: "내일 거래 가능합니다!" }
   ]);
 
-  // 안 읽은 메시지가 하나라도 있는지 계산
   const hasUnreadChats = chatRooms.some(room => room.unreadCount > 0);
 
   useEffect(() => {
@@ -74,29 +154,18 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    const checkLogin = () => {
-      setIsLoggedIn(!!sessionStorage.getItem("accessToken"));
-    };
-    window.addEventListener('storage', checkLogin);
-    return () => window.removeEventListener('storage', checkLogin);
-  }, []);
-
-  const recentSearches = ['아이폰 15 Pro', '캠핑 의자', '맥북 에어 M2'];
-  const trendingKeywords = ['자전거', '플레이스테이션 5', '에어팟 맥스'];
-
+  // 🌟 5. 로그아웃 로직
   const handleLogout = () => {
     sessionStorage.removeItem("accessToken");
     sessionStorage.removeItem("refreshToken");
     sessionStorage.removeItem("tokenType");
-    setIsLoggedIn(false);
+    setUserInfo(null); 
     navigate('/'); 
   };
 
-  // 🚀 3. 채팅 목록 클릭 시 이동할 함수
   const handleChatClick = (roomId) => {
-    setIsChatOpen(false); // 드롭다운 닫기
-    navigate(`/chat/${roomId}`); // 나중에 만들 전체 채팅 페이지로 이동!
+    setIsChatOpen(false); 
+    navigate(`/chat/${roomId}`); 
   };
 
   return (
@@ -110,9 +179,8 @@ const Header = () => {
           <span><span className="logo-brand">환승</span>마켓</span>
         </a>
 
-        {/* 검색 영역 (기존과 동일) */}
+        {/* 검색 영역 */}
         <div className="search-area" ref={searchRef}>
-          {/* ... 기존 검색 영역 코드 동일 ... */}
           <div className={`search-input-wrapper ${isSearchOpen ? 'active' : ''}`}>
             <i className="fas fa-search search-icon"></i>
             <input
@@ -123,7 +191,7 @@ const Header = () => {
           </div>
           {isSearchOpen && (
              <div className="search-dropdown">
-               {/* ... 기존 코드가 길어서 생략했습니다. 그대로 두시면 됩니다! ... */}
+               {/* 💡 기존 검색 드롭다운 내용 (생략됨) */}
              </div>
           )}
         </div>
@@ -131,31 +199,27 @@ const Header = () => {
         {/* 액션 버튼 */}
         <div className="header-actions">
           <div className="nav-links">
-            <button className="nav-link">내 근처</button>
+            <button className="nav-link" onClick={handleNearMeClick}>내 근처</button>
             <button className="nav-link">인기매물</button>
           </div>
           
           {isLoggedIn && (
             <>
-              {/* 🚨 4. 채팅 아이콘 영역 변경! (마우스 호버 시 드롭다운 열림) */}
+              {/* ✅ 채팅 영역 (복구 완료!) */}
               <div 
-                className="user-profile-container" // 프로필 컨테이너 CSS 재활용
+                className="user-profile-container" 
                 onMouseEnter={() => setIsChatOpen(true)}
                 onMouseLeave={() => setIsChatOpen(false)}
               >
                 <button className="icon-btn" title="채팅">
                   <i className="far fa-comment-dots"></i>
-                  {/* 안 읽은 메시지가 있으면 빨간 점 표시 */}
                   {hasUnreadChats && <span className="notification-dot"></span>}
                 </button>
-
-                {/* 채팅 드롭다운 창 */}
                 {isChatOpen && (
-                  <div className="profile-dropdown" style={{ width: '280px', right: '-80px' }}> {/* 위치/너비 살짝 조정 */}
+                  <div className="profile-dropdown" style={{ width: '280px', right: '-80px' }}>
                     <div style={{ padding: '10px 15px', fontWeight: 'bold', borderBottom: '1px solid #eee' }}>
                       채팅 알림
                     </div>
-                    
                     {chatRooms.length === 0 ? (
                       <div className="dropdown-item" style={{ justifyContent: 'center', color: 'gray' }}>
                         진행 중인 채팅이 없습니다.
@@ -190,23 +254,47 @@ const Header = () => {
                 )}
               </div>
 
-              {/* 알림 버튼 (기존) */}
+              {/* 알림 버튼 */}
               <button className="icon-btn" title="알림">
                 <i className="far fa-bell"></i>
                 <span className="notification-dot"></span>
               </button>
 
-              {/* 프로필 버튼 (기존) */}
+             {/* 🌟 화면 축소 / 확대 버튼 그룹 */}
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <button 
+                  className="icon-btn" 
+                  title="화면 축소" 
+                  onClick={handleZoomOut}
+                  style={{ opacity: zoomLevel <= 1.0 ? 0.3 : 1 }} // 최소 크기일 땐 흐리게!
+                >
+                  <i className="fas fa-search-minus"></i>
+                </button>
+                <button 
+                  className="icon-btn" 
+                  title="화면 확대" 
+                  onClick={handleZoomIn}
+                  style={{ opacity: zoomLevel >= 1.5 ? 0.3 : 1 }} // 최대 크기일 땐 흐리게!
+                >
+                  <i className="fas fa-search-plus"></i>
+                </button>
+              </div>
+
+              {/* ✅ 프로필 버튼 (복구 완료!) */}
               <div
                 className="user-profile-container"
                 onMouseEnter={() => setIsProfileOpen(true)}
                 onMouseLeave={() => setIsProfileOpen(false)}
               >
                 <button className="icon-btn user-avatar" title="내 프로필">
-                  <i className="far fa-user"></i>
+                  <i className="far fa-user"></i> 
                 </button>
                 {isProfileOpen && (
                   <div className="profile-dropdown">
+                    <div className="dropdown-item" style={{ fontWeight: 'bold', color: '#ff6f0f' }}>
+                      {userInfo.nickname || userInfo.username}님 환영합니다!
+                    </div>
+                    <hr style={{ margin: '5px 0' }} />
                     <div className="dropdown-item" onClick={() => navigate('/mypage')}><i className="far fa-id-card"></i> 내 정보 보기</div>
                     <div className="dropdown-item" onClick={() => navigate('/sales')}><i className="fas fa-box-open"></i> 판매 내역</div>
                     <div className="dropdown-item" onClick={() => navigate('/purchase')}><i className="fas fa-shopping-bag"></i> 구매 내역</div>
@@ -217,21 +305,23 @@ const Header = () => {
                 )}
               </div>
 
-              {/* 판매 버튼 (기존) */}
+              {/* 판매 버튼 */}
               <button className="sell-btn" onClick={() => navigate("/products/create")}>
                 <i className="fas fa-plus"></i>
                 <span>판매하기</span>
               </button>
 
-              {isAdmin && (<button className="admin-btn" onClick={() => navigate("/admin/dashboard")}>
-              <i className="fas"></i>
-              <span>관리자 페이지</span>
-              </button>)}
+              {isAdmin && (
+                <button className="admin-btn" onClick={() => navigate("/admin/adminpage")}>
+                  <i className="fas fa-cog"></i>
+                  <span>관리자 페이지</span>
+                </button>
+              )}
             </>
           )}
 
           {!isLoggedIn && (
-            <button className="login-btn" onClick={() => window.location.href = '/login'}>
+            <button className="login-btn" onClick={() => navigate('/login')}>
               로그인 / 회원가입
             </button>
           )}
