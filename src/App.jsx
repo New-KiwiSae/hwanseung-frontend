@@ -9,7 +9,6 @@ import ProductDetailPage from './pages/Product/ProductDetailPage.jsx';
 import ProductListPage from "./pages/Product/ProductListPage";
 import ProductEditPage from "./pages/Product/ProductEditPage";
 import AuthPage from './pages/Auth/AuthPage.jsx';
-import TradeChatTest from './pages/Chat/TradeChatTest.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
 import Sales from './pages/MyPage/Sales';
 import Purchase from './pages/MyPage/Purchase';
@@ -17,7 +16,8 @@ import Wishlist from './pages/MyPage/Wishlist';
 import './index.css';
 import SplashScreen from './components/SplashScreen';
 import FloatingChat from './pages/Chat/FloatingChat.jsx';
-
+import NearMePage from '../NearMePage.jsx';
+import { UserProvider } from './UserContext';
 
 import AdminLayout from './pages/Admin/AdminLayout.jsx';
 import AdminDashBoard from './pages/Admin/AdminDashBoard.jsx';
@@ -51,11 +51,13 @@ function App() {
     }
 
     return (
+        <UserProvider>
         <div className="app-wrapper" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             {!(isAuthPage || isAdminPage) && <Header />}
             <main style={{ flexGrow: 1 }}>
                 <Routes>
                     <Route path="/" element={<MainPage />} />
+                    <Route path="/near-me" element={<NearMePage />} />
                     <Route path="/products/create" element={<ProductCreatePage />} />
                     <Route path="/products/:productId" element={<ProductDetailPage />} />
                     <Route path="/products" element={<ProductListPage />} />
@@ -93,7 +95,8 @@ function App() {
       {!(isAuthPage || isAdminPage) && <FloatingChat />}
       
     </div>
+    </UserProvider>
   );
-}
 
+}
 export default App;

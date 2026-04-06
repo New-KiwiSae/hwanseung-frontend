@@ -6,8 +6,16 @@ import axios from 'axios';
 import { Client } from '@stomp/stompjs'; 
 import SockJS from 'sockjs-client';      
 
+// 🌟 1. 우리가 만든 전역 창고 도구를 가져옵니다.
+import { useUser } from '../UserContext';
+
 const Header = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!sessionStorage.getItem("accessToken"));
+  // 🌟 2. 창고에서 내 정보(userInfo)와 정보 변경 함수(setUserInfo)를 꺼내옵니다.
+  const { userInfo, setUserInfo } = useUser();
+  
+  // 🌟 3. 핵심! 로그인 상태는 "창고에 내 정보가 있나?" 하나로 완벽하게 판단 끝!
+  const isLoggedIn = !!userInfo; 
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -18,26 +26,117 @@ const Header = () => {
   const [notifications, setNotifications] = useState([]); 
   const stompClient = useRef(null); 
 
+  // ✅ 화면 점진적 확대/축소 상태 (기본 1.0 = 100%)
+  const [zoomLevel, setZoomLevel] = useState(1.0);
+
+  // ➕ 확대 버튼을 눌렀을 때 (최대 1.5까지)
+  const handleZoomIn = () => {
+    if (zoomLevel < 1.5) {
+      // 💡 컴퓨터의 소수점 계산 오차를 막기 위해 Math.round를 사용합니다.
+      const nextZoom = Math.round((zoomLevel + 0.1) * 10) / 10;
+      setZoomLevel(nextZoom);
+      document.body.style.zoom = nextZoom.toString();
+    }
+  };
+
+  // ➖ 축소 버튼을 눌렀을 때 (최소 1.0까지)
+  const handleZoomOut = () => {
+    if (zoomLevel > 1.0) {
+      const nextZoom = Math.round((zoomLevel - 0.1) * 10) / 10;
+      setZoomLevel(nextZoom);
+      document.body.style.zoom = nextZoom.toString();
+    }
+  };
   const searchRef = useRef(null);
   const navigate = useNavigate();
 
   const token = sessionStorage.getItem("accessToken"); 
   const currentUser = sessionStorage.getItem("username");
 
+ // 🌟 내 근처 클릭 로직 (지오코딩 + load 신호 추가)
+  const handleNearMeClick = () => {
+    // 1️⃣ 만약 로그인한 유저 정보에 '주소(address)'가 있다면?
+    if (userInfo && userInfo.address) {
+      const { kakao } = window;
+      
+      if (!kakao || !kakao.maps) {
+        alert("카카오 지도 스크립트를 불러오지 못했습니다.");
+        return;
+      }
+
+      // 🌟 핵심 해결 포인트: 카카오 지도가 준비될 때까지 기다렸다가 실행합니다!
+      kakao.maps.load(() => {
+        // 혹시 index.html에 &libraries=services 를 깜빡하셨을 경우를 대비한 방어 로직
+        if (!kakao.maps.services) {
+          console.error("주소 변환 라이브러리(services)가 없습니다. index.html을 확인하세요.");
+          fallbackToBrowserLocation();
+          return;
+        }
+
+        // 주소-좌표 변환 객체를 생성합니다.
+        const geocoder = new kakao.maps.services.Geocoder();
+
+        // 내 주소를 넣어서 좌표를 찾습니다.
+        geocoder.addressSearch(userInfo.address, (result, status) => {
+          if (status === kakao.maps.services.Status.OK) {
+            const lat = result[0].y; // 위도
+            const lng = result[0].x; // 경도
+            navigate(`/near-me?lat=${lat}&lng=${lng}`);
+          } else {
+            console.warn("주소 변환 실패, 브라우저 GPS를 사용합니다.");
+            fallbackToBrowserLocation();
+          }
+        });
+      });
+    } 
+    // 2️⃣ 주소가 없거나 비로그인 상태라면? (기존 브라우저 GPS 사용)
+    else {
+      fallbackToBrowserLocation();
+    }
+  };
+
+  // 🌟 (도우미 함수) 기존 브라우저 GPS 위치 찾기
+  const fallbackToBrowserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;   
+          const lng = position.coords.longitude;  
+          navigate(`/near-me?lat=${lat}&lng=${lng}`);
+        },
+        (error) => {
+          console.error("위치 정보 에러:", error);
+          alert("위치 권한을 허용하시거나, 마이페이지에서 주소를 등록해 주세요.");
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+    } else {
+      alert("이 브라우저에서는 위치 정보(Geolocation)를 지원하지 않습니다.");
+    }
+  };
+
+  // 🌟 4. 권한 체크 로직
   useEffect(() => {
+    // 1. 스토리지에서 토큰 가져오기 (저장 방식에 따라 sessionStorage 또는 sessionStorage 등 사용)
+    const token = sessionStorage.getItem("accessToken"); 
+
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
         const userRole = decodedToken.role; 
-        const authorizedRoles = ["SUPER", "SUB", "ROLE_SUPER", "ROLE_SUB", "ADMIN", "ROLE_ADMIN"]; 
-        setIsAdmin(authorizedRoles.includes(userRole));
+        const authorizedRoles = ["SUPER", "SUB", "ROLE_SUPER", "ROLE_SUB", "ADMIN", "ROLE_ADMIN"];
+        if (authorizedRoles.includes(userRole)) {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
       } catch (error) {
         setIsAdmin(false);
       }
     } else {
       setIsAdmin(false);
     }
-  }, [token]);
+  }, [userInfo], [token]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -161,8 +260,13 @@ const Header = () => {
     sessionStorage.removeItem("accessToken");
     sessionStorage.removeItem("refreshToken");
     sessionStorage.removeItem("tokenType");
-    setIsLoggedIn(false);
+    setUserInfo(null); 
     navigate('/'); 
+  };
+
+  const handleChatClick = (roomId) => {
+    setIsChatOpen(false); 
+    navigate(`/chat/${roomId}`); 
   };
 
   return (
@@ -186,12 +290,17 @@ const Header = () => {
               onFocus={() => setIsSearchOpen(true)}
             />
           </div>
+          {isSearchOpen && (
+             <div className="search-dropdown">
+               {/* ... 기존 코드가 길어서 생략했습니다. 그대로 두시면 됩니다! ... */}
+             </div>
+          )}
         </div>
 
         {/* 액션 버튼 */}
         <div className="header-actions">
           <div className="nav-links">
-            <button className="nav-link">내 근처</button>
+            <button className="nav-link" onClick={handleNearMeClick}>내 근처</button>
             <button className="nav-link">인기매물</button>
           </div>
           
@@ -201,9 +310,9 @@ const Header = () => {
 
               {/* 시스템 알림(종 모양) 버튼 */}
               <div 
-                className="user-profile-container" 
-                onMouseEnter={() => setIsNotiOpen(true)}
-                onMouseLeave={() => setIsNotiOpen(false)}
+                className="user-profile-container" // 프로필 컨테이너 CSS 재활용
+                onMouseEnter={() => setIsChatOpen(true)}
+                onMouseLeave={() => setIsChatOpen(false)}
               >
                 <button className="icon-btn" title="알림" style={{ position: 'relative' }}>
                   <i className="far fa-bell"></i>
@@ -259,13 +368,47 @@ const Header = () => {
                 )}
               </div>
 
-              {/* 프로필 버튼 */}
-              <div className="user-profile-container" onMouseEnter={() => setIsProfileOpen(true)} onMouseLeave={() => setIsProfileOpen(false)}>
+              {/* 알림 버튼 */}
+              <button className="icon-btn" title="알림">
+                <i className="far fa-bell"></i>
+                <span className="notification-dot"></span>
+              </button>
+
+             {/* 🌟 화면 축소 / 확대 버튼 그룹 */}
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <button 
+                  className="icon-btn" 
+                  title="화면 축소" 
+                  onClick={handleZoomOut}
+                  style={{ opacity: zoomLevel <= 1.0 ? 0.3 : 1 }} // 최소 크기일 땐 흐리게!
+                >
+                  <i className="fas fa-search-minus"></i>
+                </button>
+                <button 
+                  className="icon-btn" 
+                  title="화면 확대" 
+                  onClick={handleZoomIn}
+                  style={{ opacity: zoomLevel >= 1.5 ? 0.3 : 1 }} // 최대 크기일 땐 흐리게!
+                >
+                  <i className="fas fa-search-plus"></i>
+                </button>
+              </div>
+
+              {/* ✅ 프로필 버튼 (복구 완료!) */}
+              <div
+                className="user-profile-container"
+                onMouseEnter={() => setIsProfileOpen(true)}
+                onMouseLeave={() => setIsProfileOpen(false)}
+              >
                 <button className="icon-btn user-avatar" title="내 프로필">
-                  <i className="far fa-user"></i>
+                  <i className="far fa-user"></i> 
                 </button>
                 {isProfileOpen && (
                   <div className="profile-dropdown">
+                    <div className="dropdown-item" style={{ fontWeight: 'bold', color: '#ff6f0f' }}>
+                      {userInfo.nickname || userInfo.username}님 환영합니다!
+                    </div>
+                    <hr style={{ margin: '5px 0' }} />
                     <div className="dropdown-item" onClick={() => navigate('/mypage')}><i className="far fa-id-card"></i> 내 정보 보기</div>
                     <div className="dropdown-item" onClick={() => navigate('/sales')}><i className="fas fa-box-open"></i> 판매 내역</div>
                     <div className="dropdown-item" onClick={() => navigate('/purchase')}><i className="fas fa-shopping-bag"></i> 구매 내역</div>
@@ -292,7 +435,7 @@ const Header = () => {
           )}
 
           {!isLoggedIn && (
-            <button className="login-btn" onClick={() => window.location.href = '/login'}>
+            <button className="login-btn" onClick={() => navigate('/login')}>
               로그인 / 회원가입
             </button>
           )}

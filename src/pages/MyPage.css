@@ -1,0 +1,134 @@
+.mypage-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: 'Pretendard', sans-serif;
+}
+
+.mypage-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.mypage-header h2 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.mypage-header p {
+  color: #6B7280;
+  font-size: 15px;
+}
+
+/* 프로필 카드 영역 */
+.mypage-card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  background-color: #F3F4F6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: #9CA3AF;
+  margin: 0 auto 24px auto;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.info-item label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6B7280;
+  margin-bottom: 8px;
+}
+
+.info-value {
+  font-size: 16px;
+  color: #111827;
+  font-weight: 500;
+}
+
+.email-value {
+  color: #9CA3AF; /* 이메일은 흐리게 */
+}
+
+/* 수정 모드 입력칸 */
+.edit-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #00D27A;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  transition: box-shadow 0.2s;
+}
+
+.edit-input:focus {
+  box-shadow: 0 0 0 3px rgba(0, 210, 122, 0.2);
+}
+
+/* 버튼 스타일 */
+.mypage-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  justify-content: center;
+}
+
+.btn-edit, .btn-save, .btn-cancel, .btn-charge {
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btn-edit { background: #F3F4F6; color: #374151; width: 100%; }
+.btn-edit:hover { background: #E5E7EB; }
+
+.btn-save { background: #00D27A; color: white; flex: 2; }
+.btn-save:hover { background: #00B569; }
+
+.btn-cancel { background: #FEE2E2; color: #EF4444; flex: 1; }
+.btn-cancel:hover { background: #FECACA; }
+
+/* 환승페이 충전 배너 */
+.pay-banner {
+  background: #1C2331;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 10px 25px rgba(28, 35, 49, 0.15);
+}
+
+.pay-text h3 { color: #00D27A; font-size: 18px; font-weight: 800; margin: 0 0 4px 0; }
+.pay-text p { color: #9CA3AF; font-size: 13px; margin: 0; }
+
+.btn-charge { background: #00D27A; color: white; }
+.btn-charge:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 210, 122, 0.3); }
