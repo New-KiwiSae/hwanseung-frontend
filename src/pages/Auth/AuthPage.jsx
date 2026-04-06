@@ -4,9 +4,12 @@ import { login, signUp } from "../../api/AuthAPI";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./AuthPage.css";
+import { useUser } from "../../UserContext";
 
 export default function AuthPage() {
     const navigate = useNavigate();
+    const { fetchUser } = useUser();
+
     const [isSignUpActive, setIsSignUpActive] = useState(false);
     const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
 
@@ -250,8 +253,8 @@ export default function AuthPage() {
             sessionStorage.setItem('tokenType', response.data.tokenType);
             sessionStorage.setItem('accessToken', response.data.accessToken);
             sessionStorage.setItem('refreshToken', response.data.refreshToken);
-
             sessionStorage.setItem('username', signInValues.username);
+            window.location.href = "/";
             navigate("/", { replace: true });
         }).catch(() => {
             alert("로그인 정보가 올바르지 않습니다.");
