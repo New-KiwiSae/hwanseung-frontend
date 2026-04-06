@@ -3,7 +3,12 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import axios from 'axios';
 
+import { useUser } from '../../UserContext';
+
 const FloatingChat = () => {
+
+  const { userInfo } = useUser();
+
   const [isOpen, setIsOpen] = useState(false); 
   const [activeRoom, setActiveRoom] = useState(null); 
 
@@ -20,7 +25,15 @@ const FloatingChat = () => {
   const notiStompClient = useRef(null);
 
   const token = sessionStorage.getItem("accessToken");
-  const currentUser = sessionStorage.getItem("username") || "알수없음";
+  // const currentUser = sessionStorage.getItem("username") || "알수없음";
+  const currentUser = userInfo?.username || userInfo?.userId || sessionStorage.getItem("username");
+
+  // ========================================================
+  // 🚨 [여기에 탐지기 4줄 추가!]
+  console.log("🔥 1. 현재 토큰 있나요?:", !!token);
+  console.log("🔥 2. 창고(userInfo) 정보:", userInfo);
+  console.log("🔥 3. 계산된 내 아이디(currentUser):", currentUser);
+  // ========================================================
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -30,9 +43,6 @@ const FloatingChat = () => {
   // 🚨 2. [핵심] 처음에 알림 채널에 연결해서 귀를 열어둡니다!
   // ========================================================
   useEffect(() => {
-    if (!token || currentUser === "알수없음") return;
-
-    // 첫 로딩 시 채팅방 목록(안 읽음 카운트 포함) 싹 다 불러오기
     fetchMyChatRooms();
 
     // 플로팅 아이콘 전용 "알림 수신기" 연결
@@ -43,9 +53,6 @@ const FloatingChat = () => {
         // 내 알림 전용 주파수에 귀를 엽니다.
         client.subscribe(`/sub/user/${currentUser}/notification`, (message) => {
           const newNoti = JSON.parse(message.body);
-
-          // 🚨 [탐지기 3번] 알림이 플로팅 아이콘까지 도달했는지 확인!
-          console.log("🔥 [탐지기 3번] 플로팅 알림 수신됨:", newNoti);
           
           // 오직 "채팅" 알림일 때만 빨간 점을 올립니다!
           if (newNoti.type === 'CHAT') {
