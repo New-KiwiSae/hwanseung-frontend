@@ -9,7 +9,6 @@ import ProductDetailPage from './pages/Product/ProductDetailPage.jsx';
 import ProductListPage from "./pages/Product/ProductListPage";
 import ProductEditPage from "./pages/Product/ProductEditPage";
 import AuthPage from './pages/Auth/AuthPage.jsx';
-import TradeChatTest from './pages/Chat/TradeChatTest.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
 import Sales from './pages/MyPage/Sales';
 import Purchase from './pages/MyPage/Purchase';
