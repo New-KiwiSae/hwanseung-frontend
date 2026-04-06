@@ -61,8 +61,6 @@
     border-radius: 28px;
     overflow: hidden;
     box-shadow: 0 14px 34px rgba(17, 24, 39, 0.06);
-
-    /* ✅ 추가 */
     position: relative;
 }
 
@@ -89,7 +87,6 @@
     color: var(--brand-color);
 }
 
-/* ✅ 추가 : 판매완료 이미지 오버레이 */
 .product-soldout-overlay {
     position: absolute;
     inset: 0;
@@ -175,7 +172,6 @@
     color: #6b7280;
 }
 
-/* ✅ 추가 : 판매완료 chip */
 .detail-chip.soldout {
     background: #111827;
     color: #ffffff;
@@ -245,14 +241,27 @@
 }
 
 .btn-like {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     border: 1px solid var(--border-color);
     background: #ffffff;
     color: #111827;
+    box-shadow: 0 8px 18px rgba(17, 24, 39, 0.04);
 }
 
 .btn-like:hover {
-    border-color: var(--brand-color);
-    color: var(--brand-color);
+    background: #ffffff;
+    border-color: #d1d5db;
+    color: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(17, 24, 39, 0.08);
+}
+
+.btn-like:active {
+    transform: translateY(0);
+    box-shadow: 0 5px 12px rgba(17, 24, 39, 0.05);
 }
 
 .btn-chat {
@@ -267,7 +276,6 @@
     transform: translateY(-1px);
 }
 
-/* ✅ 추가 : 판매완료 시 채팅 버튼 비활성화 */
 .btn-chat:disabled {
     background: #e5e7eb;
     color: #9ca3af;
@@ -305,6 +313,7 @@
     background: #ffffff;
     border-color: var(--brand-color);
     color: var(--brand-color);
+    transform: translateY(-1px);
 }
 
 .product-detail-description-card {
@@ -358,7 +367,6 @@
 }
 
 /* 수정/삭제/판매완료 버튼 영역 */
-/* 🔥 수정 */
 .detail-owner-buttons {
     display: flex;
     justify-content: flex-end;
@@ -368,7 +376,6 @@
 }
 
 /* 수정/삭제/판매완료 공통 버튼 */
-/* 🔥 수정 */
 .detail-owner-buttons .btn-edit,
 .detail-owner-buttons .btn-delete,
 .detail-owner-buttons .btn-soldout {
@@ -396,7 +403,6 @@
     transform: translateY(-1px);
 }
 
-/* ✅ 추가 : 판매완료 버튼 */
 .detail-owner-buttons .btn-soldout {
     min-width: 88px;
     background: #111827;
@@ -423,6 +429,49 @@
     transform: translateY(-1px);
 }
 
+/* 찜 버튼 관련 */
+.like-icon {
+    flex-shrink: 0;
+    font-size: 18px;
+    color: #c4c9d1;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.like-icon.active {
+    color: #ff5a5f;
+}
+
+.btn-like:hover .like-icon {
+    transform: scale(1.08);
+}
+
+.like-text {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+}
+
+/* 본인껀 찜 불가능 */
+.btn-like:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border-color: #e5e7eb;
+    /* cursor: not-allowed; */
+    box-shadow: none;
+}
+
+.btn-like:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-like:disabled .like-icon {
+    color: #d1d5db;
+}
+
 @media (max-width: 992px) {
     .product-detail-main {
         grid-template-columns: 1fr;
@@ -440,7 +489,6 @@
         font-size: 28px;
     }
 
-    /* ✅ 추가 */
     .product-soldout-overlay {
         font-size: 26px;
     }
@@ -484,7 +532,6 @@
         border-radius: 14px;
     }
 
-    /* ✅ 추가 */
     .product-soldout-overlay {
         font-size: 22px;
     }
@@ -508,7 +555,6 @@
         margin-top: 12px;
     }
 
-    /* 🔥 수정 */
     .detail-owner-buttons .btn-edit,
     .detail-owner-buttons .btn-delete,
     .detail-owner-buttons .btn-soldout {
@@ -518,8 +564,15 @@
         border-radius: 10px;
     }
 
-    /* ✅ 추가 */
     .detail-owner-buttons .btn-soldout {
         min-width: 78px;
+    }
+
+    .like-icon {
+        font-size: 17px;
+    }
+
+    .like-text {
+        font-size: 14px;
     }
 }
