@@ -23,11 +23,24 @@ const FloatingChat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, activeRoom]);
 
+  // 🌟 수정된 백그라운드 갱신 로직 (Polling)
   useEffect(() => {
-    if (!activeRoom) {
-      fetchMyChatRooms();
-    }
-  }, [isOpen, activeRoom]);
+    if (!token) return;
+
+    // 1. 처음 컴포넌트가 켜질 때 한 번 가져옵니다.
+    fetchMyChatRooms();
+
+    // 2. 채팅창이 열려있든 닫혀있든 5초마다 백엔드에 안 읽은 메시지 개수를 물어봅니다!
+    const interval = setInterval(() => {
+      // 단, 내가 지금 특정 방(activeRoom)에서 실시간으로 대화 중일 때는 
+      // 굳이 전체 목록을 새로고침해서 화면을 깜빡거리게 할 필요가 없으므로 막아줍니다.
+      if (!activeRoom) {
+        fetchMyChatRooms();
+      }
+    }, 3000); // 3000ms = 3초
+
+    return () => clearInterval(interval); // 컴포넌트가 꺼지면 타이머 청소
+  }, [token, activeRoom]); // token이나 activeRoom이 바뀔 때마다 타이머 재설정
 
   const fetchMyChatRooms = async () => {
     if (!token) return;
@@ -75,7 +88,7 @@ const FloatingChat = () => {
 
   const toggleChat = () => {
     if (isOpen) {
-      if (stompClient.current) stompClient.current.deactivate();
+      // if (stompClient.current) stompClient.current.deactivate();
       setActiveRoom(null); 
       setIsOpen(false);
     } else {
@@ -84,7 +97,7 @@ const FloatingChat = () => {
   };
 
   const backToList = () => {
-    if (stompClient.current) stompClient.current.deactivate(); 
+    // if (stompClient.current) stompClient.current.deactivate(); 
     setActiveRoom(null); 
   };
 
