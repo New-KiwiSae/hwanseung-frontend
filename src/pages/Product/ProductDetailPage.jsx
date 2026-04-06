@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import "./ProductDetailPage.css";
+import { FiHeart } from "react-icons/fi";
+import { FaHeart } from "react-icons/fa";
 
 function formatPrice(price) {
     return Number(price || 0).toLocaleString();
@@ -26,26 +28,70 @@ export default function ProductDetailPage() {
     const [error, setError] = useState("");
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-    // 로그인 사용자 ID
-    // 토큰에서 로그인한 사용자 ID 꺼내기
-    function getUserIdFromToken() {
+    // ✅ [추가] 찜 상태
+    const [likeInfo, setLikeInfo] = useState({
+        liked: false,
+        likeCount: 0,
+    });
+
+    // 토큰에서 로그인한 사용자 정보 꺼내기
+    function getUserInfoFromToken() {
         const token = sessionStorage.getItem("accessToken");
         if (!token) return null;
 
         try {
             const payload = JSON.parse(atob(token.split(".")[1]));
-            return payload.sub;
+
+            return {
+                userId: payload.sub,
+                role: payload.role,
+            };
         } catch (e) {
             console.error("토큰 파싱 실패", e);
             return null;
         }
     }
 
-    const loginUserId = getUserIdFromToken();
+    const userInfo = getUserInfoFromToken();
+
+    const loginUserId = userInfo?.userId;
+    const loginUserRole = userInfo?.role;
 
     // 사용자 비교
     const isSeller = loginUserId && product?.sellerId === loginUserId;
+    const isAdmin = loginUserRole === "ROLE_ADMIN";
+    const canManageProduct = isSeller || isAdmin;
 
+    // ✅ [추가] 찜 상태 조회
+    const fetchLikeStatus = async () => {
+        try {
+            const token = sessionStorage.getItem("accessToken");
+
+            const response = await fetch(`/api/products/${productId}/like`, {
+                method: "GET",
+                headers: token
+                    ? {
+                        Authorization: `Bearer ${token}`,
+                    }
+                    : {},
+            });
+
+            if (!response.ok) {
+                throw new Error("찜 상태 조회 실패");
+            }
+
+            const data = await response.json();
+
+            setLikeInfo({
+                liked: data.liked,
+                likeCount: data.likeCount,
+            });
+        } catch (err) {
+            console.error("찜 상태 조회 실패:", err);
+        }
+    };
+
+    // 상품 조회
     useEffect(() => {
         const fetchProductDetail = async () => {
             try {
@@ -57,6 +103,9 @@ export default function ProductDetailPage() {
 
                 const data = await response.json();
                 setProduct(data);
+
+                // ✅ [추가] 상품 상세 조회 성공 후 찜 상태도 조회
+                await fetchLikeStatus();
             } catch (error) {
                 console.error("상품 상세 조회 실패:", error);
 
@@ -69,6 +118,93 @@ export default function ProductDetailPage() {
 
         fetchProductDetail();
     }, [productId, navigate]);
+
+    const currentUser = sessionStorage.getItem("username");
+
+    // 🚀 채팅방 생성 및 열기 함수
+    const startChat = async () => {
+        // 1. 내 물건에 내가 채팅 거는 것 방지!
+        if (currentUser === product.sellerId) {
+            alert("본인이 등록한 상품에는 채팅을 걸 수 없습니다.");
+            return;
+        }
+
+        const currentToken = sessionStorage.getItem("accessToken");
+
+        console.log("🔥 채팅할 때 쏘는 토큰:", currentToken);
+
+        try {
+            // 2. 백엔드에 중고거래 방 생성 (또는 기존 방 조회) 요청
+            const res = await axios.post(
+                "/api/chat/room/trade",
+                {
+                    itemId: product.productId,
+                    sellerId: product.sellerId,
+                },
+                {
+                    headers: { Authorization: `Bearer ${currentToken}` },
+                }
+            );
+
+            const realRoomId = res.data.roomId;
+
+            // 3. 플로팅 채팅창(FloatingChat)에게 "방 열어!" 하고 이벤트 발송!
+            window.dispatchEvent(
+                new CustomEvent("openTradeChat", {
+                    detail: {
+                        roomId: realRoomId,
+                        buyerId: product.sellerNickname,
+                        sellerId: product.sellerId,
+                        itemName: product.title,
+                    },
+                })
+            );
+        } catch (error) {
+            console.error("채팅방 생성/입장 실패:", error);
+            alert("채팅방을 여는 데 실패했습니다. 다시 시도해주세요.");
+        }
+    };
+
+    // ✅ [추가] 찜 토글 함수
+    const handleLikeToggle = async () => {
+        const token = sessionStorage.getItem("accessToken");
+
+        if (!token) {
+            alert("로그인 후 이용 가능합니다.");
+            navigate("/login");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/products/${productId}/like`, {
+                method: likeInfo.liked ? "DELETE" : "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const text = await response.text();
+            let result = {};
+
+            if (text) {
+                result = JSON.parse(text);
+            }
+
+            if (!response.ok) {
+                throw new Error(result.message || "찜 처리 실패");
+            }
+
+            setLikeInfo({
+                liked: result.liked,
+                likeCount: result.likeCount,
+            });
+
+            alert(result.message);
+        } catch (err) {
+            console.error("찜 처리 실패:", err);
+            alert(err.message || "찜 처리 중 오류 발생");
+        }
+    };
 
     // 삭제 함수
     const handleDelete = async () => {
@@ -141,49 +277,6 @@ export default function ProductDetailPage() {
             alert(err.message || "판매완료 처리 중 오류 발생");
         }
     };
-
-
-    const currentUser = sessionStorage.getItem("username");
-
-    // 🚀 [추가] 채팅방 생성 및 열기 함수
-    const startChat = async () => {
-        // 1. 내 물건에 내가 채팅 거는 것 방지!
-        if (currentUser === product.sellerId) {
-            alert("본인이 등록한 상품에는 채팅을 걸 수 없습니다.");
-            return;
-        }
-
-        const currentToken = sessionStorage.getItem("accessToken");
-
-        console.log("🔥 채팅할 때 쏘는 토큰:", currentToken);
-
-        try {
-            // 2. 백엔드에 중고거래 방 생성 (또는 기존 방 조회) 요청
-            const res = await axios.post('http://localhost/api/chat/room/trade', {
-                itemId: product.productId, // 백엔드는 itemId를 기다립니다
-                sellerId: product.sellerId
-            }, {
-                headers: { Authorization: `Bearer ${currentToken}` }
-            });
-
-            const realRoomId = res.data.roomId;
-
-            // 3. 플로팅 채팅창(FloatingChat)에게 "방 열어!" 하고 이벤트 발송!
-            window.dispatchEvent(new CustomEvent('openTradeChat', {
-                detail: {
-                    roomId: realRoomId,
-                    buyerId: product.sellerNickname, // 대화 상대방 이름 표시용
-                    sellerId: product.sellerId,
-                    itemName: product.title        // 어떤 물건인지 표시용
-                }
-            }));
-
-        } catch (error) {
-            console.error("채팅방 생성/입장 실패:", error);
-            alert("채팅방을 여는 데 실패했습니다. 다시 시도해주세요.");
-        }
-    };
-
 
     const productImages = product?.productImages || [];
     const hasImages = productImages.length > 0;
@@ -315,13 +408,24 @@ export default function ProductDetailPage() {
                         </div>
 
                         <div className="detail-action-buttons">
-                            <button type="button" className="btn-like">
-                                찜하기
+                            <button
+                                type="button"
+                                className={`btn-like ${likeInfo.liked ? "active" : ""}`}
+                                onClick={handleLikeToggle}
+                                disabled={isSeller}
+                            >
+                                {likeInfo.liked ? (
+                                    <FaHeart className="like-icon active" />
+                                ) : (
+                                    <FiHeart className="like-icon" />
+                                )}
+                                <span className="like-text">찜 {likeInfo.likeCount}</span>
                             </button>
 
                             <button
                                 type="button"
-                                className="btn-chat" onClick={startChat}
+                                className="btn-chat"
+                                onClick={startChat}
                                 disabled={product.saleStatus === "SOLD_OUT"}
                             >
                                 {product.saleStatus === "SOLD_OUT" ? "판매완료" : "채팅하기"}
@@ -334,11 +438,9 @@ export default function ProductDetailPage() {
                             </Link>
                         </div>
 
-                        {isSeller && (
-                            
+                        {canManageProduct && (
                             <div className="detail-owner-buttons">
-
-                                {product.saleStatus === "SALE" && (
+                                {isSeller && product.saleStatus === "SALE" && (
                                     <button
                                         type="button"
                                         className="btn-soldout"
@@ -357,7 +459,6 @@ export default function ProductDetailPage() {
                                 >
                                     수정
                                 </button>
-
 
                                 <button
                                     type="button"
