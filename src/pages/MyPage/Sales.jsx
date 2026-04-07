@@ -31,6 +31,10 @@ export default function Sales() {
                     //controller에서 확인 (my-sales메소드 실행)
                     headers: { Authorization: `Bearer ${token}` }
                 });
+
+                    // const activeProducts = response.data.filter(product => product.saleStatus === 'SALE');
+                    //  setMyProducts(activeProducts);
+
                 setMyProducts(response.data);
                 //response에 담겨온 데이터로 myProducts배열 채우기 
             } catch (error) {
