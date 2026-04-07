@@ -135,7 +135,7 @@ const FloatingChat = () => {
 
   const toggleChat = () => {
     if (isOpen) {
-      if (stompClient.current) stompClient.current.deactivate();
+      // if (stompClient.current) stompClient.current.deactivate();
       setActiveRoom(null); 
       setIsOpen(false);
     } else {
@@ -144,7 +144,7 @@ const FloatingChat = () => {
   };
 
   const backToList = () => {
-    if (stompClient.current) stompClient.current.deactivate(); 
+    // if (stompClient.current) stompClient.current.deactivate(); 
     setActiveRoom(null); 
   };
 
