@@ -120,8 +120,8 @@ const NearMePage = () => {
                     }
                 });
             });
-        }); // 👈 kakao.maps.load 끝나는 괄호
-    }, [lat, lng, products]); // 👈 useEffect 끝나는 괄호
+        }); 
+    }, [lat, lng, products]); 
 
     return (
         <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
