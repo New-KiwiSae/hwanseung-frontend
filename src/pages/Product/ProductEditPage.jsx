@@ -1,18 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import DaumPostcode from "react-daum-postcode";
 import "./ProductCreatePage.css";
 import { useUser } from "../../UserContext";
 
-
-
-
 export default function ProductEditPage() {
-    
     const navigate = useNavigate();
     const { productId } = useParams();
+    const { userInfo } = useUser();
 
-const { userInfo } = useUser(); // 🌟 유저 정보 꺼내기
-    const mapRef = useRef(null);    // 🌟 지도를 담을 도화지
+    const mapRef = useRef(null);
+    const mapInstance = useRef(null);
+    const markerInstance = useRef(null);
+    const geocoderInstance = useRef(null);
 
     const [form, setForm] = useState({
         title: "",
@@ -23,6 +23,7 @@ const { userInfo } = useUser(); // 🌟 유저 정보 꺼내기
     });
 
     const [loading, setLoading] = useState(true);
+    const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
 
     const formatPriceWithComma = (value) => {
         if (!value) return "";
@@ -66,6 +67,42 @@ const { userInfo } = useUser(); // 🌟 유저 정보 꺼내기
         }));
     };
 
+    const handleComplete = (data) => {
+        let fullAddress = data.address;
+        let extraAddress = "";
+
+        if (data.addressType === "R") {
+            if (data.bname !== "") extraAddress += data.bname;
+            if (data.buildingName !== "") {
+                extraAddress += extraAddress !== ""
+                    ? `, ${data.buildingName}`
+                    : data.buildingName;
+            }
+            fullAddress += extraAddress !== "" ? ` (${extraAddress})` : "";
+        }
+
+        setIsPostcodeOpen(false);
+
+        setForm((prev) => ({
+            ...prev,
+            location: fullAddress,
+        }));
+
+        const geocoder = geocoderInstance.current;
+        const map = mapInstance.current;
+        const marker = markerInstance.current;
+
+        if (geocoder && map && marker) {
+            geocoder.addressSearch(fullAddress, (result, status) => {
+                if (status === window.kakao.maps.services.Status.OK) {
+                    const coords = new window.kakao.maps.LatLng(result[0].y, result[0].x);
+                    map.setCenter(coords);
+                    marker.setPosition(coords);
+                }
+            });
+        }
+    };
+
     useEffect(() => {
         const fetchProduct = async () => {
             try {
@@ -96,63 +133,67 @@ const { userInfo } = useUser(); // 🌟 유저 정보 꺼내기
         fetchProduct();
     }, [productId, navigate]);
 
-useEffect(() => {
-        // 🌟 1번 직원이 로딩을 안 끝냈으면 돌아가서 대기!
+    useEffect(() => {
         if (loading || !window.kakao || !window.kakao.maps) return;
 
         window.kakao.maps.load(() => {
             const mapContainer = mapRef.current;
             if (!mapContainer) return;
 
-           const geocoder = new window.kakao.maps.services.Geocoder();
-            
-            // 💡 우선순위: 1.기존 상품위치 -> 2.가입주소 -> 3.기본값(안양시 등)
+            const geocoder = new window.kakao.maps.services.Geocoder();
+            geocoderInstance.current = geocoder;
+
             const initialAddress = form.location || userInfo?.address || "경기도 안양시";
 
-            // 처음 시작할 때 주소를 좌표로 바꿔서 지도를 띄웁니다.
             geocoder.addressSearch(initialAddress, (result, status) => {
                 let coords;
+
                 if (status === window.kakao.maps.services.Status.OK) {
                     coords = new window.kakao.maps.LatLng(result[0].y, result[0].x);
                 } else {
-                    // 주소 검색 실패 시 기본 좌표
-                    coords = new window.kakao.maps.LatLng(37.3943, 126.9568); 
+                    coords = new window.kakao.maps.LatLng(37.3943, 126.9568);
                 }
 
                 const map = new window.kakao.maps.Map(mapContainer, {
                     center: coords,
-                    level: 4 // 확대 정도
+                    level: 4,
                 });
+                mapInstance.current = map;
 
                 const marker = new window.kakao.maps.Marker({
                     position: coords,
-                    map: map
+                    map: map,
                 });
+                markerInstance.current = marker;
 
-                // 만약 상품에 위치가 없었다면, 기본 주소를 form에 채워줍니다.
                 if (!form.location && userInfo?.address) {
-                    setForm(prev => ({ ...prev, location: userInfo.address }));
+                    setForm((prev) => ({
+                        ...prev,
+                        location: userInfo.address,
+                    }));
                 }
 
-                // 🌟 핵심: 지도를 '클릭'했을 때 발생하는 이벤트!
-                window.kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+                window.kakao.maps.event.addListener(map, "click", function (mouseEvent) {
                     const clickedLatLng = mouseEvent.latLng;
-                    marker.setPosition(clickedLatLng); // 핀을 클릭한 곳으로 이동!
+                    marker.setPosition(clickedLatLng);
 
-                    // 클릭한 곳의 좌표를 다시 '동네 이름'으로 번역합니다. (리버스 지오코딩)
-                    geocoder.coord2RegionCode(clickedLatLng.getLng(), clickedLatLng.getLat(), (regionResult, regionStatus) => {
-                        if (regionStatus === window.kakao.maps.services.Status.OK) {
-                            // 여러 지역 정보 중 '행정동(H)'이나 '법정동(B)' 이름을 가져옵니다.
-                            const addressName = regionResult[0].address_name; 
-                            
-                            // 찾아낸 주소 글자를 form의 location에 쏙 넣어줍니다!
-                            setForm(prev => ({ ...prev, location: addressName }));
+                    geocoder.coord2RegionCode(
+                        clickedLatLng.getLng(),
+                        clickedLatLng.getLat(),
+                        (regionResult, regionStatus) => {
+                            if (regionStatus === window.kakao.maps.services.Status.OK) {
+                                const addressName = regionResult[0].address_name;
+                                setForm((prev) => ({
+                                    ...prev,
+                                    location: addressName,
+                                }));
+                            }
                         }
-                        });
+                    );
                 });
             });
         });
-    }, [loading]); // 🌟 1번 직원이 loading을 false로 바꾸면 그때 딱 한 번 출동!
+    }, [loading, userInfo, form.location]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -177,6 +218,7 @@ useEffect(() => {
 
             const text = await response.text();
             let result = {};
+
             if (text) {
                 result = JSON.parse(text);
             }
@@ -200,6 +242,32 @@ useEffect(() => {
 
     return (
         <main className="product-create-page">
+            {isPostcodeOpen && (
+                <>
+                    <div
+                        className="postcode-overlay"
+                        onClick={() => setIsPostcodeOpen(false)}
+                    />
+                    <div className="postcode-modal">
+                        <div className="postcode-header">
+                            <span>거래 장소 검색</span>
+                            <button
+                                type="button"
+                                className="postcode-close-btn"
+                                onClick={() => setIsPostcodeOpen(false)}
+                            >
+                                &times;
+                            </button>
+                        </div>
+
+                        <DaumPostcode
+                            onComplete={handleComplete}
+                            className="postcode-body"
+                        />
+                    </div>
+                </>
+            )}
+
             <div className="product-create-inner">
                 <section className="product-create-hero">
                     <span className="product-create-badge">상품 수정</span>
@@ -207,13 +275,13 @@ useEffect(() => {
                     <p>
                         기존 상품 정보를 수정해주세요.
                         <br />
-                        제목, 가격, 설명, 거래지역을 다시 입력할 수 있어요.
+                        제목, 가격, 거래 희망 장소, 설명을 다시 입력할 수 있어요.
                     </p>
                 </section>
 
                 <form className="product-create-form" onSubmit={handleSubmit}>
                     <div className="product-create-top">
-                        <section className="product-create-card info-card" style={{ gridColumn: "1 / -1" }}>
+                        <section className="product-create-card info-card product-full-column">
                             <div className="section-head">
                                 <div>
                                     <h2>기본 정보</h2>
@@ -278,63 +346,71 @@ useEffect(() => {
                                 </div>
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-group product-full-column">
                                 <label htmlFor="location">거래 희망 장소</label>
-                                <p style={{ fontSize: '13px', color: '#888', marginBottom: '10px' }}>
-                                    지도를 클릭해서 정확한 거래 장소를 콕 찍어주세요!
-                                </p>
 
-                                {/* 🌟 지도가 그려질 도화지 */}
-                                <div 
-                                    ref={mapRef} 
-                                    style={{ 
-                                        width: '100%', 
-                                        height: '250px', 
-                                        borderRadius: '12px',
-                                        marginBottom: '10px',
-                                        border: '1px solid #ddd'
-                                    }} 
-                                />
+                                <div className="location-search-row">
+                                    <input
+                                        id="location"
+                                        name="location"
+                                        type="text"
+                                        value={form.location}
+                                        readOnly
+                                        className="location-readonly-input"
+                                        placeholder="주소 검색 버튼을 눌러 거래 장소를 선택하세요."
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        className="address-search-btn"
+                                        onClick={() => setIsPostcodeOpen(true)}
+                                    >
+                                        주소 찾기
+                                    </button>
+                                </div>
 
-                                {/* 🌟 지도에서 선택된 동네가 텍스트로 보여지는 곳 (직접 입력 금지) */}
-                                <input
-                                    id="location"
-                                    name="location"
-                                    type="text"
-                                    value={form.location}
-                                    readOnly // 지도 클릭으로만 바뀌도록 막아둡니다.
-                                    style={{ backgroundColor: '#f9f9f9', cursor: 'default' }}
-                                    placeholder="지도를 클릭하면 주소가 자동으로 입력됩니다."
-                                    required
-                                />
-                            </div>
+                                <div className="location-map-help">
+                                    주소를 검색한 뒤 지도를 클릭해서 위치를 조금 더 정확하게 조정할 수 있어요.
+                                </div>
 
-                            <div className="form-group">
-                                <label htmlFor="content">상세 설명</label>
-                                <textarea
-                                    id="content"
-                                    name="content"
-                                    value={form.content}
-                                    onChange={handleChange}
-                                    placeholder="상품 상태, 사용 기간, 거래 방법 등을 자세히 적어주세요."
-                                    rows="8"
-                                    required
-                                />
+                                <div ref={mapRef} className="location-map-box" />
                             </div>
                         </section>
                     </div>
 
-                    <div className="product-create-bottom">
-                        <button
-                            type="button"
-                            className="cancel-btn"
-                            onClick={() => navigate(`/products/${productId}`)}
-                        >
-                            취소
-                        </button>
-                        <button type="submit" className="submit-btn">
-                            수정 완료
-                        </button>
+                    <section className="product-create-card detail-card">
+                        <div className="section-head">
+                            <h2>상품 설명</h2>
+                        </div>
+
+                        <div className="form-group">
+                            <textarea
+                                id="content"
+                                name="content"
+                                value={form.content}
+                                onChange={handleChange}
+                                rows="8"
+                                placeholder="상품 상태, 사용 기간, 거래 방법 등을 자세히 적어주세요."
+                                required
+                            />
+                        </div>
+                    </section>
+
+                    <div className="product-create-submit">
+                        <p>수정한 내용은 저장 후 바로 상품 상세페이지에 반영돼요.</p>
+
+                        <div className="submit-buttons">
+                            <button
+                                type="button"
+                                className="cancel-btn"
+                                onClick={() => navigate(`/products/${productId}`)}
+                            >
+                                취소
+                            </button>
+                            <button type="submit" className="submit-btn">
+                                상품 수정하기
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

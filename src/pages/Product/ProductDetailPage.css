@@ -370,9 +370,10 @@
 .detail-owner-buttons {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     gap: 10px;
     margin-top: 14px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
 /* 수정/삭제/판매완료 공통 버튼 */
@@ -380,6 +381,8 @@
 .detail-owner-buttons .btn-delete,
 .detail-owner-buttons .btn-soldout {
     min-width: 76px;
+    width: auto;
+    flex: 0 0 auto;
     height: 38px;
     padding: 0 16px;
     font-size: 13px;
@@ -389,6 +392,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 4px 10px rgba(17, 24, 39, 0.05);
+    white-space: nowrap;
 }
 
 .detail-owner-buttons .btn-edit {
@@ -553,6 +557,7 @@
     .detail-owner-buttons {
         gap: 8px;
         margin-top: 12px;
+        flex-wrap: wrap;
     }
 
     .detail-owner-buttons .btn-edit,

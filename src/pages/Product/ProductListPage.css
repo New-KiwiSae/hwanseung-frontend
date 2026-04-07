@@ -181,8 +181,8 @@
     border: 1px solid var(--border-color);
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 6px 18px rgba(17, 24, 39, 0.04); /* 🔥 수정 */
-    transition: transform 0.16s ease, box-shadow 0.16s ease; /* 🔥 수정 */
+    box-shadow: 0 6px 18px rgba(17, 24, 39, 0.04);
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
     color: #111827 !important;
     opacity: 1 !important;
     visibility: visible !important;
@@ -191,8 +191,8 @@
 }
 
 .product-card:hover {
-    transform: translateY(-1px) !important; /* 🔥 수정 */
-    box-shadow: 0 7px 18px rgba(17, 24, 39, 0.045); /* 🔥 수정 */
+    transform: translateY(-1px) !important;
+    box-shadow: 0 7px 18px rgba(17, 24, 39, 0.045);
 }
 
 .product-card * {
@@ -282,6 +282,7 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    line-clamp: 2;
 }
 
 .product-price {
@@ -309,6 +310,7 @@
     color: #c0c7d1 !important;
 }
 
+/* ✅ 수정: 하단 정렬 */
 .product-card-bottom {
     display: flex;
     align-items: center;
@@ -323,6 +325,14 @@
     color: #6b7280 !important;
 }
 
+/* ✅ 추가: 찜/채팅 묶음 */
+.product-count-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ✅ 수정: 찜 버튼 */
 .product-like-btn {
     display: inline-flex !important;
     align-items: center;
@@ -337,10 +347,17 @@
     color: #374151 !important;
     font-size: 13px;
     font-weight: 700;
+    line-height: 1;
     box-shadow: 0 4px 10px rgba(17, 24, 39, 0.04);
     transition: all 0.2s ease;
     position: relative;
     z-index: 3;
+    box-sizing: border-box;
+    cursor: pointer;
+    position: relative;
+    top: -1px;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
 .product-like-btn:hover {
@@ -357,6 +374,8 @@
     color: #c4c9d1 !important;
     transition: color 0.2s ease, transform 0.2s ease;
     flex-shrink: 0;
+    position: relative;
+    top: -1px
 }
 
 .product-like-icon.active {
@@ -393,6 +412,39 @@
 
 .product-like-btn:disabled .product-like-count {
     color: #c0c4cc !important;
+}
+
+/* ✅ 수정: 채팅 카운트 */
+.product-chat-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 58px;
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 4px 10px rgba(17, 24, 39, 0.04);
+    box-sizing: border-box;
+}
+
+.product-chat-icon {
+    font-size: 15px;
+    line-height: 1;
+    flex-shrink: 0;
+    color: #b8a7d9;
+}
+
+.product-chat-value {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
 }
 
 .product-list-state {
@@ -517,14 +569,17 @@
         font-size: 22px;
     }
 
-    .product-like-btn {
+    .product-like-btn,
+    .product-chat-count {
         height: 32px;
         min-width: 54px;
         border-radius: 10px;
         font-size: 12px;
+        vertical-align: middle;
     }
 
-    .product-like-icon {
+    .product-like-icon,
+    .product-chat-icon {
         font-size: 14px;
     }
 
