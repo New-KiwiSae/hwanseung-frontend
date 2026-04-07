@@ -28,13 +28,6 @@ const FloatingChat = () => {
   // const currentUser = sessionStorage.getItem("username") || "알수없음";
   const currentUser = userInfo?.username || userInfo?.userId || sessionStorage.getItem("username");
 
-  // ========================================================
-  // 🚨 [여기에 탐지기 4줄 추가!]
-  console.log("🔥 1. 현재 토큰 있나요?:", !!token);
-  console.log("🔥 2. 창고(userInfo) 정보:", userInfo);
-  console.log("🔥 3. 계산된 내 아이디(currentUser):", currentUser);
-  // ========================================================
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, activeRoom]);
@@ -326,8 +319,6 @@ const FloatingChat = () => {
                 {messages.length === 0 && <div className="empty-message"><p>대화를 시작해보세요!</p></div>}
                 
                 {messages.map((msg, index) => {
-                  console.log("🔥 내 아이디(currentUser):", currentUser);
-                  console.log("🔥 백엔드에서 온 메시지(msg):", msg);
 
                   const isImage = msg.content && msg.content.includes('/api/imgs/');
                   const isMe = (msg.senderId || msg.sender) === currentUser;
