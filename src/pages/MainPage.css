@@ -263,6 +263,18 @@
   cursor: pointer;
 }
 
+.category-item {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
 .category-icon-wrap {
   width: 64px;
   height: 64px;

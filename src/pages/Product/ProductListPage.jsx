@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiHeart, FiMessageCircle } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import "./ProductListPage.css";
@@ -48,6 +48,7 @@ function getUserInfoFromToken() {
 
 export default function ProductListPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     const [products, setProducts] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("all");
@@ -58,6 +59,19 @@ export default function ProductListPage() {
 
     const userInfo = getUserInfoFromToken();
     const loginUserId = userInfo?.userId;
+
+    useEffect(() => {
+        const category = searchParams.get("category");
+
+        if (
+            category &&
+            ["digital", "fashion", "furniture", "life", "hobby", "sports", "ticket"].includes(category)
+        ) {
+            setSelectedCategory(category);
+        } else {
+            setSelectedCategory("all");
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -138,6 +152,15 @@ export default function ProductListPage() {
             console.error("목록 찜 처리 실패:", err);
             alert(err.message || "찜 처리 중 오류 발생");
         }
+    };
+
+    const handleCategoryClick = (categoryKey) => {
+        if (categoryKey === "all") {
+            navigate("/products");
+            return;
+        }
+
+        navigate(`/products?category=${categoryKey}`);
     };
 
     const filteredProducts = useMemo(() => {
@@ -241,7 +264,7 @@ export default function ProductListPage() {
                                     ? "category-tab active"
                                     : "category-tab"
                             }
-                            onClick={() => setSelectedCategory(category.key)}
+                            onClick={() => handleCategoryClick(category.key)}
                         >
                             {category.label}
                         </button>
