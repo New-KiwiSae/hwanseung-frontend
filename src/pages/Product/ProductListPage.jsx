@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiHeart } from "react-icons/fi";
+import { FiHeart, FiMessageCircle } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import "./ProductListPage.css";
 
@@ -285,7 +285,7 @@ export default function ProductListPage() {
                                 >
                                     <div className="product-thumb">
                                         {product.thumbnailUrl ? (
-                                            <img src={product.thumbnailUrl} alt={product.title} />
+                                            <img src={`http://localhost:8080${product.thumbnailUrl}`} alt={product.title} />
                                         ) : (
                                             <div className="product-thumb-empty">
                                                 <span>환승마켓</span>
@@ -326,19 +326,26 @@ export default function ProductListPage() {
                                                 {isSoldOut ? "판매완료" : "판매중"}
                                             </div>
 
-                                            <button
-                                                type="button"
-                                                className={`product-like-btn ${product.liked ? "active" : ""}`}
-                                                disabled={disableLike}
-                                                onClick={(e) => handleLikeToggle(e, product)}
-                                            >
-                                                {product.liked ? (
-                                                    <FaHeart className="product-like-icon active" />
-                                                ) : (
-                                                    <FiHeart className="product-like-icon" />
-                                                )}
-                                                <span className="product-like-count">{product.likeCount}</span>
-                                            </button>
+                                            <div className="product-count-group">
+                                                <button
+                                                    type="button"
+                                                    className={`product-like-btn ${product.liked ? "active" : ""}`}
+                                                    disabled={disableLike}
+                                                    onClick={(e) => handleLikeToggle(e, product)}
+                                                >
+                                                    {product.liked ? (
+                                                        <FaHeart className="product-like-icon active" />
+                                                    ) : (
+                                                        <FiHeart className="product-like-icon" />
+                                                    )}
+                                                    <span className="product-like-count">{product.likeCount}</span>
+                                                </button>
+
+                                                <span className="product-chat-count">
+                                                    <FiMessageCircle className="product-chat-icon" />
+                                                    <span className="product-chat-value">{product.chatCount ?? 0}</span>
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </article>
