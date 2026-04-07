@@ -10,7 +10,6 @@ import ProductListPage from "./pages/Product/ProductListPage";
 import ProductEditPage from "./pages/Product/ProductEditPage";
 import AuthPage from './pages/Auth/AuthPage.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
-import Sales from './pages/MyPage/Sales';
 import Purchase from './pages/MyPage/Purchase';
 import Wishlist from './pages/MyPage/Wishlist';
 import './index.css';
@@ -18,6 +17,7 @@ import SplashScreen from './components/SplashScreen';
 import FloatingChat from './pages/Chat/FloatingChat.jsx';
 import NearMePage from '../NearMePage.jsx';
 import { UserProvider } from './UserContext';
+import Sales from './pages/MyPage/Sales.jsx';
 
 import AdminLayout from './pages/Admin/AdminLayout.jsx';
 import AdminDashBoard from './pages/Admin/AdminDashBoard.jsx';
@@ -56,6 +56,7 @@ function App() {
             {!(isAuthPage || isAdminPage) && <Header />}
             <main style={{ flexGrow: 1 }}>
                 <Routes>
+        
                     <Route path="/" element={<MainPage />} />
                     <Route path="/near-me" element={<NearMePage />} />
                     <Route path="/products/create" element={<ProductCreatePage />} />
