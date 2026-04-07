@@ -6,14 +6,14 @@ import { useNavigate } from 'react-router-dom';
 /* ── 데이터 ── */
 // 변경 후
 const categories = [
-    { emoji: '📱', label: '디지털기기' },
-    { emoji: '👕', label: '의류/잡화' },
-    { emoji: '🛋️', label: '가구/인테리어' },
-    { emoji: '🍳', label: '생활/가전' },
-    { emoji: '🎨', label: '취미/도서' },
-    { emoji: '⚽', label: '스포츠/레저' },
-    { emoji: '🎫', label: '티켓/교환권' },
-    { emoji: '✨', label: '전체보기' },
+    { emoji: '📱', label: '디지털기기', key: 'digital' },
+    { emoji: '👕', label: '의류/잡화', key: 'fashion' },
+    { emoji: '🛋️', label: '가구/인테리어', key: 'furniture' },
+    { emoji: '🍳', label: '생활/가전', key: 'life' },
+    { emoji: '🎨', label: '취미/도서', key: 'hobby' },
+    { emoji: '⚽', label: '스포츠/레저', key: 'sports' },
+    { emoji: '🎫', label: '티켓/교환권', key: 'ticket' },
+    { emoji: '✨', label: '전체보기', key: 'all' },
 ];
 
 // 확장 시 보여줄 추가 카테고리 (빈칸 8개)
@@ -224,13 +224,17 @@ const MainPage = () => {
                 <div className="container">
                     <div className="category-grid">
                         {categories.map((cat, idx) => (
-                            <a href="#" key={idx}
+                            <button
+                                type="button"
+                                key={idx}
                                 className="category-item"
-                                onClick={(e) => {
-                                    if (cat.label === '전체보기') {
-                                        e.preventDefault();
+                                onClick={() => {
+                                    if (cat.key === 'all') {
                                         setShowAllCategories(prev => !prev);
+                                        return;
                                     }
+
+                                    navigate(`/products?category=${cat.key}`);
                                 }}
                             >
                                 <div className="category-icon-wrap">
@@ -241,17 +245,21 @@ const MainPage = () => {
                                         ? (showAllCategories ? '접기' : '전체보기')
                                         : cat.label}
                                 </span>
-                            </a>
+                            </button>
                         ))}
 
                         {/* 확장된 추가 카테고리 */}
                         {showAllCategories && extraCategories.map((cat, idx) => (
-                            <a href="#" key={`extra-${idx}`} className="category-item">
+                            <button
+                                type="button"
+                                key={`extra-${idx}`}
+                                className="category-item"
+                            >
                                 <div className="category-icon-wrap">
                                     <span className="category-emoji">{cat.emoji}</span>
                                 </div>
                                 <span className="category-label">{cat.label}</span>
-                            </a>
+                            </button>
                         ))}
                     </div>
                 </div>
