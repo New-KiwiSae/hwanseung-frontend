@@ -231,18 +231,34 @@ const MyPage = () => {
           geocoder.coord2RegionCode(lng, lat, async (result, status) => {
             if (status === window.kakao.maps.services.Status.OK) {
               const myNeighborhood = result[0].region_3depth_name;
-              try {
+             try {
                 const token = sessionStorage.getItem('accessToken');
-                await axios.put(`/api/user`, {
+                
+                // 🌟 1. 업데이트할 동네 정보 만들기
+                const updatedInfo = {
                   ...userInfo,
                   neighborhood: myNeighborhood,
                   isNeighborhoodAuthenticated: true
-                }, {
-                  headers: { Authorization: `Bearer ${token}` }
+                };
+
+                // 🌟 2. 빈 택배 상자(FormData) 준비
+                const formData = new FormData();
+                
+                // 🌟 3. handleSave와 완벽하게 똑같은 방식으로 포장해서 담기
+                formData.append('userData', new Blob([JSON.stringify(updatedInfo)], { type: 'application/json' }));
+
+                // 🌟 4. 백엔드로 택배 발송!
+                await axios.put(`/api/user`, formData, {
+                  headers: { 
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data' // 포장지 명시
+                  }
                 });
+
                 alert(`🎉 성공! [${myNeighborhood}] 동네 인증이 완료되었습니다.`);
                 if (fetchUser) fetchUser();
               } catch (error) {
+                console.error("인증 실패 상세:", error);
                 alert("인증 정보를 서버에 저장하는데 실패했습니다.");
               }
             }
