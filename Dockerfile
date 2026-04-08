@@ -24,14 +24,14 @@ RUN echo 'server { \
     \
     # 2. /api 로 시작하는 요청은 백엔드로 전달 \
     location /api/ { \
-        proxy_pass http://spring-api:8080; \
+        proxy_pass http://backend:8080; \
         proxy_set_header Host $host; \
         proxy_set_header X-Real-IP $remote_addr; \
     } \
     \
     # 3. /ws-chat (웹소켓) 요청 백엔드로 전달 \
     location /ws-chat/ { \
-        proxy_pass http://spring-api:8080; \
+        proxy_pass http://backend:8080; \
         proxy_http_version 1.1; \
         proxy_set_header Upgrade $http_upgrade; \
         proxy_set_header Connection "upgrade"; \
