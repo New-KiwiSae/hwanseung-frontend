@@ -458,9 +458,9 @@ const MainPage = () => {
                                 </span>
                             </div>
                         </div>
-                        <button className="safety-cta">
+                        {/* <button className="safety-cta">
                             가이드 보기 <i className="fas fa-arrow-right"></i>
-                        </button>
+                        </button> */}
                     </div>
                 </div>
             </section>
