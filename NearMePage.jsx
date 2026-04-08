@@ -64,49 +64,54 @@ const NearMePage = () => {
         }
     }, [homeLat, homeLng]);
 
-    // 2️⃣ [지도 그리기] 지도를 띄우고 매물 핀 꽂기
+  // 2️⃣ [지도 그리기] 지도를 띄우고 매물 핀 꽂기
     useEffect(() => {
         const { kakao } = window;
         
-        // 🌟 GPS 로딩 중이거나 아직 좌표를 못 찾았다면 지도를 그리지 않고 대기!
         if (!kakao || !kakao.maps || isLoadingLoc || !currentLoc.lat) return;
-        console.log("currentLoc.lat",currentLoc.lat);
 
         kakao.maps.load(() => {
             if (!mapRef.current) return;
 
-            // 🌟 지도의 중심점은 이제 '진짜 현재 위치(currentLoc)' 입니다!
             const mapOptions = {
                 center: new kakao.maps.LatLng(currentLoc.lat, currentLoc.lng),
                 level: 5 
             };
             const map = new kakao.maps.Map(mapRef.current, mapOptions);
 
-            // 📍 1번 마커: '진짜 현재 위치' (주황색)
-            const currentMarker = new kakao.maps.Marker({
+            // =================================================================
+            // 🌟 1. '현재 내 위치' 마커를 눈에 띄는 "커스텀 오버레이"로 변경!
+            // =================================================================
+            const currentOverlayContent = `
+                <div style="background-color: #ff6f0f; color: white; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid white; transform: translateY(-50%);">
+                    📍 현재 내 위치
+                </div>
+            `;
+            const currentOverlay = new kakao.maps.CustomOverlay({
                 position: new kakao.maps.LatLng(currentLoc.lat, currentLoc.lng),
-                map: map
+                content: currentOverlayContent,
+                map: map // 생성과 동시에 지도에 붙입니다.
             });
-            const currentInfoWindow = new kakao.maps.InfoWindow({
-                content: '<div class="my-location-badge" style="color: #ff6f0f;">📍 현재 위치</div>'
-            });
-            currentInfoWindow.open(map, currentMarker);
 
-            // 🏠 2번 마커: '우리 집' (URL로 집 주소 좌표가 넘어왔을 때만 찍어줍니다!)
-            // 진짜 현재 위치와 집 주소가 완전히 똑같지 않을 때만 찍습니다.
+            // =================================================================
+            // 🌟 2. '우리 집' 마커도 "커스텀 오버레이"로 예쁘게 변경!
+            // =================================================================
             if (homeLat && homeLng && (homeLat !== currentLoc.lat || homeLng !== currentLoc.lng)) {
-                const homeMarker = new kakao.maps.Marker({
+                const homeOverlayContent = `
+                    <div style="background-color: #00d26a; color: white; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid white; transform: translateY(-50%);">
+                        🏠 우리 집
+                    </div>
+                `;
+                const homeOverlay = new kakao.maps.CustomOverlay({
                     position: new kakao.maps.LatLng(homeLat, homeLng),
+                    content: homeOverlayContent,
                     map: map
                 });
-                const homeInfoWindow = new kakao.maps.InfoWindow({
-                    content: '<div class="my-location-badge" style="color: #00d26a;">🏠 우리 집</div>'
-                });
-                homeInfoWindow.open(map, homeMarker);
             }
 
             const geocoder = new kakao.maps.services.Geocoder();
 
+            // 🌟 매물 마커는 기존 파란색 핀을 그대로 유지합니다.
             products.forEach((product) => {
                 if (!product.location) return;
 
@@ -163,9 +168,7 @@ const NearMePage = () => {
                 });
             });
         }); 
-    // 🌟 의존성 배열에 GPS 관련 변수들을 꼼꼼하게 다 넣어주어야 지도가 올바르게 업데이트됩니다.
-    }, [currentLoc, isLoadingLoc, homeLat, homeLng, products]); 
-
+    }, [currentLoc, isLoadingLoc, homeLat, homeLng, products]);
     return (
         <div className="near-me-container">
             <h2 className="near-me-title">📍 내 주변 매물</h2>

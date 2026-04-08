@@ -70,9 +70,10 @@
   font-weight: 500;
 }
 
-.email-value {
-  color: #9CA3AF; /* 이메일은 흐리게 */
-}
+/* .email-value {
+  color: #9CA3AF; 
+} ->내 정보에서 이메일 약간 흐리게  */
+
 
 /* 수정 모드 입력칸 */
 .edit-input {

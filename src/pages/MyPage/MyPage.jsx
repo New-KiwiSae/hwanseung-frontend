@@ -361,7 +361,7 @@ const MyPage = () => {
           <div className="info-list">
             <div className="info-item">
               <label>아이디</label>
-              <span className="info-value" style={{ fontWeight: 'bold', color: '#555' }}>{userInfo.username}</span>
+              <span className="info-value" >{userInfo.username}</span>
             </div>
 
             <div className="info-item">
@@ -371,7 +371,7 @@ const MyPage = () => {
 
             <div className="info-item">
               <label>이름</label>
-              <span className="info-value" style={{ fontWeight: 'bold', color: '#555' }}>{userInfo.name}</span>
+              <span className="info-value" >{userInfo.name}</span>
             </div>
 
             <div className="info-item">
