@@ -56,6 +56,7 @@ export default function ProductListPage() {
     const [sortType, setSortType] = useState("latest");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [visibleCount, setVisibleCount] = useState(12); // 무한스크롤
 
     const userInfo = getUserInfoFromToken();
     const loginUserId = userInfo?.userId;
@@ -204,6 +205,30 @@ export default function ProductListPage() {
         return result;
     }, [products, selectedCategory, keyword, sortType]);
 
+    // 카테고리/검색/정렬 바뀌면 다시 12개부터 보여주기
+    useEffect(() => {
+        setVisibleCount(12);
+    }, [selectedCategory, keyword, sortType]);
+
+    // 스크롤 끝에 가면 12개씩 더 보여주기(무한 스크롤)
+    useEffect(() => {
+        const handleScroll = () => {
+            if (loading || error) return;
+            if (visibleCount >= filteredProducts.length) return;
+
+            const scrollTop = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const fullHeight = document.documentElement.scrollHeight;
+
+            if (scrollTop + windowHeight >= fullHeight - 100) {
+                setVisibleCount((prev) => prev + 12);
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, [loading, error, visibleCount, filteredProducts.length]);
+
     return (
         <div className="product-list-page">
             <div className="product-list-inner">
@@ -295,7 +320,7 @@ export default function ProductListPage() {
 
                 {!loading && !error && filteredProducts.length > 0 && (
                     <section className="product-grid">
-                        {filteredProducts.map((product) => {
+                        {filteredProducts.slice(0, visibleCount).map((product) => {
                             const isSoldOut = product.saleStatus === "SOLD_OUT";
                             const isMyProduct = loginUserId && product.sellerId === loginUserId;
                             const disableLike = isSoldOut || isMyProduct;
@@ -308,7 +333,10 @@ export default function ProductListPage() {
                                 >
                                     <div className="product-thumb">
                                         {product.thumbnailUrl ? (
-                                            <img src={`http://localhost:8080${product.thumbnailUrl}`} alt={product.title} />
+                                            <img
+                                                src={`http://localhost:8080${product.thumbnailUrl}`}
+                                                alt={product.title}
+                                            />
                                         ) : (
                                             <div className="product-thumb-empty">
                                                 <span>환승마켓</span>
@@ -361,12 +389,16 @@ export default function ProductListPage() {
                                                     ) : (
                                                         <FiHeart className="product-like-icon" />
                                                     )}
-                                                    <span className="product-like-count">{product.likeCount}</span>
+                                                    <span className="product-like-count">
+                                                        {product.likeCount}
+                                                    </span>
                                                 </button>
 
                                                 <span className="product-chat-count">
                                                     <FiMessageCircle className="product-chat-icon" />
-                                                    <span className="product-chat-value">{product.chatCount ?? 0}</span>
+                                                    <span className="product-chat-value">
+                                                        {product.chatCount ?? 0}
+                                                    </span>
                                                 </span>
                                             </div>
                                         </div>
