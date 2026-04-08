@@ -203,6 +203,22 @@ const MyPage = () => {
         <p>환승마켓에서의 내 프로필과 결제 정보를 관리하세요.</p>
       </div>
 
+            <div className="mypage-pay-section">
+        <div className="pay-banner">
+          <div className="pay-text">
+            <h3>환승Pay 충전</h3>
+            <p>안전한 중고 거래의 시작, 환승Pay를 충전해보세요.</p>
+          </div>
+          <button className="btn-charge" onClick={() => setIsPayModalOpen(true)}>
+            <i className="fas fa-wallet"></i> 충전하기
+          </button>
+        </div>
+      </div>
+
+      {isPayModalOpen && (
+        <ChargePay onClose={() => setIsPayModalOpen(false)} userInfo={userInfo} />
+      )}
+      <br/>
       <div className="mypage-card">
         <div className="profile-section">
           {/* 🌟 프로필 이미지 영역 수정 */}
@@ -360,7 +376,7 @@ const MyPage = () => {
                   <button
                     onClick={handleNeighborhoodAuth}
                     className="auth-btn"
-                    style={{ padding: '6px 12px', background: '#ff6f0f', color: 'white', border: 'none', borderRadius: '12px', fontSize: '13px', cursor: 'pointer', fontWeight: 'bold' }}
+                    style={{ padding: '6px 12px', background: '#00D27A', color: 'white', border: 'none', borderRadius: '12px', fontSize: '15px', cursor: 'pointer', fontWeight: 'bold' }}
                   >
                     <i className="fas fa-map-marker-alt"></i> 내 동네 인증하기
                   </button>
@@ -385,22 +401,6 @@ const MyPage = () => {
           )}
         </div>
       </div>
-
-      <div className="mypage-pay-section">
-        <div className="pay-banner">
-          <div className="pay-text">
-            <h3>환승Pay 충전</h3>
-            <p>안전한 중고 거래의 시작, 환승Pay를 충전해보세요.</p>
-          </div>
-          <button className="btn-charge" onClick={() => setIsPayModalOpen(true)}>
-            <i className="fas fa-wallet"></i> 충전하기
-          </button>
-        </div>
-      </div>
-
-      {isPayModalOpen && (
-        <ChargePay onClose={() => setIsPayModalOpen(false)} userInfo={userInfo} />
-      )}
     </div>
   );
 };
