@@ -25,6 +25,15 @@ export default function ProductEditPage() {
     const [loading, setLoading] = useState(true);
     const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
 
+    // ✅ [추가] 기존 이미지
+    const [existingImages, setExistingImages] = useState([]);
+    // ✅ [추가] 삭제 체크된 기존 이미지 id
+    const [deleteImageIds, setDeleteImageIds] = useState([]);
+    // ✅ [추가] 새로 추가할 파일
+    const [newImageFiles, setNewImageFiles] = useState([]);
+    // ✅ [추가] 새 이미지 미리보기
+    const [newPreviewUrls, setNewPreviewUrls] = useState([]);
+
     const formatPriceWithComma = (value) => {
         if (!value) return "";
         return Number(value).toLocaleString("ko-KR");
@@ -103,6 +112,32 @@ export default function ProductEditPage() {
         }
     };
 
+    // ✅ [추가] 새 이미지 선택
+    const handleNewImageChange = (e) => {
+        const files = Array.from(e.target.files || []);
+
+        const remainExistingCount = existingImages.filter(
+            (img) => !deleteImageIds.includes(img.productImageId)
+        ).length;
+
+        if (remainExistingCount + files.length > 5) {
+            alert("이미지는 최대 5장까지 가능합니다.");
+            return;
+        }
+
+        setNewImageFiles(files);
+        setNewPreviewUrls(files.map((file) => URL.createObjectURL(file)));
+    };
+
+    // ✅ [추가] 기존 이미지 삭제 체크
+    const handleToggleDeleteImage = (imageId) => {
+        setDeleteImageIds((prev) =>
+            prev.includes(imageId)
+                ? prev.filter((id) => id !== imageId)
+                : [...prev, imageId]
+        );
+    };
+
     useEffect(() => {
         const fetchProduct = async () => {
             try {
@@ -121,6 +156,9 @@ export default function ProductEditPage() {
                     location: data.location || "",
                     content: data.content || "",
                 });
+
+                // ✅ [추가]
+                setExistingImages(data.productImages || []);
             } catch (error) {
                 console.error(error);
                 alert(error.message || "상품 정보 조회 실패");
@@ -200,20 +238,30 @@ export default function ProductEditPage() {
 
         try {
             const accessToken = sessionStorage.getItem("accessToken");
+            const formData = new FormData();
+
+            formData.append("title", form.title);
+            formData.append("category", form.category);
+            formData.append("price", Number(form.price));
+            formData.append("location", form.location);
+            formData.append("content", form.content);
+
+            // ✅ [추가] 삭제할 기존 이미지 id
+            deleteImageIds.forEach((id) => {
+                formData.append("deleteImageIds", id);
+            });
+
+            // ✅ [추가] 새 이미지
+            newImageFiles.forEach((file) => {
+                formData.append("newImages", file);
+            });
 
             const response = await fetch(`/api/products/${productId}`, {
                 method: "PUT",
                 headers: {
-                    "Content-Type": "application/json",
                     Authorization: accessToken ? `Bearer ${accessToken}` : "",
                 },
-                body: JSON.stringify({
-                    title: form.title,
-                    category: form.category,
-                    price: Number(form.price),
-                    location: form.location,
-                    content: form.content,
-                }),
+                body: formData,
             });
 
             const text = await response.text();
@@ -275,13 +323,89 @@ export default function ProductEditPage() {
                     <p>
                         기존 상품 정보를 수정해주세요.
                         <br />
-                        제목, 가격, 거래 희망 장소, 설명을 다시 입력할 수 있어요.
+                        이미지도 함께 수정할 수 있어요.
                     </p>
                 </section>
 
                 <form className="product-create-form" onSubmit={handleSubmit}>
                     <div className="product-create-top">
-                        <section className="product-create-card info-card product-full-column">
+                        {/* ✅ [추가] 이미지 수정 카드 */}
+                        <section className="product-create-card image-card">
+                            <div className="section-head">
+                                <div>
+                                    <h2>상품 이미지</h2>
+                                    <p>기존 이미지 삭제 + 새 이미지 추가 가능 (최대 5장)</p>
+                                </div>
+                            </div>
+
+                            {existingImages.length > 0 && (
+                                <div className="image-preview-list" style={{ marginBottom: "16px" }}>
+                                    {existingImages.map((image) => {
+                                        const checked = deleteImageIds.includes(image.productImageId);
+
+                                        return (
+                                            <div
+                                                className="image-preview"
+                                                key={image.productImageId}
+                                                style={{
+                                                    position: "relative",
+                                                    opacity: checked ? 0.45 : 1,
+                                                }}
+                                            >
+                                                <img src={image.imagePath} alt={image.originalName} />
+                                                <label
+                                                    style={{
+                                                        position: "absolute",
+                                                        top: "8px",
+                                                        left: "8px",
+                                                        background: "rgba(0,0,0,0.6)",
+                                                        color: "#fff",
+                                                        padding: "4px 8px",
+                                                        borderRadius: "8px",
+                                                        fontSize: "12px",
+                                                        cursor: "pointer",
+                                                    }}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={checked}
+                                                        onChange={() => handleToggleDeleteImage(image.productImageId)}
+                                                        style={{ marginRight: "6px" }}
+                                                    />
+                                                    삭제
+                                                </label>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            <label className="image-upload-box">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handleNewImageChange}
+                                />
+                                <div className="image-upload-content">
+                                    <div className="image-upload-plus">+</div>
+                                    <strong>새 이미지 추가</strong>
+                                    <span>선택한 이미지는 수정 시 반영됩니다.</span>
+
+                                    {newPreviewUrls.length > 0 && (
+                                        <div className="image-preview-list">
+                                            {newPreviewUrls.map((url, index) => (
+                                                <div className="image-preview" key={index}>
+                                                    <img src={url} alt={`새 미리보기 ${index + 1}`} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </label>
+                        </section>
+
+                        <section className="product-create-card info-card">
                             <div className="section-head">
                                 <div>
                                     <h2>기본 정보</h2>

@@ -33,6 +33,17 @@ const FloatingChat = () => {
   }, [messages, activeRoom]);
 
   // ========================================================
+  // 🚨 [여기에 추가!] 컴포넌트가 화면에서 완전히 사라질 때 채팅 연결을 강제 종료하는 청소부
+  // ========================================================
+  useEffect(() => {
+    return () => {
+      if (stompClient.current) {
+        stompClient.current.deactivate();
+      }
+    };
+  }, []);
+
+  // ========================================================
   // 🚨 2. [핵심] 처음에 알림 채널에 연결해서 귀를 열어둡니다!
   // ========================================================
   useEffect(() => {
@@ -188,6 +199,12 @@ const FloatingChat = () => {
   };
 
   const connectStomp = (currentRoomId) => {
+    // 🚨 [핵심 방어 코드 1] 기존에 연결된 방 라디오가 있다면 반드시 먼저 전원을 끕니다!
+    if (stompClient.current) {
+      stompClient.current.deactivate();
+      stompClient.current = null;
+    }
+
     const client = new Client({
       webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
       connectHeaders: { Authorization: `Bearer ${token}` },
