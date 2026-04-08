@@ -5,13 +5,12 @@ import { useNavigate } from 'react-router-dom';
 import ChargePay from '../../ChargePay';
 import '../../chargepay.css';
 import '../../pages/MyPage.css';
-// 🌟 1. 우리가 만든 전역 창고 도구를 가져옵니다! (경로 확인 필수)
 import { useUser } from '../../UserContext';
 
+axios.defaults.baseURL = "http://localhost:8080";
 const MyPage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-
   const IMG_BASE_URL = "http://localhost:8080";
 
   const { userInfo, isLoading, fetchUser } = useUser();
@@ -24,13 +23,25 @@ const MyPage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
 
+  // 닉네임 관련 상태
+  const [isNicknameChecked, setIsNicknameChecked] = useState(true);
+  const [nicknameMessage, setNicknameMessage] = useState('');
+  const [nicknameError, setNicknameError] = useState('');
+
+  // 🌟 SMS 인증 관련 상태 관리
+  const [isSmsSent, setIsSmsSent] = useState(false);
+  const [smsCode, setSmsCode] = useState("");
+  const [isContactVerified, setIsContactVerified] = useState(true); // 초기값은 인증됨
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isTimerActive, setIsTimerActive] = useState(false);
+
   useEffect(() => {
     if (userInfo) {
-      console.log("현재 로그인한 유저 정보:", userInfo);
       setEditData(userInfo);
       if (userInfo.profileImagePath) {
         setImagePreview(`${IMG_BASE_URL}${userInfo.profileImagePath}`);
       }
+      setIsContactVerified(true); // 정보 로드 시 인증 상태 유지
     }
   }, [userInfo]);
 
@@ -41,95 +52,229 @@ const MyPage = () => {
     }
   }, [isLoading, userInfo, navigate]);
 
-  // 🌟 이미지 파일 선택 핸들러
+  // 🌟 SMS 타이머 로직
+  useEffect(() => {
+    let timer;
+    if (isTimerActive && timeLeft > 0) {
+      timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+    } else if (timeLeft === 0) {
+      setIsTimerActive(false);
+      clearInterval(timer);
+    }
+    return () => clearInterval(timer);
+  }, [isTimerActive, timeLeft]);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  // 이미지 파일 선택 핸들러
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result); // 화면에 보여줄 미리보기 주소
+        setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
 
+  // 입력값 변경 핸들러 (연락처 변경 시 인증 초기화 로직 포함)
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditData({ ...editData, [name]: value });
+
+    if (name === "contact") {
+      // 번호를 한 글자라도 건드리면 즉시 인증되지 않은 상태로 변경
+      if (value !== userInfo.contact) {
+        setIsContactVerified(false);
+        setIsSmsSent(false);
+        setSmsCode("");
+        setIsTimerActive(false);
+      } else {
+        // 다시 원래 번호로 돌아오면 인증 완료 상태로 복구
+        setIsContactVerified(true);
+      }
+    }
   };
 
+  // 1. SMS 인증번호 발송 요청 (마이페이지 버전)
+  const handleSendSms = async () => {
+    // 연락처 유효성 검사 (숫자 11자리 등)
+    if (!editData.contact || !/^[0-9]{11}$/.test(editData.contact)) {
+      alert("올바른 연락처 11자리를 입력해주세요.");
+      return;
+    }
+
+    try {
+      // 중복 체크 (선택 사항: 본인 번호 그대로면 통과시키려면 추가 로직 필요)
+      // const checkRes = await axios.get('/api/auth/check-contact', {
+      //   params: { contact: editData.contact }
+      // });
+
+      // if (checkRes.data.isDuplicate && editData.contact !== userInfo.contact) {
+      //   alert("이미 사용 중인 번호입니다.");
+      //   return;
+      // }
+
+      // 실제 발송 요청
+      await axios.post('/api/auth/sms/send-code', {
+        phoneNumber: editData.contact
+      });
+
+      // 상태 업데이트
+      setIsSmsSent(true);
+      setTimeLeft(180); // 3분 타이머
+      setIsTimerActive(true);
+      alert("인증번호가 발송되었습니다.");
+    } catch (error) {
+      console.error(error);
+      alert("발송 실패. 잠시 후 다시 시도해주세요.");
+    }
+  };
+
+  // 2. SMS 인증번호 검증 (마이페이지 버전)
+  const handleVerifySms = async () => {
+    try {
+      await axios.post('/api/auth/verify-code', {
+        key: editData.contact, // 입력한 번호를 키로 사용
+        code: smsCode          // 사용자가 입력한 6자리 코드
+      });
+
+      setIsContactVerified(true);
+      setIsTimerActive(false);
+      alert("휴대폰 인증이 완료되었습니다.");
+    } catch (error) {
+      alert("인증번호가 일치하지 않습니다.");
+    }
+  };
+
+  // 닉네임 유효성 검사 함수
+  const validateNickname = (nickname) => {
+    if (!nickname) {
+      setNicknameError("닉네임을 입력해주세요.");
+      return false;
+    }
+    const regExp = /^[가-힣a-zA-Z0-9_]{2,8}$/;
+    const isIncompleteKorean = /[ㄱ-ㅎㅏ-ㅣ]/.test(nickname);
+
+    if (!regExp.test(nickname) || isIncompleteKorean) {
+      setNicknameError("닉네임 형식이 올바르지 않습니다. (2~8자, 언더바 허용, 자음/모음 불가)");
+      return false;
+    }
+    setNicknameError("");
+    return true;
+  };
+
+  // 닉네임 입력 변경 핸들러
+  const handleNicknameChange = (e) => {
+    const value = e.target.value;
+    setEditData({ ...editData, nickname: value });
+
+    // 유효성 검사 실행
+    validateNickname(value);
+
+    // 핵심 로직: 현재 로그인한 사용자의 기존 닉네임과 일치하면 바로 '확인됨' 처리
+    if (value === userInfo.nickname) {
+      setIsNicknameChecked(true);
+      setNicknameMessage('');
+    } else {
+      // 한 글자라도 다르면 '중복확인' 버튼이 나오도록 설정
+      setIsNicknameChecked(false);
+      setNicknameMessage('중복 확인이 필요합니다.');
+    }
+  };
+
+  // 중복 확인 버튼 클릭 시
+  const checkNicknameDuplicate = async () => {
+    if (!validateNickname(editData.nickname)) return;
+    if (editData.nickname === userInfo.nickname) {
+      setIsNicknameChecked(true);
+      setNicknameMessage('현재 사용 중인 닉네임입니다.');
+      return;
+    }
+
+    try {
+      const response = await axios.get(`/api/auth/check-nickname`, {
+        params: { nickname: editData.nickname }
+      });
+      if (!response.data.isDuplicate) {
+        setIsNicknameChecked(true);
+        setNicknameMessage('사용 가능한 닉네임입니다.');
+      } else {
+        setIsNicknameChecked(false);
+        setNicknameMessage('이미 사용 중인 닉네임입니다.');
+      }
+    } catch (error) {
+      setNicknameMessage('서버 통신 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 동네 인증 로직
   const handleNeighborhoodAuth = () => {
-    // 1. 브라우저가 GPS를 지원하는지 확인
     if (!navigator.geolocation) {
       alert("이 브라우저에서는 위치 정보를 지원하지 않습니다.");
       return;
     }
-
     alert("현재 위치를 확인 중입니다. 잠시만 기다려주세요...");
-
-    // 2. 현재 내 위치(GPS) 가져오기
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-
-        // 🌟 핵심 해결 로직: 카카오 지도가 "완전히 조립될 때까지" 기다립니다!
         window.kakao.maps.load(() => {
-
-          // 이제 조립이 끝났으니 Geocoder 부품을 안전하게 꺼낼 수 있습니다.
           const geocoder = new window.kakao.maps.services.Geocoder();
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
 
-          // 3. 카카오 지도 API로 좌표 -> 동네 이름 변환 (리버스 지오코딩)
           geocoder.coord2RegionCode(lng, lat, async (result, status) => {
             if (status === window.kakao.maps.services.Status.OK) {
               const myNeighborhood = result[0].region_3depth_name;
-
               try {
                 const token = sessionStorage.getItem('accessToken');
-
-                // 4. 백엔드에 동네 이름 저장 요청
                 await axios.put(`/api/user`, {
-                  ...userInfo, // 기존 유저 정보가 날아가지 않게 같이 담아줍니다.
+                  ...userInfo,
                   neighborhood: myNeighborhood,
                   isNeighborhoodAuthenticated: true
                 }, {
                   headers: { Authorization: `Bearer ${token}` }
                 });
-
                 alert(`🎉 성공! [${myNeighborhood}] 동네 인증이 완료되었습니다.`);
-
-                // 정보가 바뀌었으니 최신 정보로 새로고침!
                 if (fetchUser) fetchUser();
-
               } catch (error) {
-                console.error("인증 실패:", error);
                 alert("인증 정보를 서버에 저장하는데 실패했습니다.");
               }
-            } else {
-              alert("해당 좌표의 동네 이름을 찾을 수 없습니다.");
             }
           });
-        }); // 🌟 load 괄호 닫기
+        });
       },
-      (error) => {
-        console.error("GPS 에러:", error);
-        alert("위치 권한을 허용해주셔야 동네 인증이 가능합니다.");
-      },
+      (error) => alert("위치 권한을 허용해주셔야 동네 인증이 가능합니다."),
       { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
   };
 
+  // 전체 유효성 검사 (저장 전 호출)
+  const validateBeforeSave = () => {
+    if (!validateNickname(editData.nickname)) return false;
+    if (!isNicknameChecked) {
+      alert("닉네임 중복 확인을 해주세요.");
+      return false;
+    }
+    if (!isContactVerified) {
+      alert("연락처 본인인증을 완료해주세요.");
+      return false;
+    }
+    return true;
+  };
 
   const handleSave = async () => {
+    if (!validateBeforeSave()) return;
+
     const token = sessionStorage.getItem('accessToken');
     const formData = new FormData();
 
-    // 1. 일반 수정 데이터 추가 (JSON 문자열로 변환하여 넣거나 각각 추가)
-    // 백엔드 컨트롤러 설정에 따라 다르지만, 보통 파일을 포함할 땐 FormData를 씁니다.
     formData.append('userData', new Blob([JSON.stringify(editData)], { type: 'application/json' }));
-
-    // 2. 파일이 있다면 추가
     if (selectedFile) {
       formData.append('profileImage', selectedFile);
     }
@@ -138,59 +283,29 @@ const MyPage = () => {
       await axios.put('/api/user', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data' // 파일 전송 필수 헤더
+          'Content-Type': 'multipart/form-data'
         }
       });
       alert("성공적으로 정보가 수정되었습니다! 🎉");
       await fetchUser();
       setIsEditing(false);
       setSelectedFile(null);
+      setNicknameMessage('');
     } catch (error) {
-      console.error("수정 실패:", error);
       alert("정보 수정에 실패했습니다.");
     }
-  };
-
-  const handleAddressSearch = () => {
-    new window.daum.Postcode({
-      oncomplete: (data) => {
-        // 검색 결과에서 주소를 가져옵니다.
-        let fullAddress = data.address;
-        let extraAddress = '';
-
-        if (data.addressType === 'R') {
-          if (data.bname !== '') extraAddress += data.bname;
-          if (data.buildingName !== '') extraAddress += (extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName);
-          fullAddress += (extraAddress !== '' ? ` (${extraAddress})` : '');
-        }
-
-        // 🌟 중요: editData 상태를 업데이트합니다.
-        setEditData(prev => ({
-          ...prev,
-          zipCode: data.zonecode, // 우편번호
-          address: fullAddress     // 기본 주소
-        }));
-      }
-    }).open();
   };
 
   const handleComplete = (data) => {
     let fullAddress = data.address;
     let extraAddress = '';
-
     if (data.addressType === 'R') {
       if (data.bname !== '') extraAddress += data.bname;
       if (data.buildingName !== '') extraAddress += extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName;
       fullAddress += extraAddress !== '' ? ` (${extraAddress})` : '';
     }
-
-    setEditData({
-      ...editData,
-      zipCode: data.zonecode,
-      address: fullAddress,
-    });
-
-    setIsPostcodeOpen(false); // 주소 선택 완료 후 닫기
+    setEditData({ ...editData, zipCode: data.zonecode, address: fullAddress });
+    setIsPostcodeOpen(false);
   };
 
   if (isLoading) return <div className="mypage-container" style={{ padding: '50px', textAlign: 'center' }}>정보를 불러오는 중입니다...</div>;
@@ -205,7 +320,6 @@ const MyPage = () => {
 
       <div className="mypage-card">
         <div className="profile-section">
-          {/* 🌟 프로필 이미지 영역 수정 */}
           <div className="profile-avatar-container" style={{ textAlign: 'center', marginBottom: '20px' }}>
             <div className="profile-avatar" onClick={() => isEditing && fileInputRef.current.click()}
               style={{ cursor: isEditing ? 'pointer' : 'default', overflow: 'hidden' }}>
@@ -214,67 +328,127 @@ const MyPage = () => {
               ) : (
                 <i className="far fa-user"></i>
               )}
-              {/* {isEditing && (
-                <div className="avatar-edit-overlay" style={{ position: 'absolute', bottom: 0, background: 'rgba(0,0,0,0.5)', width: '100%', color: '#fff', fontSize: '12px' }}>
-                  변경
-                </div>
-              )} */}
             </div>
-            {/* 숨겨진 파일 input */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              accept="image/*"
-              onChange={handleFileChange}
-            />
+            <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleFileChange} />
           </div>
 
           <div className="info-list">
-            {!isEditing && userInfo.profileOriginalName && (
-              <div className="info-item">
-                <label>프로필 파일명(없앨예정)</label>
-                <span className="info-value" style={{ fontSize: '12px', color: '#888' }}>
-                  {userInfo.profileOriginalName}
-                </span>
-              </div>
-            )}
-            {/* 🌟 1. 아이디 영역 추가 (수정 불가, username 연결) */}
             <div className="info-item">
               <label>아이디</label>
-              <span className="info-value" style={{ fontWeight: 'bold', color: '#555' }}>
-                {userInfo.username}
-              </span>
+              <span className="info-value" style={{ fontWeight: 'bold', color: '#555' }}>{userInfo.username}</span>
             </div>
 
-            {/* 🌟 2. 이메일 영역 (수정 불가 유지) */}
             <div className="info-item">
               <label>이메일</label>
               <span className="info-value email-value">{userInfo.email}</span>
             </div>
 
-            {/* 🌟 3. 이름(실명) 영역 (name 연결로 변경) */}
             <div className="info-item">
               <label>이름</label>
-              {/* input 창을 아예 없애고, 아이디처럼 텍스트로만 보여줍니다. */}
-              <span className="info-value" style={{ fontWeight: 'bold', color: '#555' }}>
-                {userInfo.name}
-              </span>
+              <span className="info-value" style={{ fontWeight: 'bold', color: '#555' }}>{userInfo.name}</span>
             </div>
 
             <div className="info-item">
-              <label>별명(닉네임)</label>
+              <label>닉네임</label>
               {isEditing ? (
-                <input type="text" name="nickname" value={editData.nickname || ''} onChange={handleChange} className="edit-input" placeholder="사용하실 별명을 입력하세요" />
+                <div className="nickname-edit-container">
+                  <div className="input-group" style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                      type="text"
+                      name="nickname"
+                      value={editData.nickname || ''}
+                      onChange={handleNicknameChange}
+                      className={`edit-input nickname-input ${nicknameError ? 'input-error' : ''}`}
+                      placeholder="닉네임을 입력하세요"
+                    />
+                    <button
+                      type="button"
+                      /* 중복 확인이 완료되었을 때(isNicknameChecked === true) 스타일 변경 */
+                      className={`btn small-btn ${isNicknameChecked ? '' : 'outline-btn'}`}
+                      onClick={checkNicknameDuplicate}
+                      style={{
+                        whiteSpace: 'nowrap',
+                        backgroundColor: isNicknameChecked ? '#00d26a' : '', // 확인됨 상태일 때 초록색
+                        color: isNicknameChecked ? 'white' : '',
+                        borderColor: isNicknameChecked ? '#00d26a' : ''
+                      }}
+                    >
+                      {isNicknameChecked ? "확인됨" : "중복확인"}
+                    </button>
+                  </div>
+                  {nicknameError ? (
+                    <p className="message error" style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>{nicknameError}</p>
+                  ) : (
+                    nicknameMessage && (
+                      <p className={`message ${isNicknameChecked ? 'success' : 'error'}`} style={{ color: isNicknameChecked ? 'green' : 'orange', fontSize: '12px', marginTop: '4px' }}>
+                        {nicknameMessage}
+                      </p>
+                    )
+                  )}
+                </div>
               ) : (
-                <span className="info-value">{userInfo.nickname || '별명이 없습니다.'}</span>
+                <span className="info-value">{userInfo.nickname}</span>
               )}
             </div>
 
             <div className="info-item">
               <label>연락처</label>
               {isEditing ? (
-                <input type="text" name="contact" value={editData.contact || ''} onChange={handleChange} className="edit-input" />
+                <div className="contact-edit-wrapper" style={{ width: '100%' }}>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                    <input
+                      type="text"
+                      name="contact"
+                      value={editData.contact || ''}
+                      onChange={handleChange}
+                      className="edit-input"
+                      placeholder="숫자만 입력"
+                      disabled={isSmsSent && !isContactVerified} // 인증번호 발송 중에는 번호 수정 방지
+                    />
+
+                    {/* 1. 인증요청 / 재발송 버튼 */}
+                    <button
+                      type="button"
+                      className={`btn small-btn ${isContactVerified ? '' : 'outline-btn'}`}
+                      style={{
+                        backgroundColor: isContactVerified ? '#00d26a' : '',
+                        color: isContactVerified ? 'white' : '',
+                        borderColor: isContactVerified ? '#00d26a' : '',
+                        whiteSpace: 'nowrap'
+                      }}
+                      onClick={handleSendSms}
+                      disabled={isContactVerified} // 이미 인증됐으면 비활성화
+                    >
+                      {isContactVerified ? "인증완료" : (isSmsSent ? "재발송" : "인증요청")}
+                    </button>
+                  </div>
+
+                  {/* 2. 인증번호 입력창 (발송 성공했고 아직 인증 전일 때만 노출) */}
+                  {isSmsSent && !isContactVerified && (
+                    <div className="sms-verify-row" style={{ display: 'flex', gap: '8px' }}>
+                      <div style={{ position: 'relative', flex: 1 }}>
+                        <input
+                          type="text"
+                          placeholder="인증번호"
+                          value={smsCode}
+                          onChange={(e) => setSmsCode(e.target.value)}
+                          className="edit-input"
+                        />
+                        {/* 타이머 표시 */}
+                        <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#ff6f0f', fontSize: '12px' }}>
+                          {formatTime(timeLeft)}
+                        </span>
+                      </div>
+                      <button type="button" onClick={handleVerifySms} className="btn small-btn">확인</button>
+
+                      {/* 번호 잘못 입력했을 때를 대비한 취소 버튼 */}
+                      <button type="button" onClick={() => {
+                        setIsSmsSent(false);
+                        setIsTimerActive(false);
+                      }} className="btn small-btn outline-btn">취소</button>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <span className="info-value">{userInfo.contact}</span>
               )}
@@ -284,58 +458,22 @@ const MyPage = () => {
               <label>주소</label>
               {isEditing ? (
                 <div className="address-section">
-                  {/* 우편번호 + 주소검색 버튼 */}
                   <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                    <input
-                      type="text"
-                      value={editData.zipCode || ''}
-                      readOnly
-                      placeholder="우편번호"
-                      className="edit-input"
-                      style={{ width: '120px' }}
-                    />
-                    <button
-                      type="button"
-                      className="btn-address-search"
-                      onClick={() => setIsPostcodeOpen(true)}
-                    >
-                      주소 검색
-                    </button>
+                    <input type="text" value={editData.zipCode || ''} readOnly placeholder="우편번호" className="edit-input" style={{ width: '120px' }} />
+                    <button type="button" className="btn-address-search" onClick={() => setIsPostcodeOpen(true)}>주소 검색</button>
                   </div>
+                  <input type="text" value={editData.address || ''} readOnly className="edit-input" style={{ marginBottom: '8px' }} placeholder="주소를 검색해주세요" />
+                  <input type="text" name="detailAddress" value={editData.detailAddress || ''} onChange={handleChange} className="edit-input" placeholder="상세주소를 입력해주세요" />
 
-                  {/* 기본 주소 입력란 */}
-                  <input
-                    type="text"
-                    value={editData.address || ''}
-                    readOnly
-                    className="edit-input"
-                    style={{ marginBottom: '8px' }}
-                    placeholder="주소를 검색해주세요"
-                  />
-
-                  {/* 상세 주소 입력란 */}
-                  <input
-                    type="text"
-                    name="detailAddress"
-                    value={editData.detailAddress || ''}
-                    onChange={handleChange}
-                    className="edit-input"
-                    placeholder="상세주소를 입력해주세요"
-                  />
-
-                  {/* 주소 검색 모달 (CSS 클래스 통일) */}
                   {isPostcodeOpen && (
                     <>
-                      <div className="postcode-overlay" onClick={() => setIsPostcodeOpen(false)} />
-                      <div className="postcode-modal">
-                        <div className="postcode-header">
+                      <div className="postcode-overlay" onClick={() => setIsPostcodeOpen(false)} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 1000 }} />
+                      <div className="postcode-modal" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '400px', background: '#fff', zIndex: 1001, padding: '20px', borderRadius: '8px' }}>
+                        <div className="postcode-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                           <span>주소 검색</span>
-                          <button type="button" className="postcode-close-btn" onClick={() => setIsPostcodeOpen(false)}>&times;</button>
+                          <button type="button" onClick={() => setIsPostcodeOpen(false)}>&times;</button>
                         </div>
-                        <DaumPostcode
-                          onComplete={handleComplete}
-                          style={{ width: '100%', height: '100%' }}
-                        />
+                        <DaumPostcode onComplete={handleComplete} style={{ width: '100%', height: '400px' }} />
                       </div>
                     </>
                   )}
@@ -348,7 +486,6 @@ const MyPage = () => {
               )}
             </div>
 
-            {/* 🌟 3단계: 여기에 동네 인증 버튼 영역을 새로 추가합니다! 🌟 */}
             <div className="info-item">
               <label>동네 인증</label>
               <div className="auth-badge-area">
@@ -357,31 +494,46 @@ const MyPage = () => {
                     <i className="fas fa-check-circle"></i> {userInfo.neighborhood} 인증됨
                   </span>
                 ) : (
-                  <button
-                    onClick={handleNeighborhoodAuth}
-                    className="auth-btn"
-                    style={{ padding: '6px 12px', background: '#ff6f0f', color: 'white', border: 'none', borderRadius: '12px', fontSize: '13px', cursor: 'pointer', fontWeight: 'bold' }}
-                  >
+                  <button onClick={handleNeighborhoodAuth} className="auth-btn" style={{ padding: '6px 12px', background: '#ff6f0f', color: 'white', border: 'none', borderRadius: '12px', fontSize: '13px', cursor: 'pointer', fontWeight: 'bold' }}>
                     <i className="fas fa-map-marker-alt"></i> 내 동네 인증하기
                   </button>
                 )}
               </div>
             </div>
-
           </div>
         </div>
 
         <div className="mypage-actions">
           {isEditing ? (
             <>
-              <button className="btn-save" onClick={handleSave}><i className="fas fa-check"></i> 저장하기</button>
+              <button
+                className="btn-save"
+                onClick={handleSave}
+                disabled={!isNicknameChecked || !isContactVerified}
+                style={{ opacity: (!isNicknameChecked || !isContactVerified) ? 0.6 : 1 }}
+              >
+                저장하기
+              </button>
               <button className="btn-cancel" onClick={() => {
                 setIsEditing(false);
                 setEditData(userInfo);
-              }}>취소</button>
+                setNicknameError('');
+                setNicknameMessage('');
+                setIsNicknameChecked(true); // 취소 시 다시 true로 리셋
+                setIsContactVerified(true);
+                setIsSmsSent(false);
+              }}>
+                취소
+              </button>
             </>
           ) : (
-            <button className="btn-edit" onClick={() => setIsEditing(true)}><i className="fas fa-pen"></i> 수정하기</button>
+            <button className="btn-edit" onClick={() => {
+              setIsEditing(true);
+              setIsNicknameChecked(true); // 수정 모드 진입 시 처음엔 '확인됨'
+              setNicknameMessage('');
+            }}>
+              <i className="fas fa-pen"></i> 수정하기
+            </button>
           )}
         </div>
       </div>
@@ -398,9 +550,7 @@ const MyPage = () => {
         </div>
       </div>
 
-      {isPayModalOpen && (
-        <ChargePay onClose={() => setIsPayModalOpen(false)} userInfo={userInfo} />
-      )}
+      {isPayModalOpen && <ChargePay onClose={() => setIsPayModalOpen(false)} userInfo={userInfo} />}
     </div>
   );
 };
