@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import DaumPostcode from 'react-daum-postcode';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +18,7 @@ const MyPage = () => {
   const [editData, setEditData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -34,6 +35,10 @@ const MyPage = () => {
   const [isContactVerified, setIsContactVerified] = useState(true); // 초기값은 인증됨
   const [timeLeft, setTimeLeft] = useState(0);
   const [isTimerActive, setIsTimerActive] = useState(false);
+
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [verifyPassword, setVerifyPassword] = useState('');
+  const [verifyError, setVerifyError] = useState('');
 
   useEffect(() => {
     if (userInfo) {
@@ -64,6 +69,9 @@ const MyPage = () => {
     return () => clearInterval(timer);
   }, [isTimerActive, timeLeft]);
 
+  useEffect(() => {
+  }, [editData]); // editData가 바뀔 때마다 실행됨
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -83,11 +91,11 @@ const MyPage = () => {
     }
   };
 
-  // 입력값 변경 핸들러 (연락처 변경 시 인증 초기화 로직 포함)
+  // 입력값 변경 핸들러
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const newErrors = {};
     setEditData({ ...editData, [name]: value });
-
     if (name === "contact") {
       // 번호를 한 글자라도 건드리면 즉시 인증되지 않은 상태로 변경
       if (value !== userInfo.contact) {
@@ -100,7 +108,70 @@ const MyPage = () => {
         setIsContactVerified(true);
       }
     }
+
   };
+
+  const handleVerifyPassword = async () => {
+    if (!verifyPassword) {
+      setVerifyError('비밀번호를 입력해주세요.');
+      return;
+    }
+
+    try {
+      const token = sessionStorage.getItem('accessToken');
+
+      await axios.post('/api/user/verify-password',
+        { password: verifyPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // ✅ 핵심: 기존 userInfo를 복사하되, 비밀번호 관련 필드만 확실히 빈 문자열로 초기화
+      const initialEditData = {
+        ...userInfo,
+        password: '',
+        confirmPassword: ''
+      };
+
+      setEditData(initialEditData);
+      setIsEditing(true);           // 수정 모드 활성화
+      setIsPasswordModalOpen(false); // 모달 닫기
+
+      // 나머지 상태 초기화
+      setIsNicknameChecked(true);
+      setNicknameMessage('');
+      setVerifyPassword('');
+      setVerifyError('');
+
+    } catch (error) {
+      setVerifyError('비밀번호가 일치하지 않습니다.');
+    }
+  };
+
+  const validateUpdate = useCallback(() => {
+    const newErrors = {};
+    if (editData.password) {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(editData.password)) {
+        newErrors.password = "대/소문자, 숫자, 특수문자 포함 8자 이상이어야 합니다.";
+        ("newErrors.password", newErrors.password)
+      }
+    }
+
+    if (editData.confirmPassword && editData.password !== editData.confirmPassword) {
+      newErrors.confirmPassword = "비밀번호가 일치하지 않습니다.";
+    }
+
+    setErrors(newErrors);
+  }, [editData]);
+
+  useEffect(() => {
+    const hasValues = Object.values(editData).some(val => val !== "");
+    if (!hasValues) {
+      setErrors({});
+      return;
+    }
+    validateUpdate();
+  }, [editData, validateUpdate]);
 
   // 1. SMS 인증번호 발송 요청 (마이페이지 버전)
   const handleSendSms = async () => {
@@ -112,14 +183,14 @@ const MyPage = () => {
 
     try {
       // 중복 체크 (선택 사항: 본인 번호 그대로면 통과시키려면 추가 로직 필요)
-      // const checkRes = await axios.get('/api/auth/check-contact', {
-      //   params: { contact: editData.contact }
-      // });
+      const checkRes = await axios.get('/api/auth/check-contact', {
+        params: { contact: editData.contact }
+      });
 
-      // if (checkRes.data.isDuplicate && editData.contact !== userInfo.contact) {
-      //   alert("이미 사용 중인 번호입니다.");
-      //   return;
-      // }
+      if (checkRes.data.isDuplicate && editData.contact !== userInfo.contact) {
+        alert("이미 사용 중인 번호입니다.");
+        return;
+      }
 
       // 실제 발송 요청
       await axios.post('/api/auth/sms/send-code', {
@@ -272,9 +343,20 @@ const MyPage = () => {
     if (!validateBeforeSave()) return;
 
     const token = sessionStorage.getItem('accessToken');
-    const formData = new FormData();
 
-    formData.append('userData', new Blob([JSON.stringify(editData)], { type: 'application/json' }));
+    // ✅ 보낼 데이터를 복사합니다.
+    const dataToSend = { ...editData };
+
+    // ✅ 비밀번호 입력창이 비어있다면 객체에서 제거 (기존 비밀번호 유지 목적)
+    if (!dataToSend.password || dataToSend.password.trim() === "") {
+      delete dataToSend.password;
+      delete dataToSend.confirmPassword;
+    }
+
+    const formData = new FormData();
+    // 수정된 dataToSend를 Blob으로 넣습니다.
+    formData.append('userData', new Blob([JSON.stringify(dataToSend)], { type: 'application/json' }));
+
     if (selectedFile) {
       formData.append('profileImage', selectedFile);
     }
@@ -290,7 +372,6 @@ const MyPage = () => {
       await fetchUser();
       setIsEditing(false);
       setSelectedFile(null);
-      setNicknameMessage('');
     } catch (error) {
       alert("정보 수정에 실패했습니다.");
     }
@@ -335,18 +416,40 @@ const MyPage = () => {
           <div className="info-list">
             <div className="info-item">
               <label>아이디</label>
-              <span className="info-value" style={{ fontWeight: 'bold', color: '#555' }}>{userInfo.username}</span>
+              <span className="info-value" >{userInfo.username}</span>
             </div>
 
             <div className="info-item">
               <label>이메일</label>
-              <span className="info-value email-value">{userInfo.email}</span>
+              <span className="info-value">{userInfo.email}</span>
             </div>
 
             <div className="info-item">
               <label>이름</label>
-              <span className="info-value" style={{ fontWeight: 'bold', color: '#555' }}>{userInfo.name}</span>
+              <span className="info-value" >{userInfo.name}</span>
             </div>
+
+            <div className="info-item">
+              <label>비밀번호</label>
+              {isEditing ? (
+                <div className="input-wrapper">
+                  <input type="password" id="password" name="password" className="edit-input" placeholder="비밀번호(변경시만 입력)" onChange={handleChange} value={editData.password || ''} autoComplete="new-password" required />
+                </div>
+              ) : (
+                <span className="info-value">********</span>
+              )}
+              {errors.password && <span className="error-msg">{errors.password}</span>}
+            </div>
+            {isEditing ? (
+              <div className="info-item">
+                {/* <label>비밀번호 재확인</label> */}
+                <div className="input-wrapper">
+                  <input type="password" id="password" name="confirmPassword" className="edit-input" placeholder="비밀번호 재확인" onChange={handleChange} value={editData.confirmPassword || ''} required />
+                </div>
+              </div>
+            ) : ""}
+            {isEditing && errors.confirmPassword && <span className="error-msg">{errors.confirmPassword}</span>}
+
 
             <div className="info-item">
               <label>닉네임</label>
@@ -487,6 +590,41 @@ const MyPage = () => {
             </div>
 
             <div className="info-item">
+              <label>생년월일</label>
+              {isEditing ? (
+                <input type="date" id="birthday" name="birthday" className="edit-input" onChange={handleChange} value={editData.birthday} max={new Date().toISOString().split("T")[0]} />
+              ) : (
+                <span className="info-value">
+                  {userInfo.birthday = null ? "미입력" : userInfo.birthday}
+                </span>
+              )}
+            </div>
+
+            <div className="info-item">
+              <label>성별</label>
+              {isEditing ? (
+                <div className="gender-section">
+                  <label className="gender-radio">
+                    <input type="radio" name="gender" value="" checked={editData.gender === "" || editData.gender === null} onChange={handleChange} /> 선택안함
+                  </label>
+                  <label className="gender-radio">
+                    <input type="radio" name="gender" value="MALE" checked={editData.gender === "MALE"} onChange={handleChange} /> 남성
+                  </label>
+                  <label className="gender-radio">
+                    <input type="radio" name="gender" value="FEMALE" checked={editData.gender === "FEMALE"} onChange={handleChange} /> 여성
+                  </label>
+                </div>
+              ) : (
+                <span className="info-value">
+                  {{
+                    MALE: "남성",
+                    FEMALE: "여성",
+                  }[userInfo.gender] || "선택안함"}
+                </span>
+              )}
+            </div>
+
+            <div className="info-item">
               <label>동네 인증</label>
               <div className="auth-badge-area">
                 {userInfo.isNeighborhoodAuthenticated ? (
@@ -522,21 +660,80 @@ const MyPage = () => {
                 setIsNicknameChecked(true); // 취소 시 다시 true로 리셋
                 setIsContactVerified(true);
                 setIsSmsSent(false);
+                setIsSmsSent(false);
               }}>
                 취소
               </button>
             </>
           ) : (
-            <button className="btn-edit" onClick={() => {
-              setIsEditing(true);
-              setIsNicknameChecked(true); // 수정 모드 진입 시 처음엔 '확인됨'
-              setNicknameMessage('');
-            }}>
+            <button className="btn-edit" onClick={() => setIsPasswordModalOpen(true)}
+            // onClick={() => {
+            //   setIsEditing(true);
+            //   setIsNicknameChecked(true); // 수정 모드 진입 시 처음엔 '확인됨'
+            //   setNicknameMessage('');
+            // }}
+            >
               <i className="fas fa-pen"></i> 수정하기
             </button>
           )}
         </div>
       </div>
+
+      {/* 🌟 [추가] 비밀번호 확인 팝업창 (CSS 클래스만 사용) */}
+      {isPasswordModalOpen && (
+        <>
+          <div className="pw-modal-overlay" onClick={() => setIsPasswordModalOpen(false)} />
+          <div className="pw-modal">
+            <h3 className="pw-modal-header">비밀번호 확인</h3>
+            <p className="pw-modal-desc">
+              안전한 정보 수정을 위해 비밀번호를 다시 한번 입력해주세요.
+            </p>
+
+            <input
+              type="password"
+              placeholder="비밀번호 입력"
+              className="edit-input pw-modal-input"
+              value={verifyPassword}
+              autoComplete="new-password"
+              onChange={(e) => {
+                setVerifyPassword(e.target.value);
+                setVerifyError('');
+              }}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') handleVerifyPassword();
+              }}
+            />
+
+            {verifyError && <p className="pw-modal-error">{verifyError}</p>}
+
+            <div className={`pw-modal-actions ${verifyError ? 'has-error' : ''}`}>
+              <button onClick={() => setIsPasswordModalOpen(false)} className="btn-pw-cancel">
+                취소
+              </button>
+              <button onClick={handleVerifyPassword} className="btn-pw-confirm">
+                확인
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       <div className="mypage-pay-section">
         <div className="pay-banner">

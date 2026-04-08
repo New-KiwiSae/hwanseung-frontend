@@ -24,7 +24,7 @@ export default function AuthPage() {
     const [isSmsSent, setIsSmsSent] = useState(false);
     const [timeLeft, setTimeLeft] = useState(0); // 남은 시간 (초)
     const [isTimerActive, setIsTimerActive] = useState(false);
-    const [isEmailChecked, setIsEmailChecked] = useState(false);
+    const [isEmailSent, setIsEmailSent] = useState(false);
 
 
 
@@ -165,6 +165,7 @@ export default function AuthPage() {
                 email: signUpValues.email
             });
             alert("인증번호가 발송되었습니다. 메일함을 확인해주세요.");
+            setIsEmailSent(true); //
         } catch (error) {
             if (error.response?.status === 409) {
                 setErrors({ ...errors, email: "이미 사용 중인 이메일입니다." });
@@ -317,8 +318,8 @@ export default function AuthPage() {
             setSmsCode("");
             setIsSmsSent(false);
             setErrors({});
-
             setIsSignUpActive(false);
+            setIsEmailSent(false);
 
 
         }).catch(() => {
@@ -493,8 +494,6 @@ export default function AuthPage() {
                             </div>
                         )}
 
-                        <hr className="gray-line" />
-                        <span className="sub-text">선택 정보 입력</span>
 
                         {/* 이메일 입력 + 인증번호 발송 */}
                         <div className="input-group with-btn">
@@ -523,7 +522,7 @@ export default function AuthPage() {
                         </div>
 
                         {/* 인증번호 확인란 (메일 발송 성공 시에만 보여주는 것이 좋습니다) */}
-                        {!isEmailVerified && (
+                        {isEmailSent && !isEmailVerified && (
                             <div className="input-group with-btn">
                                 <div className="input-wrapper">
                                     <input
@@ -542,6 +541,10 @@ export default function AuthPage() {
                                 {errors.verificationCode && <span className="error-msg">{errors.verificationCode}</span>}
                             </div>
                         )}
+                        
+                        <hr className="gray-line" />
+                        <span className="sub-text">선택 정보 입력</span>
+
                         {/* 주소 그룹 (아이콘 고정을 위해 wrapper 구조 적용) */}
                         <div className="address-group">
                             <div className="input-group with-btn">
@@ -566,7 +569,6 @@ export default function AuthPage() {
                         </div>
 
                         <div className="input-group">
-                            {/* 날짜 입력창은 보통 아이콘이 브라우저 자체적으로 내장되므로 wrapper 없이도 무방하지만, 스타일 통일을 원하시면 감싸주세요 */}
                             <input type="date" id="birthday" onChange={handleSignUpChange} value={signUpValues.birthday} max={new Date().toISOString().split("T")[0]} />
                         </div>
 
