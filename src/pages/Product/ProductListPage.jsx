@@ -334,7 +334,8 @@ export default function ProductListPage() {
                                     <div className="product-thumb">
                                         {product.thumbnailUrl ? (
                                             <img
-                                                src={`http://localhost:8080${product.thumbnailUrl}`}
+                                                // src={`http://localhost:8080${product.thumbnailUrl}`}
+                                                src={`${product.thumbnailUrl}`}
                                                 alt={product.title}
                                             />
                                         ) : (
