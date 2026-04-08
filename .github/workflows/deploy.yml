@@ -31,4 +31,5 @@ jobs:
 
             # 전체 컨테이너를 종료시키는 down 명령어 삭제
             # 프론트엔드(frontend) 서비스만 콕 집어서 다시 빌드하고 백그라운드(-d)로 실행
+            docker-compose rm -f -s frontend
             docker-compose up -d --build frontend
