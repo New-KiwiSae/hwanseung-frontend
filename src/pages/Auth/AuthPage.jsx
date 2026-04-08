@@ -25,7 +25,7 @@ export default function AuthPage() {
     const [timeLeft, setTimeLeft] = useState(0); // 남은 시간 (초)
     const [isTimerActive, setIsTimerActive] = useState(false);
     const [isEmailChecked, setIsEmailChecked] = useState(false);
-    
+
 
 
     const [signUpValues, setSignUpValues] = useState({
@@ -85,8 +85,8 @@ export default function AuthPage() {
             newErrors.contact = "연락처는 숫자 11자리여야 합니다.";
         }
 
-        if (signUpValues.nickname && (signUpValues.nickname.length < 2 || signUpValues.nickname.length > 8)) {
-            newErrors.nickname = "닉네임은 2자에서 8자 사이입니다.";
+        if (signUpValues.nickname && !/^[가-힣a-zA-Z0-9_]{2,8}$/.test(signUpValues.nickname)) {
+            newErrors.nickname = "닉네임 형식이 올바르지 않습니다. (2~8자, 언더바 허용)";
         }
 
         if (signUpValues.birthday) {
@@ -118,44 +118,44 @@ export default function AuthPage() {
 
     // 중복 확인 버튼 클릭 이벤트
     const handleDuplicateCheck = async (type, value) => {
-    if (!value || errors[type]) {
-        alert("입력 형식이 올바르지 않습니다.");
-        return;
-    }
-
-    try {
-        const response = await axios.get(`/api/auth/check-${type}`, { params: { [type]: value } });
-
-        if (response.data.isDuplicate) {
-            alert(`이미 사용 중인 ${type === 'username' ? '아이디' : type}입니다.`);
-        } else {
-            alert(`사용 가능한 ${type === 'username' ? '아이디' : type}입니다!`);
-            if (type === 'username') setIsIdChecked(true);
-            if (type === 'nickname') setIsNicknameChecked(true);
-            // ✨ 에러 해결: 이제 isEmailChecked가 정의되었으므로 정상 작동합니다.
-            if (type === 'email') setIsEmailChecked(true); 
+        if (!value || errors[type]) {
+            alert("입력 형식이 올바르지 않습니다.");
+            return;
         }
-    } catch (error) {
-        alert("중복 체크 연결에 실패했습니다.");
-    }
-};
+
+        try {
+            const response = await axios.get(`/api/auth/check-${type}`, { params: { [type]: value } });
+
+            if (response.data.isDuplicate) {
+                alert(`이미 사용 중인 ${type === 'username' ? '아이디' : type}입니다.`);
+            } else {
+                alert(`사용 가능한 ${type === 'username' ? '아이디' : type}입니다!`);
+                if (type === 'username') setIsIdChecked(true);
+                if (type === 'nickname') setIsNicknameChecked(true);
+                // ✨ 에러 해결: 이제 isEmailChecked가 정의되었으므로 정상 작동합니다.
+                if (type === 'email') setIsEmailChecked(true);
+            }
+        } catch (error) {
+            alert("중복 체크 연결에 실패했습니다.");
+        }
+    };
 
     const handleSignUpChange = (e) => {
-    const { id, value, name } = e.target;
-    const targetId = id || name;
+        const { id, value, name } = e.target;
+        const targetId = id || name;
 
-    let finalValue = value;
-    if (targetId === "gender" && value === "") {
-        finalValue = null;
-    }
+        let finalValue = value;
+        if (targetId === "gender" && value === "") {
+            finalValue = null;
+        }
 
-    setSignUpValues(prev => ({ ...prev, [targetId]: finalValue }));
+        setSignUpValues(prev => ({ ...prev, [targetId]: finalValue }));
 
-    // 값이 변경되면 중복 확인 상태 초기화
-    if (targetId === 'username') setIsIdChecked(false);
-    if (targetId === 'nickname') setIsNicknameChecked(false);
-    if (targetId === 'email') setIsEmailChecked(false); // ✨ 추가
-};
+        // 값이 변경되면 중복 확인 상태 초기화
+        if (targetId === 'username') setIsIdChecked(false);
+        if (targetId === 'nickname') setIsNicknameChecked(false);
+        if (targetId === 'email') setIsEmailChecked(false); // ✨ 추가
+    };
 
     /*이메일인증 */
     const handleSendVerification = async () => {
@@ -317,7 +317,7 @@ export default function AuthPage() {
             setSmsCode("");
             setIsSmsSent(false);
             setErrors({});
-                
+
             setIsSignUpActive(false);
 
 
@@ -461,11 +461,11 @@ export default function AuthPage() {
                             <div className="input-group-container">
                                 <div className="input-group with-btn">
                                     <div className="input-wrapper">
-                                        <input 
-                                            type="text" 
-                                            placeholder="인증번호 6자리" 
-                                            onChange={(e) => setSmsCode(e.target.value)} 
-                                            value={smsCode} 
+                                        <input
+                                            type="text"
+                                            placeholder="인증번호 6자리"
+                                            onChange={(e) => setSmsCode(e.target.value)}
+                                            value={smsCode}
                                         />
                                         <i className="fas fa-key"></i>
                                         {/* 타이머 표시 */}
@@ -473,8 +473,8 @@ export default function AuthPage() {
                                             {formatTime(timeLeft)}
                                         </span>
                                     </div>
-                                    <button 
-                                        type="button" 
+                                    <button
+                                        type="button"
                                         className="btn small-btn primary-btn"
                                         onClick={handleVerifySmsCode}
                                         disabled={timeLeft === 0}
@@ -482,7 +482,7 @@ export default function AuthPage() {
                                         확인
                                     </button>
                                 </div>
-                                
+
                                 {/* 재전송 링크 */}
                                 <div className="resend-wrapper">
                                     <span>번호를 받지 못하셨나요?</span>
@@ -492,7 +492,7 @@ export default function AuthPage() {
                                 </div>
                             </div>
                         )}
-                        
+
                         <hr className="gray-line" />
                         <span className="sub-text">선택 정보 입력</span>
 
