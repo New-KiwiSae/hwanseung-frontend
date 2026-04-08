@@ -29,5 +29,7 @@ jobs:
           key: ${{ secrets.GCP_SSH_KEY }}
           script: |
             cd ~/hsproject
+
+            docker-compose down
             # frontend 컨테이너만 다시 빌드해서 재실행합니다.
             docker-compose up -d --build
