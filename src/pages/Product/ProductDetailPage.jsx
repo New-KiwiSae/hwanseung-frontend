@@ -154,7 +154,8 @@ export default function ProductDetailPage() {
             // 🚨 [추가] "채팅하기" 누르는 즉시 상대방에게 STOMP 알림 발사!
             // ========================================================
             const tempClient = new Client({
-                webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
+                // webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
+                webSocketFactory: () => new SockJS('/ws-chat'),
                 connectHeaders: { Authorization: `Bearer ${currentToken}` },
                 onConnect: () => {
                     const messageData = { 
