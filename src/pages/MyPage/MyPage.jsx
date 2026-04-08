@@ -3,7 +3,7 @@ import DaumPostcode from 'react-daum-postcode';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import ChargePay from '../../ChargePay';
-import '../../chargepay.css';
+import '../../chargePay.css'
 import '../../pages/MyPage.css';
 import { useUser } from '../../UserContext';
 

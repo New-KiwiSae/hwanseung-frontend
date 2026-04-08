@@ -1,5 +1,5 @@
 # 1단계: 빌드 스테이지
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
