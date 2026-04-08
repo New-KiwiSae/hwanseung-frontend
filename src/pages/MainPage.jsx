@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './MainPage.css';
 import { useNavigate } from 'react-router-dom';
+import { fetchCategories } from '../api/CategoriesAPI';
 
 /* ── 데이터 ── */
 const categories = [

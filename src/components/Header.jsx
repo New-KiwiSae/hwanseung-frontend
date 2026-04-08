@@ -289,7 +289,7 @@ const Header = () => {
               </div>
 
               <button className="sell-btn" onClick={() => navigate("/products/create")}><i className="fas fa-plus"></i><span>판매하기</span></button>
-              {isAdmin && <button className="admin-btn" onClick={() => navigate("/admin/dashboard")}><i className="fas"></i><span>관리자 페이지</span></button>}
+              {isAdmin && <button className="admin-btn" onClick={() => navigate("/admin/dashboard")}><i className="fas fa-lock"></i><span>관리자 페이지</span></button>}
             </>
           )}
 

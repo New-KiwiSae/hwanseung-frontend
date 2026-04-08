@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import './near-me.css'; // 🌟 css 파일 임포트
 
 const NearMePage = () => {
     const [searchParams] = useSearchParams();
     const mapRef = useRef(null);
 
-    // 🌟 서버에서 가져온 '진짜 매물'들을 담아둘 바구니입니다.
+    // 🌟 서버에서 가져온 '진짜 매물'들을 담아둘 바구니
     const [products, setProducts] = useState([]);
 
     // URL에서 내 위치(위도, 경도) 꺼내기
@@ -17,13 +18,9 @@ const NearMePage = () => {
     useEffect(() => {
         const fetchNearbyProducts = async () => {
             try {
-                // 학생분이 Spring Boot에 만들어둔 주소로 요청을 보냅니다!
-               // 🌟 임시 수정: 반경 필터링(nearby)을 빼고 전체 상품(/api/products)을 다 가져옵니다!
                 const response = await axios.get(`/api/products`);
-
                 console.log("📦 서버에서 받은 매물 목록:", response.data);
-                
-                setProducts(response.data); // 가져온 데이터를 바구니에 쏙 담습니다.
+                setProducts(response.data);
             } catch (error) {
                 console.error("매물 가져오기 실패:", error);
             }
@@ -54,50 +51,77 @@ const NearMePage = () => {
                 position: new kakao.maps.LatLng(lat, lng),
                 map: map
             });
+            
             const myInfoWindow = new kakao.maps.InfoWindow({
                 content: '<div style="padding:5px; font-size:12px; font-weight:bold; color:#00d26a;">🙋‍♂️ 내 위치</div>'
             });
             myInfoWindow.open(map, myMarker);
 
-            // 주소 번역기 준비 (글자 주소 -> 숫자 좌표)
             const geocoder = new kakao.maps.services.Geocoder();
 
             // 🌟 서버에서 가져온 매물들을 하나씩 지도에 올리기
             products.forEach((product) => {
-                // DB에 저장된 주소(location)가 없으면 건너뜁니다.
                 if (!product.location) return;
 
-                // 매물의 '글자 주소'(예: 안양시 동안구)를 검색해서 지도용 좌표로 바꿉니다.
                 geocoder.addressSearch(product.location, (result, status) => {
                     if (status === kakao.maps.services.Status.OK) {
                         const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
 
-                        // 매물 위치에 마커 찍기
                         const marker = new kakao.maps.Marker({
                             map: map,
                             position: coords
                         });
 
-                        // 마커에 올릴 예쁜 말풍선 만들기
-                        const infowindow = new kakao.maps.InfoWindow({
-                            content: `
-                                <div style="padding:10px; min-width:150px; border-radius:8px;">
-                                    <div style="font-weight:bold; font-size:13px; margin-bottom:5px;">🛍️ ${product.title}</div>
-                                    <div style="color:#ff6f0f; font-weight:bold; font-size:12px;">${product.price ? product.price.toLocaleString() : 0}원</div>
-                                    <a href="/products/${product.productId || product.id}" style="display:block; margin-top:8px; font-size:11px; color:#0056b3; text-decoration:none;">상세보기 ></a>
-                                </div>
-                            `
+                        // 🎈 1. 마우스 '호버' 시 보여줄 [작은 미리보기 창]
+                        const hoverWindow = new kakao.maps.InfoWindow({
+                            content: `<div style="padding:5px 10px; font-size:12px; font-weight:bold; color:#333;">🛍️ ${product.title}</div>`
                         });
 
-                        // 마우스 올리면 말풍선 열기
-                        kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker));
-                        // 마우스 내리면 말풍선 닫기
-                        kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close());
+                        // 🎈 2. 마커 '클릭' 시 보여줄 [상세 정보 창] 
+                        const detailWindow = new kakao.maps.InfoWindow({
+                            content: `
+                                <div class="info-window-wrap">
+                                    <div class="info-title">🛍️ ${product.title}</div>
+                                    <div class="info-address">
+                                        📍 ${product.location} <br/> 
+                                        <span>(정확한 위치는 채팅으로 문의하세요)</span>
+                                    </div>
+                                    <div class="info-bottom">
+                                        <span class="info-price">${product.price ? product.price.toLocaleString() : 0}원</span>
+                                        <a href="/products/${product.productId || product.id}" class="info-link">상세보기 ></a>
+                                    </div>
+                                </div>
+                            `,
+                            removable: true // X 닫기 버튼 활성화
+                        });
+
+                        // 🖱️ 이벤트 1: 마우스 올렸을 때
+                        kakao.maps.event.addListener(marker, 'mouseover', () => {
+                            if (!detailWindow.getMap()) {
+                                hoverWindow.open(map, marker);
+                            }
+                        });
+
+                        // 🖱️ 이벤트 2: 마우스 내렸을 때
+                        kakao.maps.event.addListener(marker, 'mouseout', () => {
+                            hoverWindow.close();
+                        });
+
+                        // 🖱️ 이벤트 3: 마커를 클릭했을 때
+                        kakao.maps.event.addListener(marker, 'click', () => {
+                            hoverWindow.close(); // 미리보기 창 닫기
+
+                            if (detailWindow.getMap()) {
+                                detailWindow.close(); // 이미 열려있으면 닫기
+                            } else {
+                                detailWindow.open(map, marker); // 닫혀있으면 열기
+                            }
+                        });
                     }
                 });
             });
-        });
-    }, [lat, lng, products]); // 🌟 바구니(products)에 매물이 들어오면 지도를 다시 그립니다.
+        }); 
+    }, [lat, lng, products]); 
 
     return (
         <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
