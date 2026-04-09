@@ -217,9 +217,7 @@ const Header = () => {
           
           {isLoggedIn && (
             <>
-              {/* 시스템 알림(종 모양) 버튼 */}
               <div className="user-profile-container" onMouseEnter={() => setIsNotiOpen(true)} onMouseLeave={() => setIsNotiOpen(false)}>
-                {/* 🌟 기존 인라인 스타일 삭제 (아이콘 css에 이미 적용되어 있음) */}
                 <button className="icon-btn" title="알림">
                   <i className="far fa-bell"></i>
                   {unreadNotiCount > 0 && (
@@ -230,7 +228,6 @@ const Header = () => {
                 </button>
 
                 {isNotiOpen && (
-                  /* 🌟 알림 드롭다운 스타일 분리 */
                   <div className="profile-dropdown noti-dropdown">
                     <div className="noti-header">
                       <span>새로운 알림</span>
@@ -280,7 +277,7 @@ const Header = () => {
                 {isProfileOpen && (
                   <div className="profile-dropdown">
                     <div className="dropdown-item" style={{ fontWeight: 'bold', color: '#ff6f0f' }}>{userInfo.nickname || userInfo.username}님 환영합니다!</div>
-                    <hr /> {/* 🌟 불필요한 인라인 margin 삭제 (css에 이미 있음) */}
+                    <hr /> 
                     <div className="dropdown-item" onClick={() => navigate('/mypage')}><i className="far fa-id-card"></i> 내 정보 보기</div>
                     <div className="dropdown-item" onClick={() => navigate('/sales')}><i className="fas fa-box-open"></i> 거래 내역</div>
                     {/* <div className="dropdown-item" onClick={() => navigate('/purchase')}><i className="fas fa-shopping-bag"></i> 구매 내역</div> */}
