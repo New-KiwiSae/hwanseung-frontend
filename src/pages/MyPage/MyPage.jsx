@@ -34,13 +34,16 @@ const MyPage = () => {
   // 🌟 SMS 인증 관련 상태 관리
   const [isSmsSent, setIsSmsSent] = useState(false);
   const [smsCode, setSmsCode] = useState("");
-  const [isContactVerified, setIsContactVerified] = useState(true); // 초기값은 인증됨
+  const [isContactVerified, setIsContactVerified] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isTimerActive, setIsTimerActive] = useState(false);
 
+  // 🌟 비밀번호 재확인 팝업 상태 관리
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [verifyPassword, setVerifyPassword] = useState('');
   const [verifyError, setVerifyError] = useState('');
+
+
 
   useEffect(() => {
     if (userInfo) {
@@ -48,7 +51,7 @@ const MyPage = () => {
       if (userInfo.profileImagePath) {
         setImagePreview(`${IMG_BASE_URL}${userInfo.profileImagePath}`);
       }
-      setIsContactVerified(true); // 정보 로드 시 인증 상태 유지
+      setIsContactVerified(true);
     }
   }, [userInfo]);
 
@@ -80,7 +83,6 @@ const MyPage = () => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  // 이미지 파일 선택 핸들러
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -93,24 +95,20 @@ const MyPage = () => {
     }
   };
 
-  // 입력값 변경 핸들러
   const handleChange = (e) => {
     const { name, value } = e.target;
     const newErrors = {};
     setEditData({ ...editData, [name]: value });
     if (name === "contact") {
-      // 번호를 한 글자라도 건드리면 즉시 인증되지 않은 상태로 변경
       if (value !== userInfo.contact) {
         setIsContactVerified(false);
         setIsSmsSent(false);
         setSmsCode("");
         setIsTimerActive(false);
       } else {
-        // 다시 원래 번호로 돌아오면 인증 완료 상태로 복구
         setIsContactVerified(true);
       }
     }
-
   };
 
   const handleVerifyPassword = async () => {
@@ -175,14 +173,41 @@ const MyPage = () => {
     validateUpdate();
   }, [editData, validateUpdate]);
 
-  // 1. SMS 인증번호 발송 요청 (마이페이지 버전)
+  // 🌟 비밀번호 검증 함수 (수정 모드 진입 전)
+  // const handleVerifyPassword = async () => {
+  //   if (!verifyPassword) {
+  //     setVerifyError('비밀번호를 입력해주세요.');
+  //     return;
+  //   }
+
+  //   try {
+  //     const token = sessionStorage.getItem('accessToken');
+      
+  //     // 백엔드 API (주소는 실제 백엔드 설정에 맞게 변경하세요)
+  //     await axios.post('/api/user/verify-password', 
+  //       { password: verifyPassword }, 
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
+
+  //     // 비밀번호가 맞다면 수정 모드 진입
+  //     setIsPasswordModalOpen(false);
+  //     setIsEditing(true);
+  //     setIsNicknameChecked(true);
+  //     setNicknameMessage('');
+  //     setVerifyPassword('');
+  //     setVerifyError('');
+
+  //   } catch (error) {
+  //     // 비밀번호가 틀렸다면 에러 메시지
+  //     setVerifyError('비밀번호가 일치하지 않습니다.');
+  //   }
+  // };
+
   const handleSendSms = async () => {
-    // 연락처 유효성 검사 (숫자 11자리 등)
     if (!editData.contact || !/^[0-9]{11}$/.test(editData.contact)) {
       alert("올바른 연락처 11자리를 입력해주세요.");
       return;
     }
-
     try {
       // 중복 체크 (선택 사항: 본인 번호 그대로면 통과시키려면 추가 로직 필요)
       const checkRes = await axios.get('/api/auth/check-contact', {
@@ -201,23 +226,20 @@ const MyPage = () => {
 
       // 상태 업데이트
       setIsSmsSent(true);
-      setTimeLeft(180); // 3분 타이머
+      setTimeLeft(180);
       setIsTimerActive(true);
       alert("인증번호가 발송되었습니다.");
     } catch (error) {
-      console.error(error);
       alert("발송 실패. 잠시 후 다시 시도해주세요.");
     }
   };
 
-  // 2. SMS 인증번호 검증 (마이페이지 버전)
   const handleVerifySms = async () => {
     try {
       await axios.post('/api/auth/verify-code', {
-        key: editData.contact, // 입력한 번호를 키로 사용
-        code: smsCode          // 사용자가 입력한 6자리 코드
+        key: editData.contact,
+        code: smsCode
       });
-
       setIsContactVerified(true);
       setIsTimerActive(false);
       alert("휴대폰 인증이 완료되었습니다.");
@@ -226,7 +248,6 @@ const MyPage = () => {
     }
   };
 
-  // 닉네임 유효성 검사 함수
   const validateNickname = (nickname) => {
     if (!nickname) {
       setNicknameError("닉네임을 입력해주세요.");
@@ -243,26 +264,20 @@ const MyPage = () => {
     return true;
   };
 
-  // 닉네임 입력 변경 핸들러
   const handleNicknameChange = (e) => {
     const value = e.target.value;
     setEditData({ ...editData, nickname: value });
-
-    // 유효성 검사 실행
     validateNickname(value);
 
-    // 핵심 로직: 현재 로그인한 사용자의 기존 닉네임과 일치하면 바로 '확인됨' 처리
     if (value === userInfo.nickname) {
       setIsNicknameChecked(true);
       setNicknameMessage('');
     } else {
-      // 한 글자라도 다르면 '중복확인' 버튼이 나오도록 설정
       setIsNicknameChecked(false);
       setNicknameMessage('중복 확인이 필요합니다.');
     }
   };
 
-  // 중복 확인 버튼 클릭 시
   const checkNicknameDuplicate = async () => {
     if (!validateNickname(editData.nickname)) return;
     if (editData.nickname === userInfo.nickname) {
@@ -270,7 +285,6 @@ const MyPage = () => {
       setNicknameMessage('현재 사용 중인 닉네임입니다.');
       return;
     }
-
     try {
       const response = await axios.get(`/api/auth/check-nickname`, {
         params: { nickname: editData.nickname }
@@ -287,7 +301,6 @@ const MyPage = () => {
     }
   };
 
-  // 동네 인증 로직
   const handleNeighborhoodAuth = () => {
     if (!navigator.geolocation) {
       alert("이 브라우저에서는 위치 정보를 지원하지 않습니다.");
@@ -304,34 +317,27 @@ const MyPage = () => {
           geocoder.coord2RegionCode(lng, lat, async (result, status) => {
             if (status === window.kakao.maps.services.Status.OK) {
               const myNeighborhood = result[0].region_3depth_name;
-             try {
+              try {
                 const token = sessionStorage.getItem('accessToken');
-                
-                // 🌟 1. 업데이트할 동네 정보 만들기
                 const updatedInfo = {
                   ...userInfo,
                   neighborhood: myNeighborhood,
                   isNeighborhoodAuthenticated: true
                 };
 
-                // 🌟 2. 빈 택배 상자(FormData) 준비
                 const formData = new FormData();
-                
-                // 🌟 3. handleSave와 완벽하게 똑같은 방식으로 포장해서 담기
                 formData.append('userData', new Blob([JSON.stringify(updatedInfo)], { type: 'application/json' }));
 
-                // 🌟 4. 백엔드로 택배 발송!
                 await axios.put(`/api/user`, formData, {
                   headers: { 
                     Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data' // 포장지 명시
+                    'Content-Type': 'multipart/form-data'
                   }
                 });
 
                 alert(`🎉 성공! [${myNeighborhood}] 동네 인증이 완료되었습니다.`);
                 if (fetchUser) fetchUser();
               } catch (error) {
-                console.error("인증 실패 상세:", error);
                 alert("인증 정보를 서버에 저장하는데 실패했습니다.");
               }
             }
@@ -343,7 +349,6 @@ const MyPage = () => {
     );
   };
 
-  // 전체 유효성 검사 (저장 전 호출)
   const validateBeforeSave = () => {
     if (!validateNickname(editData.nickname)) return false;
     if (!isNicknameChecked) {
@@ -495,7 +500,7 @@ const MyPage = () => {
         <p>환승마켓에서의 내 프로필과 결제 정보를 관리하세요.</p>
       </div>
 
-            <div className="mypage-pay-section">
+      <div className="mypage-pay-section">
         <div className="pay-banner">
           <div className="pay-text">
             <h3>환승Pay 충전</h3>
@@ -578,12 +583,11 @@ const MyPage = () => {
                     />
                     <button
                       type="button"
-                      /* 중복 확인이 완료되었을 때(isNicknameChecked === true) 스타일 변경 */
                       className={`btn small-btn ${isNicknameChecked ? '' : 'outline-btn'}`}
                       onClick={checkNicknameDuplicate}
                       style={{
                         whiteSpace: 'nowrap',
-                        backgroundColor: isNicknameChecked ? '#00d26a' : '', // 확인됨 상태일 때 초록색
+                        backgroundColor: isNicknameChecked ? '#00d26a' : '',
                         color: isNicknameChecked ? 'white' : '',
                         borderColor: isNicknameChecked ? '#00d26a' : ''
                       }}
@@ -618,10 +622,9 @@ const MyPage = () => {
                       onChange={handleChange}
                       className="edit-input"
                       placeholder="숫자만 입력"
-                      disabled={isSmsSent && !isContactVerified} // 인증번호 발송 중에는 번호 수정 방지
+                      disabled={isSmsSent && !isContactVerified}
                     />
 
-                    {/* 1. 인증요청 / 재발송 버튼 */}
                     <button
                       type="button"
                       className={`btn small-btn ${isContactVerified ? '' : 'outline-btn'}`}
@@ -632,13 +635,12 @@ const MyPage = () => {
                         whiteSpace: 'nowrap'
                       }}
                       onClick={handleSendSms}
-                      disabled={isContactVerified} // 이미 인증됐으면 비활성화
+                      disabled={isContactVerified}
                     >
                       {isContactVerified ? "인증완료" : (isSmsSent ? "재발송" : "인증요청")}
                     </button>
                   </div>
 
-                  {/* 2. 인증번호 입력창 (발송 성공했고 아직 인증 전일 때만 노출) */}
                   {isSmsSent && !isContactVerified && (
                     <div className="sms-verify-row" style={{ display: 'flex', gap: '8px' }}>
                       <div style={{ position: 'relative', flex: 1 }}>
@@ -649,14 +651,12 @@ const MyPage = () => {
                           onChange={(e) => setSmsCode(e.target.value)}
                           className="edit-input"
                         />
-                        {/* 타이머 표시 */}
                         <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#ff6f0f', fontSize: '12px' }}>
                           {formatTime(timeLeft)}
                         </span>
                       </div>
                       <button type="button" onClick={handleVerifySms} className="btn small-btn">확인</button>
 
-                      {/* 번호 잘못 입력했을 때를 대비한 취소 버튼 */}
                       <button type="button" onClick={() => {
                         setIsSmsSent(false);
                         setIsTimerActive(false);
@@ -773,7 +773,7 @@ const MyPage = () => {
                 setEditData(userInfo);
                 setNicknameError('');
                 setNicknameMessage('');
-                setIsNicknameChecked(true); // 취소 시 다시 true로 리셋
+                setIsNicknameChecked(true); 
                 setIsContactVerified(true);
                 setIsSmsSent(false);
                 setIsSmsSent(false);
