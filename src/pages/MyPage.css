@@ -138,6 +138,8 @@
 .btn-charge { background: #00D27A; color: white; }
 .btn-charge:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 210, 122, 0.3); }
 
+.auth-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 210, 122, 0.3); transition: all 0.2s; }
+
 /* 주소 검색 모달 배경 (어둡게) */
 .postcode-overlay {
     position: fixed;

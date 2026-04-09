@@ -118,7 +118,8 @@ const Header = () => {
 
     const fetchHistoryNotifications = async () => {
       try {
-        const res = await axios.get(`http://localhost/api/notifications`, {
+        // const res = await axios.get(`http://localhost/api/notifications`, {
+        const res = await axios.get(`/api/notifications`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -133,7 +134,8 @@ const Header = () => {
     fetchHistoryNotifications();
 
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
+      // webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
+      webSocketFactory: () => new SockJS('/ws-chat'),
       connectHeaders: { Authorization: `Bearer ${token}` },
       onConnect: () => {
         client.subscribe(`/sub/user/${currentUser}/notification`, (message) => {
@@ -165,7 +167,8 @@ const Header = () => {
     }
 
     try {
-      await axios.put(`http://localhost/api/notifications/${noti.id}/read`, {}, {
+      // await axios.put(`http://localhost/api/notifications/${noti.id}/read`, {}, {
+      await axios.put(`/api/notifications/${noti.id}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch(e) { console.error(e); }
@@ -174,7 +177,8 @@ const Header = () => {
   const handleReadAll = async () => {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true, read: true })));
     try {
-      await axios.put(`http://localhost/api/notifications/read-all`, {}, {
+      // await axios.put(`http://localhost/api/notifications/read-all`, {}, {
+      await axios.put(`/api/notifications/read-all`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch(e) { console.error(e); }
@@ -184,7 +188,8 @@ const Header = () => {
     e.stopPropagation(); 
     setNotifications(prev => prev.filter(n => n.id !== notiId));
     try {
-      await axios.delete(`http://localhost/api/notifications/${notiId}`, {
+      // await axios.delete(`http://localhost/api/notifications/${notiId}`, {
+      await axios.delete(`/api/notifications/${notiId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch(error) { 
@@ -289,7 +294,7 @@ const Header = () => {
               </div>
 
               <button className="sell-btn" onClick={() => navigate("/products/create")}><i className="fas fa-plus"></i><span>판매하기</span></button>
-              {isAdmin && <button className="admin-btn" onClick={() => navigate("/admin/dashboard")}><i className="fas"></i><span>관리자 페이지</span></button>}
+              {isAdmin && <button className="admin-btn" onClick={() => navigate("/admin/dashboard")}><i className="fas fa-lock"></i><span>관리자 페이지</span></button>}
             </>
           )}
 

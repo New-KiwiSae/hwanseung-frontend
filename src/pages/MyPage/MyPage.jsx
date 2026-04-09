@@ -3,15 +3,17 @@ import DaumPostcode from 'react-daum-postcode';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import ChargePay from '../../ChargePay';
-import '../../chargepay.css';
+import '../../chargePay.css'
 import '../../pages/MyPage.css';
 import { useUser } from '../../UserContext';
 
-axios.defaults.baseURL = "http://localhost:8080";
+// axios.defaults.baseURL = "http://localhost:8080";
+axios.defaults.baseURL = "";
 const MyPage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  const IMG_BASE_URL = "http://localhost:8080";
+  // const IMG_BASE_URL = "http://localhost:8080";
+  const IMG_BASE_URL = "";
 
   const { userInfo, isLoading, fetchUser } = useUser();
 
@@ -302,18 +304,34 @@ const MyPage = () => {
           geocoder.coord2RegionCode(lng, lat, async (result, status) => {
             if (status === window.kakao.maps.services.Status.OK) {
               const myNeighborhood = result[0].region_3depth_name;
-              try {
+             try {
                 const token = sessionStorage.getItem('accessToken');
-                await axios.put(`/api/user`, {
+                
+                // 🌟 1. 업데이트할 동네 정보 만들기
+                const updatedInfo = {
                   ...userInfo,
                   neighborhood: myNeighborhood,
                   isNeighborhoodAuthenticated: true
-                }, {
-                  headers: { Authorization: `Bearer ${token}` }
+                };
+
+                // 🌟 2. 빈 택배 상자(FormData) 준비
+                const formData = new FormData();
+                
+                // 🌟 3. handleSave와 완벽하게 똑같은 방식으로 포장해서 담기
+                formData.append('userData', new Blob([JSON.stringify(updatedInfo)], { type: 'application/json' }));
+
+                // 🌟 4. 백엔드로 택배 발송!
+                await axios.put(`/api/user`, formData, {
+                  headers: { 
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data' // 포장지 명시
+                  }
                 });
+
                 alert(`🎉 성공! [${myNeighborhood}] 동네 인증이 완료되었습니다.`);
                 if (fetchUser) fetchUser();
               } catch (error) {
+                console.error("인증 실패 상세:", error);
                 alert("인증 정보를 서버에 저장하는데 실패했습니다.");
               }
             }
@@ -477,6 +495,22 @@ const MyPage = () => {
         <p>환승마켓에서의 내 프로필과 결제 정보를 관리하세요.</p>
       </div>
 
+            <div className="mypage-pay-section">
+        <div className="pay-banner">
+          <div className="pay-text">
+            <h3>환승Pay 충전</h3>
+            <p>안전한 중고 거래의 시작, 환승Pay를 충전해보세요.</p>
+          </div>
+          <button className="btn-charge" onClick={() => setIsPayModalOpen(true)}>
+            <i className="fas fa-wallet"></i> 충전하기
+          </button>
+        </div>
+      </div>
+
+      {isPayModalOpen && (
+        <ChargePay onClose={() => setIsPayModalOpen(false)} userInfo={userInfo} />
+      )}
+      <br/>
       <div className="mypage-card">
         <div className="profile-section">
           <div className="profile-avatar-container" style={{ textAlign: 'center', marginBottom: '20px' }}>
@@ -710,7 +744,11 @@ const MyPage = () => {
                     <i className="fas fa-check-circle"></i> {userInfo.neighborhood} 인증됨
                   </span>
                 ) : (
-                  <button onClick={handleNeighborhoodAuth} className="auth-btn" style={{ padding: '6px 12px', background: '#ff6f0f', color: 'white', border: 'none', borderRadius: '12px', fontSize: '13px', cursor: 'pointer', fontWeight: 'bold' }}>
+                  <button
+                    onClick={handleNeighborhoodAuth}
+                    className="auth-btn"
+                    style={{ padding: '6px 12px', background: '#00D27A', color: 'white', border: 'none', borderRadius: '12px', fontSize: '15px', cursor: 'pointer', fontWeight: 'bold' }}
+                  >
                     <i className="fas fa-map-marker-alt"></i> 내 동네 인증하기
                   </button>
                 )}
