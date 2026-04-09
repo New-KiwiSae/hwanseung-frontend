@@ -118,7 +118,7 @@ const MainPage = () => {
                     return (b.likeCount || 0) - (a.likeCount || 0); // 내림차순 정렬
                 });
 
-                // 1등부터 8등까지만 딱 잘라서(slice) 보여주는 것이 좋습니다!
+                // 1등부터 6등까지만 딱 잘라서(slice) 보여주는 것이 좋습니다!
                 const top6Products = popularProducts.slice(0, 6);
 
                 // 정렬되고 잘라진 1~6등 상품들을 바구니에 담습니다.
