@@ -1,32 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './MainPage.css';
 import { useNavigate } from 'react-router-dom';
-import { fetchCategories } from '../api/CategoriesAPI';
-
-/* ── 데이터 ── */
-// 변경 후
-const categories = [
-    { emoji: '📱', label: '디지털기기', key: 'digital' },
-    { emoji: '👕', label: '의류/잡화', key: 'fashion' },
-    { emoji: '🛋️', label: '가구/인테리어', key: 'furniture' },
-    { emoji: '🍳', label: '생활/가전', key: 'life' },
-    { emoji: '🎨', label: '취미/도서', key: 'hobby' },
-    { emoji: '⚽', label: '스포츠/레저', key: 'sports' },
-    { emoji: '🎫', label: '티켓/교환권', key: 'ticket' },
-    { emoji: '✨', label: '전체보기', key: 'all' },
-];
-
-// 확장 시 보여줄 추가 카테고리 (빈칸 8개)
-const extraCategories = [
-    { emoji: '', label: '' },
-    { emoji: '', label: '' },
-    { emoji: '', label: '' },
-    { emoji: '', label: '' },
-    { emoji: '', label: '' },
-    { emoji: '', label: '' },
-    { emoji: '', label: '' },
-    { emoji: '', label: '' },
-];
+import { fetchCategories } from '../api/AdminCategoriesAPI';
+// 분리한 Public API 호출
+import { fetchPublicCategories } from '../api/PublicCategoryAPI';
 
 const products = [
     { id: 1, title: '아이폰 15 Pro 256GB 블루', price: 1250000, location: '서울 강남구', time: '2분 전', badge: '안심결제', likes: 45, chats: 12, img: '📱', color: '#f0f4ff' },
@@ -89,11 +66,36 @@ const MainPage = () => {
     const liveFeedIndex = useRef(3);
 
     const navigate = useNavigate();
-    const [showAllCategories, setShowAllCategories] = useState(false);
 
+    // 카테고리 상태 관리
+    const [fetchedCategories, setFetchedCategories] = useState([]);
+    const [showAllCategories, setShowAllCategories] = useState(false);
 
     // 숫자 롤링
     const statValues = stats.map(s => useCountUp(s.value, 2200, statsVisible));
+
+    // 동적 카테고리 로드
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                const data = await fetchPublicCategories();
+                // 백엔드에서 반환된 data 배열에서 active가 true인 것만 필터링
+                const activeOnly = data.filter(c => c.active);
+                setFetchedCategories(activeOnly);
+            } catch (err) {
+                console.error('메인 카테고리 로드 실패:', err);
+            }
+        };
+        loadCategories();
+    }, []);
+
+    // 화면에 보여줄 카테고리 분리 연산
+    const VISIBLE_LIMIT = 7;
+    const mainCategories = fetchedCategories.slice(0, VISIBLE_LIMIT);
+    const extraCategoriesList = fetchedCategories.slice(VISIBLE_LIMIT);
+    const hasMore = fetchedCategories.length > VISIBLE_LIMIT;
+
+    const statValues1 = stats.map(s => useCountUp(s.value, 2200, statsVisible));
 
     // Hero 등장 애니메이션
     useEffect(() => {
@@ -223,42 +225,58 @@ const MainPage = () => {
             <section className="category-section">
                 <div className="container">
                     <div className="category-grid">
-                        {categories.map((cat, idx) => (
+                        
+                        {/* 1. 기본 노출 카테고리 */}
+                        {mainCategories.map((cat) => (
                             <button
                                 type="button"
-                                key={idx}
+                                key={cat.id}
                                 className="category-item"
-                                onClick={() => {
-                                    if (cat.key === 'all') {
-                                        setShowAllCategories(prev => !prev);
-                                        return;
-                                    }
-
-                                    navigate(`/products?category=${cat.key}`);
-                                }}
+                                onClick={() => navigate(`/products?category=${cat.key}`)}
                             >
                                 <div className="category-icon-wrap">
-                                    <span className="category-emoji">{cat.emoji}</span>
+                                    <span className="category-emoji">
+                                        {cat.emoji || '📦'}
+                                    </span>
                                 </div>
                                 <span className="category-label">
-                                    {cat.label === '전체보기'
-                                        ? (showAllCategories ? '접기' : '전체보기')
-                                        : cat.label}
+                                    {cat.displayName}
                                 </span>
                             </button>
                         ))}
 
-                        {/* 확장된 추가 카테고리 */}
-                        {showAllCategories && extraCategories.map((cat, idx) => (
+                        {/* 2. 전체보기 토글 버튼 */}
+                        {hasMore && (
                             <button
                                 type="button"
-                                key={`extra-${idx}`}
                                 className="category-item"
+                                onClick={() => setShowAllCategories(prev => !prev)}
                             >
                                 <div className="category-icon-wrap">
-                                    <span className="category-emoji">{cat.emoji}</span>
+                                    <span className="category-emoji">✨</span>
                                 </div>
-                                <span className="category-label">{cat.label}</span>
+                                <span className="category-label">
+                                    {showAllCategories ? '접기' : '전체보기'}
+                                </span>
+                            </button>
+                        )}
+
+                        {/* 3. 확장 카테고리 */}
+                        {showAllCategories && extraCategoriesList.map((cat) => (
+                            <button
+                                type="button"
+                                key={`extra-${cat.id}`}
+                                className="category-item"
+                                onClick={() => navigate(`/products?category=${cat.key}`)}
+                            >
+                                <div className="category-icon-wrap">
+                                    <span className="category-emoji">
+                                        {cat.emoji || '📦'}
+                                    </span>
+                                </div>
+                                <span className="category-label">
+                                    {cat.displayName}
+                                </span>
                             </button>
                         ))}
                     </div>

@@ -7,7 +7,7 @@ import {
     deleteCategory,
     updateCategoryOrder,
     toggleCategoryActive,
-} from '../../api/CategoriesAPI';
+} from '../../api/AdminCategoriesAPI';
 
 // 이모지 프리셋 (카테고리용)
 const EMOJI_PRESETS = [

@@ -25,7 +25,6 @@ import AdminStatistics from './pages/Admin/AdminStatistics.jsx';
 import AdminNotifications from './pages/Admin/AdminNotifications.jsx';
 import AdminReports from './pages/Admin/AdminReports.jsx';
 import AdminUsers from './pages/Admin/AdminUsers.jsx';
-import AdminInquiries from './pages/Admin/AdminInquiries.jsx';
 import AdminProducts from './pages/Admin/AdminProducts.jsx';
 import AdminTransactions from './pages/Admin/AdminTransactions.jsx';
 import AdminCategories from './pages/Admin/AdminCategories.jsx';
@@ -80,7 +79,6 @@ function App() {
                         {/* <Route path="chat" element={<AdminChatManage />} /> */}
                         <Route path="notifications" element={<AdminNotifications />} />
                         <Route path="announcements" element={<AdminAnnouncements />} />
-                        <Route path="inquiries" element={<AdminInquiries />} />
                     </Route>
 
                     <Route element={<Layout />}>
