@@ -84,15 +84,15 @@ export default function MyPageSidebar({ userInfo }) {
 
                 <NavLink to="/sales" className={({ isActive }) => (isActive ? 'active' : '')}>
                     <button>
-                        <i className="fas fa-box-open"></i> 판매 내역
+                        <i className="fas fa-box-open"></i> 거래 내역
                     </button>
                 </NavLink>
 
-                <NavLink to="/purchase" className={({ isActive }) => (isActive ? 'active' : '')}>
+                {/* <NavLink to="/purchase" className={({ isActive }) => (isActive ? 'active' : '')}>
                     <button>
                         <i className="fas fa-shopping-bag"></i> 구매 내역
                     </button>
-                </NavLink>
+                </NavLink> */}
 
                 <NavLink to="/wishlist" className={({ isActive }) => (isActive ? 'active' : '')}>
                     <button>

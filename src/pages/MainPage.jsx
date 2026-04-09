@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import './MainPage.css';
 import { useNavigate } from 'react-router-dom';
 import { fetchCategories } from '../api/CategoriesAPI';
+import axios from 'axios';
 
 /* ── 데이터 ── */
 const categories = [
@@ -28,7 +29,7 @@ const extraCategories = [
 
 const liveFeedData = [
     { user: '망원동 김*님', item: '맥북 에어', icon: 'fas fa-gift', status: '환승 완료' },
-    { user: '성수동 이*님', item: '캠핑 체어', icon: 'fas fa-handshake', status: '매칭 중' },
+    { user: '성수동 이*님', item: '캠핑 체어', icon: 'fas fa-handshake', status: '매칭' },
     { user: '논현동 박*님', item: '자전거', icon: 'fas fa-bolt', status: '환승 완료' },
     { user: '판교동 최*님', item: '에어팟 맥스', icon: 'fas fa-star', status: '방금 업로드' },
     { user: '잠실동 정*님', item: 'PS5 슬림', icon: 'fas fa-fire', status: '환승 완료' },
@@ -116,7 +117,41 @@ const MainPage = () => {
         fetchPopularProducts();
     }, []);
 
-    // Hero 등장
+    //백엔드에서 진짜 가져오기 
+    const [realProducts, setRealProducts] = useState([]);
+
+    // 🌟 2. 화면이 처음 켜질 때 백엔드 창고에서 물건 가져오기
+   useEffect(() => {
+        const fetchRealProducts = async () => {
+            try {
+                const response = await axios.get('/api/products');
+                
+                // 🚨 기존 코드: 도착한 데이터를 그대로 바구니에 담음 (최신순)
+                // setRealProducts(response.data);
+
+                const filteredProducts = response.data.filter(product => {
+                    return (product.likeCount || 0) >= 2;
+                });
+
+
+                // 🌟 [수정된 코드] 도착한 데이터를 '찜(likeCount)'이 많은 순서대로 줄 세웁니다!
+                const popularProducts = response.data.sort((a, b) => {
+                    return (b.likeCount || 0) - (a.likeCount || 0); // 내림차순 정렬
+                });
+
+                // 1등부터 6등까지만 딱 잘라서(slice) 보여주는 것이 좋습니다!
+                const top6Products = popularProducts.slice(0, 6);
+
+                // 정렬되고 잘라진 1~6등 상품들을 바구니에 담습니다.
+                setRealProducts(top6Products);
+
+            } catch (error) {
+                console.error("인기 매물을 불러오지 못했습니다.", error);
+            }
+        };
+        fetchRealProducts();
+    }, []);
+    // Hero 등장 애니메이션
     useEffect(() => {
         const timer = setTimeout(() => setHeroVisible(true), 100);
         return () => clearTimeout(timer);
@@ -211,8 +246,7 @@ const MainPage = () => {
                                 <i className="fas fa-arrow-right"></i>
                                 거래 시작하기
                             </button>
-
-                            <button className="btn-secondary">
+                            <button className="btn-secondary" onClick={() => navigate("/info")} >
                                 <i className="fas fa-book-open"></i>
                                 서비스 안내
                             </button>
@@ -328,15 +362,14 @@ const MainPage = () => {
                             </h2>
                             <p className="section-subtitle">지금 이순간, 가장 많이 찾는 상품들이에요.</p>
                         </div>
-
-                        <button
-                            type="button"
-                            className="view-all-link"
-                            onClick={() => navigate('/products')}
-                            style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
-                        >
+                       <span 
+                                className="view-all-link" 
+                                // 🌟 꼬리표(?filter=popular)를 붙여서 이동시킵니다!
+                                onClick={() => navigate('/products?filter=popular')} 
+                                style={{ cursor: 'pointer' }}
+                            >
                             전체보기 <i className="fas fa-chevron-right"></i>
-                        </button>
+                        </span>
                     </div>
 
                     <div className="main-popular-grid">
@@ -461,7 +494,6 @@ const MainPage = () => {
                 </div>
             </section>
 
-            {/* ═══ 안전거래 가이드 ═══ */}
             <section className="safety-section">
                 <div className="container">
                     <div className="safety-banner">
@@ -488,10 +520,9 @@ const MainPage = () => {
                                 </span>
                             </div>
                         </div>
-
-                        <button className="safety-cta">
+                        {/* <button className="safety-cta">
                             가이드 보기 <i className="fas fa-arrow-right"></i>
-                        </button>
+                        </button> */}
                     </div>
                 </div>
             </section>
