@@ -155,7 +155,8 @@ export default function ProductDetailPage() {
             const realRoomId = res.data.roomId;
 
             const tempClient = new Client({
-                webSocketFactory: () => new SockJS("http://localhost/ws-chat"),
+                // webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
+                webSocketFactory: () => new SockJS('/ws-chat'),
                 connectHeaders: { Authorization: `Bearer ${currentToken}` },
                 onConnect: () => {
                     const messageData = {

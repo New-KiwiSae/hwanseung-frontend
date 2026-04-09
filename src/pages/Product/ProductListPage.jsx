@@ -350,8 +350,9 @@ export default function ProductListPage() {
                                         <div className="product-thumb">
                                             {product.thumbnailUrl && !hasBrokenImage ? (
                                                 <img
-                                                    src={`http://localhost:8080${product.thumbnailUrl}`}
-                                                    alt=""
+                                                    // src={`http://localhost:8080${product.thumbnailUrl}`}
+                                                src={`${product.thumbnailUrl}`}
+                                                    alt={product.title}
                                                     onError={() => {
                                                         setImageErrorMap((prev) => ({
                                                             ...prev,

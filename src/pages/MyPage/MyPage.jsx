@@ -3,15 +3,17 @@ import DaumPostcode from 'react-daum-postcode';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import ChargePay from '../../ChargePay';
-import '../../chargepay.css';
+import '../../chargePay.css'
 import '../../pages/MyPage.css';
 import { useUser } from '../../UserContext';
 
-axios.defaults.baseURL = "http://localhost:8080";
+// axios.defaults.baseURL = "http://localhost:8080";
+axios.defaults.baseURL = "";
 const MyPage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  const IMG_BASE_URL = "http://localhost:8080";
+  // const IMG_BASE_URL = "http://localhost:8080";
+  const IMG_BASE_URL = "";
 
   const { userInfo, isLoading, fetchUser } = useUser();
 
