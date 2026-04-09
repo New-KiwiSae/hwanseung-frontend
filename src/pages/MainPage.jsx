@@ -108,16 +108,21 @@ const MainPage = () => {
                 // 🚨 기존 코드: 도착한 데이터를 그대로 바구니에 담음 (최신순)
                 // setRealProducts(response.data);
 
+                const filteredProducts = response.data.filter(product => {
+                    return (product.likeCount || 0) >= 2;
+                });
+
+
                 // 🌟 [수정된 코드] 도착한 데이터를 '찜(likeCount)'이 많은 순서대로 줄 세웁니다!
                 const popularProducts = response.data.sort((a, b) => {
                     return (b.likeCount || 0) - (a.likeCount || 0); // 내림차순 정렬
                 });
 
                 // 1등부터 8등까지만 딱 잘라서(slice) 보여주는 것이 좋습니다!
-                const top8Products = popularProducts.slice(0, 8);
+                const top6Products = popularProducts.slice(0, 6);
 
-                // 정렬되고 잘라진 1~8등 상품들을 바구니에 담습니다.
-                setRealProducts(top8Products);
+                // 정렬되고 잘라진 1~6등 상품들을 바구니에 담습니다.
+                setRealProducts(top6Products);
 
             } catch (error) {
                 console.error("인기 매물을 불러오지 못했습니다.", error);
@@ -208,7 +213,7 @@ const MainPage = () => {
                                 <i className="fas fa-arrow-right"></i>
                                 거래 시작하기
                             </button>
-                            <button className="btn-secondary">
+                            <button className="btn-secondary" onClick={() => navigate("/info")} >
                                 <i className="fas fa-book-open"></i>
                                 서비스 안내
                             </button>
@@ -321,13 +326,18 @@ const MainPage = () => {
                             </h2>
                             <p className="section-subtitle">지금 이 순간, 가장 많이 찾는 상품들이에요.</p>
                         </div>
-                        <a href="#" className="view-all-link">
+                       <span 
+                                className="view-all-link" 
+                                // 🌟 꼬리표(?filter=popular)를 붙여서 이동시킵니다!
+                                onClick={() => navigate('/products?filter=popular')} 
+                                style={{ cursor: 'pointer' }}
+                            >
                             전체보기 <i className="fas fa-chevron-right"></i>
-                        </a>
+                        </span>
                     </div>
 
                   <div className="product-grid">
-                        {/* 🌟 수정 완료: 진짜 매물 바구니(realProducts)에서 하나씩(product) 꺼냅니다! */}
+                    
                         {realProducts.map((product, idx) => (
                             <article
                                 key={product.productId}
@@ -433,7 +443,6 @@ const MainPage = () => {
                 </div>
             </section>
 
-            {/* ═══ 안전거래 가이드 ═══ */}
             <section className="safety-section">
                 <div className="container">
                     <div className="safety-banner">
