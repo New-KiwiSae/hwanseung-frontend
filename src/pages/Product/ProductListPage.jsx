@@ -49,6 +49,7 @@ function getUserInfoFromToken() {
 export default function ProductListPage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const filterParam = searchParams.get("filter");
 
     const [products, setProducts] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("all");
@@ -181,7 +182,9 @@ export default function ProductListPage() {
                 (product.location &&
                     product.location.toLowerCase().includes(lowerKeyword));
 
-            return matchCategory && matchKeyword;
+                    const matchPopular = filterParam === "popular" ? ((product.likeCount || 0) >= 2): true;
+
+            return matchCategory && matchKeyword && matchPopular;
         });
 
         result.sort((a, b) => {
@@ -204,7 +207,7 @@ export default function ProductListPage() {
         });
 
         return result;
-    }, [products, selectedCategory, keyword, sortType]);
+    }, [products, selectedCategory, keyword, sortType, filterParam]);
 
     useEffect(() => {
         setVisibleCount(12);
