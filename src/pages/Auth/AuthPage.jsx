@@ -143,7 +143,7 @@ export default function AuthPage() {
 
                 if (type === 'username') setIsIdChecked(true);
                 if (type === 'nickname') setIsNicknameChecked(true);
-                if (type === 'email') setIsEmailChecked(true);
+                // if (type === 'email') setIsEmailChecked(true);
             }
         } catch (error) {
             alert(`${displayName} 중복 체크 연결에 실패했습니다.`);
@@ -164,7 +164,7 @@ export default function AuthPage() {
         // 값이 변경되면 중복 확인 상태 초기화
         if (targetId === 'username') setIsIdChecked(false);
         if (targetId === 'nickname') setIsNicknameChecked(false);
-        if (targetId === 'email') setIsEmailChecked(false); // ✨ 추가
+        // if (targetId === 'email') setIsEmailChecked(false); // ✨ 추가
     };
 
     /*이메일인증 */
@@ -386,7 +386,7 @@ export default function AuthPage() {
 
             setIsIdChecked(false);
             setIsNicknameChecked(false);
-            setIsEmailChecked(false);
+            // setIsEmailChecked(false);
             setIsEmailVerified(false);
             setIsContactVerified(false);
             setVerificationCode("");
@@ -395,7 +395,6 @@ export default function AuthPage() {
             setErrors({});
             setIsSignUpActive(false);
             setIsEmailSent(false);
-
 
         }).catch(() => {
             alert("가입 중 오류가 발생했습니다.");
