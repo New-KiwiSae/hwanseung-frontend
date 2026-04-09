@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 import './Header.css';
 import axios from 'axios';
-import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs'; 
+import SockJS from 'sockjs-client';       
 
 // 🌟 1. 우리가 만든 전역 창고 도구를 가져옵니다.
 import { useUser } from '../UserContext';
@@ -113,22 +113,19 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // ========================================================
-  // 🚨 [알림 구독] 헤더는 '채팅'을 제외한 시스템 알림(찜 등)만 받습니다!
-  // ========================================================
   useEffect(() => {
     if (!token || !currentUser) return;
 
     const fetchHistoryNotifications = async () => {
       try {
-        const res = await axios.get(`http://localhost/api/notifications`, {
+        // const res = await axios.get(`http://localhost/api/notifications`, {
+        const res = await axios.get(`/api/notifications`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-
-        // 🚀 채팅 알림(CHAT)은 헤더에서 버립니다! (플로팅 채팅 아이콘이 담당)
+        
+        // 🚀 채팅 알림(CHAT)은 헤더에서 버립니다!
         const systemNotis = res.data.filter(n => n.type !== 'CHAT');
         setNotifications(systemNotis);
-
       } catch (error) {
         console.error("알림 내역 불러오기 실패:", error);
       }
@@ -136,14 +133,13 @@ const Header = () => {
     fetchHistoryNotifications();
 
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
+      // webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
+      webSocketFactory: () => new SockJS('/ws-chat'),
       connectHeaders: { Authorization: `Bearer ${token}` },
       onConnect: () => {
         client.subscribe(`/sub/user/${currentUser}/notification`, (message) => {
           const newNoti = JSON.parse(message.body);
-
-          if (newNoti.type === 'CHAT') return;
-
+          if (newNoti.type === 'CHAT') return; 
           setNotifications(prev => [newNoti, ...prev]);
         });
       }
@@ -168,7 +164,8 @@ const Header = () => {
     }
 
     try {
-      await axios.put(`http://localhost/api/notifications/${noti.id}/read`, {}, {
+      // await axios.put(`http://localhost/api/notifications/${noti.id}/read`, {}, {
+      await axios.put(`/api/notifications/${noti.id}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (e) { console.error(e); }
@@ -177,7 +174,8 @@ const Header = () => {
   const handleReadAll = async () => {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true, read: true })));
     try {
-      await axios.put(`http://localhost/api/notifications/read-all`, {}, {
+      // await axios.put(`http://localhost/api/notifications/read-all`, {}, {
+      await axios.put(`/api/notifications/read-all`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (e) { console.error(e); }
@@ -187,7 +185,8 @@ const Header = () => {
     e.stopPropagation();
     setNotifications(prev => prev.filter(n => n.id !== notiId));
     try {
-      await axios.delete(`http://localhost/api/notifications/${notiId}`, {
+      // await axios.delete(`http://localhost/api/notifications/${notiId}`, {
+      await axios.delete(`/api/notifications/${notiId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (error) {
@@ -226,50 +225,56 @@ const Header = () => {
 
           {isLoggedIn && (
             <>
-              {/* 시스템 알림(종 모양) 버튼 */}
               <div className="user-profile-container" onMouseEnter={() => setIsNotiOpen(true)} onMouseLeave={() => setIsNotiOpen(false)}>
-                <button className="icon-btn" title="알림" style={{ position: 'relative' }}>
+                <button className="icon-btn" title="알림">
                   <i className="far fa-bell"></i>
                   {unreadNotiCount > 0 && (
-                    <span style={{
-                      position: 'absolute', top: '2px', right: '2px', backgroundColor: '#ff4d4f', color: 'white',
-                      borderRadius: '50%', width: '18px', height: '18px', fontSize: '10px',
-                      display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', border: '2px solid white'
-                    }}>
+                    <span className="noti-badge">
                       {unreadNotiCount > 9 ? '9+' : unreadNotiCount}
                     </span>
                   )}
                 </button>
 
                 {isNotiOpen && (
-                  <div className="profile-dropdown" style={{ width: '320px', right: '-60px', maxHeight: '400px', overflowY: 'auto' }}>
-                    <div style={{ padding: '12px 15px', fontWeight: 'bold', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
+                  <div className="profile-dropdown noti-dropdown">
+                    <div className="noti-header">
                       <span>새로운 알림</span>
                       {unreadNotiCount > 0 && (
-                        <span style={{ fontSize: '0.8em', color: '#007bff', cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); handleReadAll(); }}>
+                        <span className="noti-read-all" onClick={(e) => { e.stopPropagation(); handleReadAll(); }}>
                           모두 읽음
                         </span>
                       )}
                     </div>
 
                     {!(notifications && notifications.length > 0) ? (
-                      <div style={{ padding: '30px 15px', textAlign: 'center', color: '#999', fontSize: '0.9em' }}>새로운 알림이 없습니다.</div>
+                      <div className="noti-empty">새로운 알림이 없습니다.</div>
                     ) : (
                       notifications.map((noti) => (
-                        <div key={noti.id} className="dropdown-item" onClick={() => handleNotiClick(noti)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '12px 15px', backgroundColor: noti.isRead ? '#fff' : '#f0f8ff', borderBottom: '1px solid #f5f5f5', cursor: 'pointer' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%', marginBottom: '4px' }}>
-                            <div style={{ fontSize: '0.9em', color: '#333', lineHeight: '1.4', paddingRight: '10px' }}>
-                              {noti.type === 'FAVORITE' && <i className="fas fa-heart" style={{ color: '#ff4d4f', marginRight: '6px' }}></i>}
-                              {noti.type === 'NOTICE' && <i className="fas fa-bullhorn" style={{ color: '#007bff', marginRight: '6px' }}></i>}
+                        /* 🌟 안 읽은 알림 배경색 동적 클래스 추가 (unread) */
+                        <div 
+                          key={noti.id} 
+                          className={`noti-item ${!noti.isRead ? 'unread' : ''}`} 
+                          onClick={() => handleNotiClick(noti)}
+                        >
+                          <div className="noti-item-top">
+                            <div className="noti-content">
+                              {noti.type === 'FAVORITE' && <i className="fas fa-heart noti-icon heart"></i>}
+                              {noti.type === 'NOTICE' && <i className="fas fa-bullhorn noti-icon notice"></i>}
                               {noti.content}
                             </div>
-                            <button onClick={(e) => handleDeleteNoti(e, noti.id)} style={{ background: 'none', border: 'none', color: '#ccc', cursor: 'pointer', padding: '0', fontSize: '1.1em', flexShrink: 0 }} title="알림 삭제"><i className="fas fa-times"></i></button>
+                            <button onClick={(e) => handleDeleteNoti(e, noti.id)} className="noti-delete-btn" title="알림 삭제">
+                              <i className="fas fa-times"></i>
+                            </button>
                           </div>
-                          <div style={{ fontSize: '0.75em', color: '#999', width: '100%' }}>{new Date(noti.createdAt || Date.now()).toLocaleString()}</div>
+                          <div className="noti-date">
+                            {new Date(noti.createdAt || Date.now()).toLocaleString()}
+                          </div>
                         </div>
                       ))
                     )}
-                    <div className="dropdown-item" style={{ justifyContent: 'center', color: '#666', fontSize: '0.85em', borderTop: '1px solid #eee' }} onClick={() => navigate('/notifications')}>알림 전체보기</div>
+                    <div className="dropdown-item noti-view-all" onClick={() => navigate('/notifications')}>
+                      알림 전체보기
+                    </div>
                   </div>
                 )}
               </div>
@@ -283,8 +288,8 @@ const Header = () => {
                       <div className="dropdown-item" style={{ fontWeight: 'bold', color: '#ff6f0f' }}>{userInfo.nickname || userInfo.username}님 환영합니다!</div>
                       <hr style={{ margin: '5px 0' }} />
                       <div className="dropdown-item" onClick={() => navigate('/mypage')}><i className="far fa-id-card"></i> 내 정보 보기</div>
-                      <div className="dropdown-item" onClick={() => navigate('/sales')}><i className="fas fa-box-open"></i> 판매 내역</div>
-                      <div className="dropdown-item" onClick={() => navigate('/purchase')}><i className="fas fa-shopping-bag"></i> 구매 내역</div>
+                      <div className="dropdown-item" onClick={() => navigate('/sales')}><i className="fas fa-box-open"></i> 거래 내역</div>
+                      {/* <div className="dropdown-item" onClick={() => navigate('/purchase')}><i className="fas fa-shopping-bag"></i> 구매 내역</div> */}
                       <div className="dropdown-item" onClick={() => navigate('/wishlist')}><i className="fas fa-heart"></i> 관심 목록</div>
                       <hr />
                       <div className="dropdown-item logout-item" onClick={handleLogout}><i className="fas fa-sign-out-alt"></i> 로그아웃</div>
