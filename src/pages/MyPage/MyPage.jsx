@@ -392,6 +392,84 @@ const MyPage = () => {
   if (isLoading) return <div className="mypage-container" style={{ padding: '50px', textAlign: 'center' }}>정보를 불러오는 중입니다...</div>;
   if (!userInfo) return null;
 
+  // 회원탈퇴
+    const clearAuthSession = () => {
+        sessionStorage.removeItem('tokenType');
+        sessionStorage.removeItem('accessToken');
+        sessionStorage.removeItem('refreshToken');
+        // 필요한 경우 다른 상태값들도 초기화
+        window.location.href = '/login'; // 로그인 페이지로 강제 이동
+    };
+
+    const WithdrawalSection = () => {
+        const [password, setPassword] = useState("");
+        const [isModalOpen, setIsModalOpen] = useState(false);
+
+        const handleWithdrawal = async () => {
+            try {
+                // 백엔드 withdraw API 호출
+                const response = await axios.post('/api/auth/withdraw',
+                    { password }, // JSON Body
+                    { headers: { Authorization: `Bearer ${sessionStorage.getItem('accessToken')}` } }
+                );
+
+                if (response.status === 200) {
+                    alert("그동안 이용해주셔서 감사합니다. 회원 탈퇴가 완료되었습니다.");
+                    clearAuthSession(); // 세션 정리 및 이동
+                }
+            } catch (error) {
+                // 백엔드에서 던진 "비밀번호가 일치하지 않습니다" 등의 메시지 처리
+                alert(error.response?.data || "탈퇴 처리 중 오류가 발생했습니다.");
+            }
+        };
+
+        return (
+            <div className="withdrawal-container">
+                <h3>회원 탈퇴</h3>
+                <p>탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.</p>
+                <button onClick={() => setIsModalOpen(true)}>탈퇴하기</button>
+
+                {isModalOpen && (
+                    <div className="modal">
+                        <h4>본인 확인을 위해 비밀번호를 입력해주세요.</h4>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="비밀번호 입력"
+                        />
+                        <button onClick={handleWithdrawal}>정말 탈퇴하기</button>
+                        <button onClick={() => setIsModalOpen(false)}>취소</button>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const handleWithdraw = async () => {
+        const password = prompt("본인 확인을 위해 비밀번호를 입력해주세요.");
+
+        if (!password) return;
+
+        if (window.confirm("정말로 탈퇴하시겠습니까? 탈퇴 후 데이터는 복구할 수 없습니다.")) {
+            try {
+                await axios.post('/api/user/withdraw',
+                    { password },
+                    { headers: { Authorization: `Bearer ${sessionStorage.getItem('accessToken')}` } }
+                );
+
+                alert("탈퇴 처리가 완료되었습니다. 그동안 이용해주셔서 감사합니다.");
+
+                // 모든 세션 정보 삭제 및 이동
+                sessionStorage.clear();
+                window.location.href = "/";
+            } catch (error) {
+                alert(error.response?.data || "탈퇴 처리 중 오류가 발생했습니다.");
+            }
+        }
+    };
+
+
   return (
     <div className="mypage-container">
       <div className="mypage-header">
@@ -679,6 +757,8 @@ const MyPage = () => {
         </div>
       </div>
 
+      
+
       {/* 🌟 [추가] 비밀번호 확인 팝업창 (CSS 클래스만 사용) */}
       {isPasswordModalOpen && (
         <>
@@ -718,23 +798,6 @@ const MyPage = () => {
         </>
       )}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       <div className="mypage-pay-section">
         <div className="pay-banner">
           <div className="pay-text">
@@ -748,6 +811,12 @@ const MyPage = () => {
       </div>
 
       {isPayModalOpen && <ChargePay onClose={() => setIsPayModalOpen(false)} userInfo={userInfo} />}
+
+      {/* 회원 탈퇴 구역  */}
+      <div className="withdrawal-footer" style={{ marginTop: '40px', textAlign: 'right', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+        <span style={{ color: '#999', fontSize: '13px', marginRight: '15px' }}>더 이상 서비스를 이용하지 않으시나요?</span>
+        <button onClick={handleWithdraw} style={{ background: 'none', border: 'none', color: '#999', textDecoration: 'underline', cursor: 'pointer', fontSize: '13px' }}>회원 탈퇴</button>
+      </div>
     </div>
   );
 };

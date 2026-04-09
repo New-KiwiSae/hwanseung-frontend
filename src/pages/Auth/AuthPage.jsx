@@ -123,20 +123,30 @@ export default function AuthPage() {
             return;
         }
 
+        // 1. 표시할 이름 매핑 객체 생성
+        const typeNames = {
+            username: "아이디",
+            nickname: "닉네임",
+            email: "이메일"
+        };
+        const displayName = typeNames[type] || type; // 매핑된 이름이 없으면 기본 type 출력
+
         try {
             const response = await axios.get(`/api/auth/check-${type}`, { params: { [type]: value } });
 
             if (response.data.isDuplicate) {
-                alert(`이미 사용 중인 ${type === 'username' ? '아이디' : type}입니다.`);
+                // 2. 매핑된 이름 사용
+                alert(`이미 사용 중인 ${displayName}입니다.`);
             } else {
-                alert(`사용 가능한 ${type === 'username' ? '아이디' : type}입니다!`);
+                // 3. 매핑된 이름 사용
+                alert(`사용 가능한 ${displayName}입니다!`);
+
                 if (type === 'username') setIsIdChecked(true);
                 if (type === 'nickname') setIsNicknameChecked(true);
-                // ✨ 에러 해결: 이제 isEmailChecked가 정의되었으므로 정상 작동합니다.
                 if (type === 'email') setIsEmailChecked(true);
             }
         } catch (error) {
-            alert("중복 체크 연결에 실패했습니다.");
+            alert(`${displayName} 중복 체크 연결에 실패했습니다.`);
         }
     };
 
@@ -159,34 +169,68 @@ export default function AuthPage() {
 
     /*이메일인증 */
     const handleSendVerification = async () => {
-        try {
-            // 서버 API 호출 (중복 확인 후 메일 발송)
-            const response = await axios.post('/api/auth/email/send-code', {
-                email: signUpValues.email
-            });
-            alert("인증번호가 발송되었습니다. 메일함을 확인해주세요.");
-            setIsEmailSent(true); //
-        } catch (error) {
-            if (error.response?.status === 409) {
-                setErrors({ ...errors, email: "이미 사용 중인 이메일입니다." });
-            } else {
-                alert("메일 발송에 실패했습니다.");
-            }
+        if (!signUpValues.email || errors.email) {
+            alert("올바른 이메일 형식을 입력해주세요.");
+            return;
         }
+        // try {
+        //     // 서버 API 호출 (중복 확인 후 메일 발송)
+        //     const response = await axios.post('/api/auth/email/send-code', {
+        //         email: signUpValues.email
+        //     });
+        //     alert("인증번호가 발송되었습니다. 메일함을 확인해주세요.");
+        //     setIsEmailSent(true); //
+        // } catch (error) {
+        //     if (error.response?.status === 409) {
+        //         setErrors({ ...errors, email: "이미 사용 중인 이메일입니다." });
+        //     } else {
+        //         alert("메일 발송에 실패했습니다.");
+        //     }
+        // }
+
+        // 개발용 우회 로직
+        try {
+            // 1. 서버에 이메일 중복 체크 API 호출
+            const response = await axios.get(`/api/auth/check-email`, {
+                params: { email: signUpValues.email }
+            });
+
+            if (response.data.isDuplicate) {
+                alert("이미 사용 중인 이메일입니다.");
+                setErrors({ ...errors, email: "이미 사용 중인 이메일입니다." });
+                return; // 중복이면 여기서 중단
+            }
+
+            // 2. 중복이 아닐 경우 -> 개발 모드 우회 (실제 발송 API 호출 대신)
+            alert('[개발 모드] 인증번호 입력창에 아무 번호나 입력해주세요.');
+            setIsEmailSent(true); // // 인증번호 입력창을 보여주는 상태값 활성화
+
+        } catch (error) {
+            console.error("중복 체크 에러:", error);
+            alert("서버 연결에 실패했습니다.");
+        }
+
+
     };
 
     const handleVerifyCode = async () => {
-        try {
-            // 서버에 입력한 번호 확인 요청
-            await axios.post('/api/auth/verify-code', {
-                key: signUpValues.email,
-                code: verificationCode
-            });
-            setIsEmailVerified(true); // 인증 완료 상태값 변경
-            alert("이메일 인증이 성공했습니다.");
-        } catch (error) {
-            setErrors({ ...errors, verificationCode: "인증번호가 일치하지 않습니다." });
-        }
+        // try {
+        //     // 서버에 입력한 번호 확인 요청
+        //     await axios.post('/api/auth/verify-code', {
+        //         key: signUpValues.email,
+        //         code: verificationCode
+        //     });
+        //     setIsEmailVerified(true); // 인증 완료 상태값 변경
+        //     alert("이메일 인증이 성공했습니다.");
+        // } catch (error) {
+        //     setErrors({ ...errors, verificationCode: "인증번호가 일치하지 않습니다." });
+        // }
+
+        console.log('[개발모드] 인증 성공');
+        setIsEmailVerified(true);
+        alert('[개발모드] 인증되었습니다.');
+
+
     };
 
     const formatTime = (seconds) => {
@@ -215,33 +259,61 @@ export default function AuthPage() {
             alert("올바른 연락처를 입력해주세요.");
             return;
         }
+        // try {
+        //     await axios.post('/api/auth/sms/send-code', {
+        //         phoneNumber: signUpValues.contact
+        //     });
+
+        //     // 타이머 초기화 (3분 = 180초)
+        //     setTimeLeft(180);
+        //     setIsTimerActive(true);
+        //     setIsSmsSent(true);
+        //     alert("인증번호가 발송되었습니다.");
+        // } catch (error) {
+        //     alert("발송 실패. 잠시 후 다시 시도해주세요.");
+        // }
+
+        // 개발용 우회 로직
         try {
-            await axios.post('/api/auth/sms/send-code', {
-                phoneNumber: signUpValues.contact
+            // 1. 서버에 연락처 중복 체크 API 호출
+            const response = await axios.get(`/api/auth/check-contact`, {
+                params: { contact: signUpValues.contact }
             });
 
-            // 타이머 초기화 (3분 = 180초)
+            if (response.data.isDuplicate) {
+                alert("이미 등록된 연락처입니다.");
+                setErrors({ ...errors, contact: "이미 사용 중인 연락처입니다." });
+                return;
+            }
+
+            // 2. 중복이 아닐 경우 -> 개발 모드 타이머 활성화 및 발송 처리
+            alert('[개발모드] 인증번호 입력창에 아무 번호나 입력해주세요.');
             setTimeLeft(180);
             setIsTimerActive(true);
             setIsSmsSent(true);
-            alert("인증번호가 발송되었습니다.");
+
         } catch (error) {
-            alert("발송 실패. 잠시 후 다시 시도해주세요.");
+            alert("서버 연결에 실패했습니다.");
         }
+
     };
 
     // 2. SMS 인증번호 검증
     const handleVerifySmsCode = async () => {
-        try {
-            await axios.post('/api/auth/verify-code', {
-                key: signUpValues.contact, // 휴대폰 번호를 키로 사용
-                code: smsCode
-            });
-            setIsContactVerified(true);
-            alert("휴대폰 인증이 완료되었습니다.");
-        } catch (error) {
-            alert("인증번호가 일치하지 않습니다.");
-        }
+        // try {
+        //     await axios.post('/api/auth/verify-code', {
+        //         key: signUpValues.contact, // 휴대폰 번호를 키로 사용
+        //         code: smsCode
+        //     });
+        //     setIsContactVerified(true);
+        //     alert("휴대폰 인증이 완료되었습니다.");
+        // } catch (error) {
+        //     alert("인증번호가 일치하지 않습니다.");
+        // }
+
+        console.log('[개발모드] 인증 성공');
+        setIsContactVerified(true);
+        alert('[개발모드] 인증되었습니다.');
     };
 
     const handleSignInChange = (e) => {
@@ -255,12 +327,15 @@ export default function AuthPage() {
             sessionStorage.setItem('accessToken', response.data.accessToken);
             sessionStorage.setItem('refreshToken', response.data.refreshToken);
             sessionStorage.setItem('username', signInValues.username);
-            window.location.href = "/";
-            navigate("/", { replace: true });
-        }).catch(() => {
-            alert("로그인 정보가 올바르지 않습니다.");
-        });
-    };
+        window.location.href = "/";
+    }).catch((error) => {
+        // 🌟 서버가 보낸 JSON 객체에서 message 필드를 꺼냅니다.
+        const errorMessage = error.response?.data?.message || "로그인 정보가 올바르지 않습니다.";
+        
+        alert(errorMessage); 
+        console.error("에러 발생:", error.response?.data);
+    });
+};
 
     const onSignUpSubmit = async (e) => {
         e.preventDefault();
@@ -345,6 +420,8 @@ export default function AuthPage() {
 
         setIsPostcodeOpen(false);
     };
+
+
 
     return (
         <div className="auth-page-wrapper">
@@ -541,7 +618,7 @@ export default function AuthPage() {
                                 {errors.verificationCode && <span className="error-msg">{errors.verificationCode}</span>}
                             </div>
                         )}
-                        
+
                         <hr className="gray-line" />
                         <span className="sub-text">선택 정보 입력</span>
 
