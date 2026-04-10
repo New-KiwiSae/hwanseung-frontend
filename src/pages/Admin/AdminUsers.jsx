@@ -154,7 +154,7 @@ function AdminUsers() {
                                     </td>
                                     <td style={{ padding: '12px 15px' }}>
                                         <button 
-                                            onClick={() => toggleUserStatus(user.userId, user.status)}
+                                            onClick={() => toggleUserStatus(user.id, user.status)}
                                             style={{ 
                                                 padding: '5px 10px', fontSize: '0.85rem', cursor: 'pointer',
                                                 backgroundColor: user.status === 'ACTIVE' ? '#fff' : '#333',
