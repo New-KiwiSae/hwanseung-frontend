@@ -26,7 +26,6 @@ import AdminStatistics from './pages/Admin/AdminStatistics.jsx';
 import AdminNotifications from './pages/Admin/AdminNotifications.jsx';
 import AdminReports from './pages/Admin/AdminReports.jsx';
 import AdminUsers from './pages/Admin/AdminUsers.jsx';
-import AdminInquiries from './pages/Admin/AdminInquiries.jsx';
 import AdminProducts from './pages/Admin/AdminProducts.jsx';
 import AdminTransactions from './pages/Admin/AdminTransactions.jsx';
 import AdminCategories from './pages/Admin/AdminCategories.jsx';
@@ -36,20 +35,24 @@ import AdminAnnouncements from './pages/Admin/AdminAnnouncements.jsx';
 
 
 function App() {
-    const location = useLocation();
-    const isAuthPage = location.pathname === '/login';
-    const isAdminPage = location.pathname.startsWith('/admin');
-    const [showSplash, setShowSplash] = useState(() => {
-        return !sessionStorage.getItem('splashShown');
-    });
-
     const handleSplashFinish = useCallback(() => {
         sessionStorage.setItem('splashShown', 'true');
         setShowSplash(false);
     }, []);
 
+    useEffect(() => {
+    if (!showSplash) return;
+        const id = setInterval(() => {
+            setLoadProgress((p) => {
+                if (p >= 100) { clearInterval(id); return 100; }
+                return p + 2;
+            });
+        }, 40);
+        return () => clearInterval(id);
+    }, [showSplash]);
+
     if (showSplash) {
-        return <SplashScreen onFinish={handleSplashFinish} />;
+        return <SplashScreen progress={loadProgress} onFinish={handleSplashFinish} />;
     }
 
     return (
@@ -82,7 +85,6 @@ function App() {
                         {/* <Route path="chat" element={<AdminChatManage />} /> */}
                         <Route path="notifications" element={<AdminNotifications />} />
                         <Route path="announcements" element={<AdminAnnouncements />} />
-                        <Route path="inquiries" element={<AdminInquiries />} />
                     </Route>
 
                     <Route element={<Layout />}>

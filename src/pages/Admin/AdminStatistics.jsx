@@ -147,7 +147,7 @@ function AdminStatistics() {
                             <div>
                                 <div className={styles.liveBannerLabel}>현재 접속자 수</div>
                                 <div className={styles.liveBannerValue}>
-                                    {fmt(typeof onlineUsers === 'object' ? onlineUsers.count : onlineUsers)}명
+                                    {fmt(onlineUsers?.count ?? onlineUsers ?? 0)}명
                                 </div>
                             </div>
                         </div>
