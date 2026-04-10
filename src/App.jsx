@@ -72,7 +72,20 @@ function App() {
                     <Route path="/products/:productId/edit" element={<ProductEditPage />} />
 
 
-                        <Route path="/login" element={<AuthPage />} />
+                    <Route path="/admin" element={<AdminLayout />}>
+                        <Route index element={<AdminDashBoard />} />
+                        <Route path="dashboard" element={<AdminDashBoard />} />
+                        <Route path="statistics" element={<AdminStatistics />} />
+                        <Route path="products" element={<AdminProducts />} />
+                        <Route path="transactions" element={<AdminTransactions />} />
+                        <Route path="categories" element={<AdminCategories />} />
+                        <Route path="users" element={<AdminUsers />} />
+                        <Route path="reports" element={<AdminReports />} />
+                        <Route path="chat" element={<AdminChatManager />} />
+                        {/* <Route path="chat" element={<AdminChatManage />} /> */}
+                        <Route path="notifications" element={<AdminNotifications />} />
+                        <Route path="announcements" element={<AdminAnnouncements />} />
+                    </Route>
 
                         <Route path="/admin" element={<AdminLayout />}>
                             <Route index element={<AdminDashBoard />} />
