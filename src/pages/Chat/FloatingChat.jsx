@@ -61,13 +61,16 @@ const FloatingChat = () => {
           // 오직 "채팅" 알림일 때만 빨간 점을 올립니다!
           if (newNoti.type === 'CHAT') {
             // const incomingRoomId = newNoti.relatedItemId.toString();
-            const incomingRoomId = newNoti.relatedStringId;
+            // const incomingRoomId = newNoti.relatedStringId;
+            const incomingRoomId = String(newNoti.relatedStringId);
+            let isNewRoom = false;
 
             setChatRooms((prevRooms) => {
               // 꼼수: 최신 activeRoom 상태 확인
               let currentActiveRoomId = null;
               setActiveRoom(current => {
-                 currentActiveRoomId = current?.roomId;
+                //  currentActiveRoomId = current?.roomId;
+                currentActiveRoomId = current?.roomId ? String(current.roomId) : null;
                  return current;
               });
 
@@ -77,15 +80,30 @@ const FloatingChat = () => {
               }
 
               // 안 보고 있는 방이라면 뱃지 올리기!
-              const roomExists = prevRooms.find(r => r.roomId === incomingRoomId);
+              // const roomExists = prevRooms.find(r => r.roomId === incomingRoomId);
+              const roomExists = prevRooms.find(r => String(r.roomId) === incomingRoomId);
+
               if (roomExists) {
                 const updatedRoom = { ...roomExists, unreadCount: roomExists.unreadCount + 1, lastMessage: newNoti.content };
-                return [updatedRoom, ...prevRooms.filter(r => r.roomId !== incomingRoomId)]; // 맨 위로 끌어올림
+                // return [updatedRoom, ...prevRooms.filter(r => r.roomId !== incomingRoomId)]; // 맨 위로 끌어올림
+                return [updatedRoom, ...prevRooms.filter(r => String(r.roomId) !== incomingRoomId)];
               } else {
-                fetchMyChatRooms(); // 처음 말 거는 사람이면 목록 새로 불러오기
-                return prevRooms;
+                // fetchMyChatRooms(); // 처음 말 거는 사람이면 목록 새로 불러오기
+                // return prevRooms;
+                isNewRoom = true; 
+                const newTempRoom = {
+                  roomId: incomingRoomId, 
+                  buyerId: "새로운 대화",
+                  unreadCount: 1, // 첫 메시지니까 무조건 1개!
+                  lastMessage: newNoti.content
+                };
+                return [newTempRoom, ...prevRooms]; // 맨 위로 올림
               }
             });
+            // 💡 3. 리액트 화면 꼬임 방지를 위해 상태 업데이트(setChatRooms) 바깥에서 DB 호출
+            if (isNewRoom) {
+              fetchMyChatRooms(); 
+            }
           }
         });
       }
@@ -103,11 +121,31 @@ const FloatingChat = () => {
   const fetchMyChatRooms = async () => {
     if (!token) return;
     try {
-      // const res = await axios.get('http://localhost/api/chat/my-rooms', {
       const res = await axios.get('/api/chat/my-rooms', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setChatRooms(res.data);
+      
+      setChatRooms(currentRooms => {
+        const mergedRooms = res.data.map(serverRoom => {
+          // 💡 방 번호 비교할 때 String() 통일
+          const localRoom = currentRooms.find(r => String(r.roomId) === String(serverRoom.roomId));
+          
+          // 💡 서버는 0개라고 우겨도, 내 화면에 이미 1개로 떠있다면 내 화면의 뱃지 개수를 지킨다!
+          if (localRoom && localRoom.unreadCount > serverRoom.unreadCount) {
+            return { ...serverRoom, unreadCount: localRoom.unreadCount, lastMessage: localRoom.lastMessage };
+          }
+          return serverRoom;
+        });
+
+        // 💡 아직 서버 DB에 반영 안 된 완전 새로운 임시 방도 리스트에서 삭제되지 않게 보호
+        currentRooms.forEach(localRoom => {
+          if (!mergedRooms.find(r => String(r.roomId) === String(localRoom.roomId))) {
+            mergedRooms.push(localRoom);
+          }
+        });
+
+        return mergedRooms;
+      });
     } catch (error) {
       console.error("채팅방 목록 불러오기 실패:", error);
     }
@@ -182,16 +220,22 @@ const FloatingChat = () => {
 
   const startAdminChat = async () => {
     try {
-      // const roomRes = await axios.post('http://localhost/api/chat/room/admin', {}, { 
       const roomRes = await axios.post('/api/chat/room/admin', {}, { 
         headers: { Authorization: `Bearer ${token}` } 
       });
       const realRoomId = roomRes.data.roomId;
       
-      setActiveRoom({ roomId: realRoomId, buyerId: "환승마켓 고객센터", itemName: "1:1 문의", unreadCount: 0 });
+      const newAdminRoom = { roomId: realRoomId, buyerId: "환승마켓 고객센터", itemName: "1:1 문의", unreadCount: 0 };
+      setActiveRoom(newAdminRoom);
       setMessages([]);
 
-      // const historyRes = await axios.get(`http://localhost/api/chat/room/${realRoomId}/messages`, {
+      // 💡 [여기가 추가된 부분!] 방 생성 직후 내 채팅 목록 화면에 즉시 추가!
+      setChatRooms((prev) => {
+        const exists = prev.find(r => r.roomId === realRoomId);
+        if (exists) return prev;
+        return [newAdminRoom, ...prev]; 
+      });
+
       const historyRes = await axios.get(`/api/chat/room/${realRoomId}/messages`, {
         headers: { Authorization: `Bearer ${token}` }
       });
