@@ -53,6 +53,19 @@ const FloatingChat = () => {
     const client = new Client({
       webSocketFactory: () => new SockJS('/ws-chat'),
       connectHeaders: { Authorization: `Bearer ${token}` },
+
+      // 🚨 [좀비 방어막 1 추가] 🚨
+      reconnectDelay: 0, // 강제 재접속 기능 완전히 끄기!
+      onStompError: (frame) => {
+        console.error("STOMP 에러:", frame);
+        client.deactivate(); // 에러 나면 즉시 포기! (서버 폭파 방지)
+      },
+      onWebSocketClose: () => {
+        console.log("웹소켓 연결이 강제로 끊어졌습니다. (토큰 만료 등)");
+        client.deactivate(); // 끊겨도 매달리지 않고 포기!
+      },
+      // -------------------------
+
       onConnect: () => {
         // 내 알림 전용 주파수에 귀를 엽니다.
         client.subscribe(`/sub/user/${currentUser}/notification`, (message) => {
@@ -258,6 +271,19 @@ const FloatingChat = () => {
       // webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
       webSocketFactory: () => new SockJS('/ws-chat'),
       connectHeaders: { Authorization: `Bearer ${token}` },
+
+      // 🚨 [좀비 방어막 2 추가] 🚨
+      reconnectDelay: 0, // 강제 재접속 끄기
+      onStompError: (frame) => {
+        console.error("STOMP 에러:", frame);
+        client.deactivate();
+      },
+      onWebSocketClose: () => {
+        console.log("웹소켓 연결이 강제로 끊어졌습니다.");
+        client.deactivate();
+      },
+      // -------------------------
+      
       onConnect: () => {
         client.subscribe(`/sub/chat/room/${currentRoomId}`, (message) => {
           const receivedMessage = JSON.parse(message.body);
