@@ -27,7 +27,7 @@ const CATEGORY_MAP = {
 const STATUS_MAP = {
     SALE: { label: '판매중', style: styles.badgeSale },
     SOLD_OUT: { label: '판매완료', style: styles.badgeSoldOut },
-    PENDING: { label: '승인대기', style: styles.badgePending },
+    PENDING: { label: '예약중', style: styles.badgePending },
     REJECTED: { label: '반려', style: styles.badgeRejected },
     HIDDEN: { label: '숨김', style: styles.badgeHidden },
 };
@@ -324,7 +324,7 @@ function AdminProducts() {
                 />
                 <SummaryCard
                     icon="bx bx-time-five" iconBg="rgba(234,179,8,0.12)" iconColor="#eab308"
-                    label="승인대기" value={summary.pending}
+                    label="예약중" value={summary.pending}
                     active={filterStatus === 'PENDING'} onClick={() => handleStatusFilter('PENDING')}
                 />
                 <SummaryCard

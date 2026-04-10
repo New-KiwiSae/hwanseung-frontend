@@ -3,7 +3,7 @@ import axios from "axios";
 /** * 최신 토큰을 포함한 헤더를 반환하는 함수
  * 호출될 때마다 sessionStorage에서 최신 값을 읽어옵니다.
  */
-const getHeader = () => {
+export const getHeader = () => {
     const accessToken = sessionStorage.getItem("accessToken");
     const refreshToken = sessionStorage.getItem("refreshToken");
 
