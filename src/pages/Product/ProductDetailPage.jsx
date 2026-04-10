@@ -29,7 +29,6 @@ export default function ProductDetailPage() {
     const [imageErrorMap, setImageErrorMap] = useState({});
     const [categories, setCategories] = useState([]);
 
-
     const categoryLabelMap = categories.reduce((acc, category) => {
         acc[category.key] = category.displayName;
         return acc;
@@ -82,8 +81,8 @@ export default function ProductDetailPage() {
                 method: "GET",
                 headers: token
                     ? {
-                          Authorization: `Bearer ${token}`,
-                      }
+                        Authorization: `Bearer ${token}`,
+                    }
                     : {},
             });
 
@@ -174,8 +173,7 @@ export default function ProductDetailPage() {
             const realRoomId = res.data.roomId;
 
             const tempClient = new Client({
-                // webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
-                webSocketFactory: () => new SockJS('/ws-chat'),
+                webSocketFactory: () => new SockJS("/ws-chat"),
                 connectHeaders: { Authorization: `Bearer ${currentToken}` },
                 onConnect: () => {
                     const messageData = {
@@ -250,6 +248,25 @@ export default function ProductDetailPage() {
             console.error("찜 처리 실패:", err);
             alert(err.message || "찜 처리 중 오류 발생");
         }
+    };
+
+    // 신고 페이지 이동
+    const handleReport = () => {
+        const token = sessionStorage.getItem("accessToken");
+
+        if (!token) {
+            alert("로그인 후 이용해주세요.");
+            navigate("/login");
+            return;
+        }
+
+        if (isSeller) {
+            alert("본인 상품은 신고할 수 없습니다.");
+            return;
+        }
+
+        // ✅ 핵심: 신고 페이지로 이동
+        navigate(`/reports/create/${productId}`);
     };
 
     const handleDelete = async () => {
@@ -565,6 +582,11 @@ export default function ProductDetailPage() {
                                 <span className="label">조회수</span>
                                 <span className="value">{product.viewCount}</span>
                             </div>
+
+                            <div className="detail-info-item">
+                                <span className="label">신고횟수</span>
+                                <span className="value">{product.reportCount ?? 0}</span>
+                            </div>
                         </div>
 
                         <div className="detail-action-buttons">
@@ -594,7 +616,8 @@ export default function ProductDetailPage() {
                             <button
                                 type="button"
                                 className="btn-report"
-                                onClick={() => alert("신고 기능은 준비 중입니다.")}
+                                onClick={handleReport}
+                                disabled={isSeller}
                             >
                                 신고하기
                             </button>

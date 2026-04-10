@@ -8,6 +8,7 @@ import ProductCreatePage from "./pages/Product/ProductCreatePage";
 import ProductDetailPage from './pages/Product/ProductDetailPage.jsx';
 import ProductListPage from "./pages/Product/ProductListPage";
 import ProductEditPage from "./pages/Product/ProductEditPage";
+import ReportCreatePage from './pages/Report/ReportCreatePage.jsx';
 import ScrollToTop from "./components/ScrollToTop";
 import AuthPage from './pages/Auth/AuthPage.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
@@ -66,6 +67,7 @@ function App() {
                         <Route path="/products/:productId" element={<ProductDetailPage />} />
                         <Route path="/products" element={<ProductListPage />} />
                         <Route path="/products/:productId/edit" element={<ProductEditPage />} />
+                        <Route path="/reports/create/:productId" element={<ReportCreatePage />} />
                         <Route path="/info" element={<InfoPage />} />
 
                         <Route path="/login" element={<AuthPage />} />
