@@ -117,6 +117,7 @@ function ReportCreatePage() {
 
                             <textarea
                                 className="report-textarea"
+                                required
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                                 placeholder="신고 사유를 자세히 입력해주세요."

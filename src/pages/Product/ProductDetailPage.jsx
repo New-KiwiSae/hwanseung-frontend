@@ -12,6 +12,27 @@ function formatPrice(price) {
     return Number(price || 0).toLocaleString();
 }
 
+// ✅ 추가: 작성일 표시용 함수
+function formatDate(dateString) {
+    if (!dateString) return "-";
+
+    const now = new Date();
+    const date = new Date(dateString);
+
+    const diff = Math.floor((now - date) / 1000);
+
+    if (diff < 60) return "방금 전";
+    if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}일 전`;
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}.${month}.${day}`;
+}
+
 const saleStatusLabelMap = {
     SALE: "판매중",
     RESERVED: "예약중",
@@ -81,8 +102,8 @@ export default function ProductDetailPage() {
                 method: "GET",
                 headers: token
                     ? {
-                        Authorization: `Bearer ${token}`,
-                    }
+                          Authorization: `Bearer ${token}`,
+                      }
                     : {},
             });
 
@@ -250,8 +271,8 @@ export default function ProductDetailPage() {
         }
     };
 
-    // 신고 페이지 이동
-    const handleReport = () => {
+    // ✏️수정: 신고 버튼 클릭 시 서버에 먼저 중복 신고 여부 확인
+    const handleReport = async () => {
         const token = sessionStorage.getItem("accessToken");
 
         if (!token) {
@@ -265,8 +286,35 @@ export default function ProductDetailPage() {
             return;
         }
 
-        // ✅ 핵심: 신고 페이지로 이동
-        navigate(`/reports/create/${productId}`);
+        try {
+            const response = await fetch(`/api/reports/products/${productId}/check`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const text = await response.text();
+            let result = {};
+
+            if (text) {
+                result = JSON.parse(text);
+            }
+
+            if (!response.ok) {
+                throw new Error(result.message || "신고 가능 여부 확인 실패");
+            }
+
+            if (result.reported) {
+                alert(result.message || "이미 신고한 상품입니다.");
+                return;
+            }
+
+            navigate(`/reports/create/${productId}`);
+        } catch (err) {
+            console.error("신고 가능 여부 확인 실패:", err);
+            alert(err.message || "신고 확인 중 오류 발생");
+        }
     };
 
     const handleDelete = async () => {
@@ -564,6 +612,12 @@ export default function ProductDetailPage() {
                                 <span className="value">{product.location}</span>
                             </div>
 
+                            {/* ✅ 추가: 거래지역 아래 작성일 */}
+                            <div className="detail-info-item">
+                                <span className="label">작성일</span>
+                                <span className="value">{formatDate(product.createdAt)}</span>
+                            </div>
+
                             <div className="detail-info-item">
                                 <span className="label">카테고리</span>
                                 <span className="value">
@@ -581,11 +635,6 @@ export default function ProductDetailPage() {
                             <div className="detail-info-item">
                                 <span className="label">조회수</span>
                                 <span className="value">{product.viewCount}</span>
-                            </div>
-
-                            <div className="detail-info-item">
-                                <span className="label">신고횟수</span>
-                                <span className="value">{product.reportCount ?? 0}</span>
                             </div>
                         </div>
 
@@ -629,7 +678,7 @@ export default function ProductDetailPage() {
                             </Link>
                         </div>
 
-                        {canManageProduct && (
+                        {canManageProduct && !isSoldOut && (
                             <div className="detail-owner-buttons">
                                 {canChangeSaleStatus && product.saleStatus === "SALE" && (
                                     <button
