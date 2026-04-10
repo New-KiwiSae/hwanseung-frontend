@@ -81,7 +81,6 @@ const Header = () => {
   useEffect(() => {
     if (token) {
       try {
-        console.log('token aaa', token);
         const decodedToken = jwtDecode(token);
         const userRole = decodedToken.role;
         const authorizedRoles = ["SUPER", "SUB", "ROLE_SUPER", "ROLE_SUB", "ADMIN", "ROLE_ADMIN"];
@@ -199,7 +198,7 @@ const Header = () => {
     sessionStorage.removeItem("refreshToken");
     sessionStorage.removeItem("tokenType");
     setUserInfo(null);
-    navigate('/');
+    window.location.href = '/';
   };
 
   return (

@@ -35,20 +35,24 @@ import AdminAnnouncements from './pages/Admin/AdminAnnouncements.jsx';
 
 
 function App() {
-    const location = useLocation();
-    const isAuthPage = location.pathname === '/login';
-    const isAdminPage = location.pathname.startsWith('/admin');
-    const [showSplash, setShowSplash] = useState(() => {
-        return !sessionStorage.getItem('splashShown');
-    });
-
     const handleSplashFinish = useCallback(() => {
         sessionStorage.setItem('splashShown', 'true');
         setShowSplash(false);
     }, []);
 
+    useEffect(() => {
+    if (!showSplash) return;
+        const id = setInterval(() => {
+            setLoadProgress((p) => {
+                if (p >= 100) { clearInterval(id); return 100; }
+                return p + 2;
+            });
+        }, 40);
+        return () => clearInterval(id);
+    }, [showSplash]);
+
     if (showSplash) {
-        return <SplashScreen onFinish={handleSplashFinish} />;
+        return <SplashScreen progress={loadProgress} onFinish={handleSplashFinish} />;
     }
 
     return (
