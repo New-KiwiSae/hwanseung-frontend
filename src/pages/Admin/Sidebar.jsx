@@ -13,7 +13,6 @@ const menuItems = [
   { path: '/admin/chat', icon: 'bx-message-dots', label: '채팅 관리' },
   { path: '/admin/notifications', icon: 'bx-bell', label: '알림' },
   { path: '/admin/announcements', icon: 'bx-news', label: '공지사항 관리' },
-  { path: '/admin/inquiries', icon: 'bx-chat', label: '문의 내역' },
 ];
 
 const Sidebar = () => {
@@ -43,6 +42,7 @@ const Sidebar = () => {
   };
 
   const handleLogout = (e) => {
+    console.log('로그아웃 클릭');
     e.preventDefault();
     sessionStorage.removeItem("accessToken");
     sessionStorage.removeItem("refreshToken");

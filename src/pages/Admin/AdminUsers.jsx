@@ -109,7 +109,7 @@ function AdminUsers() {
                             <th style={{ padding: '12px 15px' }}>ID</th>
                             <th style={{ padding: '12px 15px' }}>이메일</th>
                             <th style={{ padding: '12px 15px' }}>닉네임</th>
-                            <th style={{ padding: '12px 15px' }}>신뢰도</th>
+                            <th style={{ padding: '12px 15px' }}>신뢰레벨</th>
                             <th style={{ padding: '12px 15px' }}>누적신고</th>
                             <th style={{ padding: '12px 15px' }}>상태</th>
                             <th style={{ padding: '12px 15px' }}>관리</th>
@@ -135,7 +135,7 @@ function AdminUsers() {
                                     <td style={{ padding: '12px 15px' }}>{user.email}</td>
                                     <td style={{ padding: '12px 15px' }}>{user.nickname}</td>
                                     <td style={{ padding: '12px 15px', color: user.trustScore < 30 ? '#d9534f' : 'inherit' }}>
-                                        {user.trustScore}℃
+                                        Lv.{user.trustScore}
                                     </td>
                                     <td style={{ padding: '12px 15px' }}>
                                         {user.reportCount > 0 ? (

@@ -42,20 +42,27 @@ function SplashScreen({ onFinish }) {
             <circle cx="200" cy="265" r="9" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="6" />
             <circle cx="250" cy="240" r="9" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="6" />
             <path className="smile-anim"
-              d="M 150 240 L 175 265 L 225 265 L 250 240"
-              fill="none" stroke="#00D27A" strokeWidth="17"
-              strokeLinejoin="round" strokeLinecap="round" />
+            d="M 150 240 L 175 265 L 225 265 L 250 240"
+            fill="none" stroke="#00D27A" strokeWidth="17"
+            strokeLinejoin="round" strokeLinecap="round"
+            pathLength="100"
+            strokeDasharray="100"
+            strokeDashoffset={100 - Math.min(progress, 100)} />
             <circle className="node-anim-1" cx="150" cy="240" r="9"
-              fill="#FFFFFF" stroke="#00D27A" strokeWidth="6" />
+            fill="#FFFFFF" stroke="#00D27A" strokeWidth="6"
+            style={{ opacity: progress >= 10 ? 1 : 0 }} />
             <circle className="node-anim-2" cx="200" cy="265" r="9"
-              fill="#FFFFFF" stroke="#00D27A" strokeWidth="6" />
+            fill="#FFFFFF" stroke="#00D27A" strokeWidth="6"
+            style={{ opacity: progress >= 55 ? 1 : 0 }} />
             <circle className="node-anim-3" cx="250" cy="240" r="9"
-              fill="#FFFFFF" stroke="#00D27A" strokeWidth="6" />
+            fill="#FFFFFF" stroke="#00D27A" strokeWidth="6"
+            style={{ opacity: progress >= 100 ? 1 : 0 }} />
           </g>
           <text x="200" y="345" fontFamily="'Pretendard', sans-serif"
             fontWeight="900" fontSize="52" letterSpacing="-2"
             textAnchor="middle" fill="#2B2D36">
-            환승<tspan className="text-market-anim">마켓</tspan>
+            환승<tspan className="text-market-anim"
+            fill={progress >= 70 ? '#00D27A' : '#E5E7EB'}>마켓</tspan>
           </text>
           <text x="200" y="375" fontFamily="'Pretendard', sans-serif"
             fontWeight="700" fontSize="16" letterSpacing="4"

@@ -11,23 +11,24 @@ import { useUser } from '../UserContext';
 
 const Header = () => {
   const { userInfo, setUserInfo } = useUser();
-  const isLoggedIn = !!userInfo; 
+  // const isLoggedIn = !!userInfo;
 
+  const [isLoggedIn, setisLoggedIn] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
   // 알림 관련 상태값들
-  const [isNotiOpen, setIsNotiOpen] = useState(false); 
-  const [notifications, setNotifications] = useState([]); 
-  const stompClient = useRef(null); 
+  const [isNotiOpen, setIsNotiOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const stompClient = useRef(null);
 
   const searchRef = useRef(null);
   const navigate = useNavigate();
 
   // 💡 Context API(userInfo)에서 아이디를 먼저 찾고, 없으면 sessionStorage에서 찾도록 튼튼하게 보강!
-  const token = sessionStorage.getItem("accessToken"); 
+  const token = sessionStorage.getItem("accessToken");
   const currentUser = userInfo?.username || userInfo?.userId || sessionStorage.getItem("username");
 
   const handleNearMeClick = () => {
@@ -45,8 +46,8 @@ const Header = () => {
         const geocoder = new kakao.maps.services.Geocoder();
         geocoder.addressSearch(userInfo.address, (result, status) => {
           if (status === kakao.maps.services.Status.OK) {
-            const lat = result[0].y; 
-            const lng = result[0].x; 
+            const lat = result[0].y;
+            const lng = result[0].x;
             navigate(`/near-me?lat=${lat}&lng=${lng}`);
           } else {
             fallbackToBrowserLocation();
@@ -62,8 +63,8 @@ const Header = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const lat = position.coords.latitude;   
-          const lng = position.coords.longitude;  
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
           navigate(`/near-me?lat=${lat}&lng=${lng}`);
         },
         (error) => {
@@ -81,9 +82,10 @@ const Header = () => {
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
-        const userRole = decodedToken.role; 
+        const userRole = decodedToken.role;
         const authorizedRoles = ["SUPER", "SUB", "ROLE_SUPER", "ROLE_SUB", "ADMIN", "ROLE_ADMIN"];
         setIsAdmin(authorizedRoles.includes(userRole));
+        setisLoggedIn(true);
       } catch (error) {
         setIsAdmin(false);
       }
@@ -153,11 +155,11 @@ const Header = () => {
   const unreadNotiCount = (notifications || []).filter(noti => noti && noti.isRead !== true && noti.read !== true).length;
 
   const handleNotiClick = async (noti) => {
-    setIsNotiOpen(false); 
+    setIsNotiOpen(false);
     setNotifications(prev => prev.map(n => n.id === noti.id ? { ...n, isRead: true, read: true } : n));
-    
+
     if (noti.type === 'FAVORITE' && noti.relatedItemId) {
-      navigate(`/products/${noti.relatedItemId}`); 
+      navigate(`/products/${noti.relatedItemId}`);
     }
 
     try {
@@ -165,7 +167,7 @@ const Header = () => {
       await axios.put(`/api/notifications/${noti.id}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-    } catch(e) { console.error(e); }
+    } catch (e) { console.error(e); }
   };
 
   const handleReadAll = async () => {
@@ -175,19 +177,19 @@ const Header = () => {
       await axios.put(`/api/notifications/read-all`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-    } catch(e) { console.error(e); }
+    } catch (e) { console.error(e); }
   };
 
   const handleDeleteNoti = async (e, notiId) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     setNotifications(prev => prev.filter(n => n.id !== notiId));
     try {
       // await axios.delete(`http://localhost/api/notifications/${notiId}`, {
       await axios.delete(`/api/notifications/${notiId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-    } catch(error) { 
-      console.error("알림 삭제 통신 실패:", error); 
+    } catch (error) {
+      console.error("알림 삭제 통신 실패:", error);
     }
   };
 
@@ -195,8 +197,8 @@ const Header = () => {
     sessionStorage.removeItem("accessToken");
     sessionStorage.removeItem("refreshToken");
     sessionStorage.removeItem("tokenType");
-    setUserInfo(null); 
-    navigate('/'); 
+    setUserInfo(null);
+    window.location.href = '/';
   };
 
   return (
@@ -219,7 +221,7 @@ const Header = () => {
             <button className="nav-link" onClick={handleNearMeClick}>내 근처</button>
             <button className="nav-link">인기매물</button>
           </div>
-          
+
           {isLoggedIn && (
             <>
               <div className="user-profile-container" onMouseEnter={() => setIsNotiOpen(true)} onMouseLeave={() => setIsNotiOpen(false)}>
@@ -242,7 +244,7 @@ const Header = () => {
                         </span>
                       )}
                     </div>
-                    
+
                     {!(notifications && notifications.length > 0) ? (
                       <div className="noti-empty">새로운 알림이 없습니다.</div>
                     ) : (
@@ -277,21 +279,24 @@ const Header = () => {
               </div>
 
               {/* 프로필 버튼 */}
-              <div className="user-profile-container" onMouseEnter={() => setIsProfileOpen(true)} onMouseLeave={() => setIsProfileOpen(false)}>
-                <button className="icon-btn user-avatar" title="내 프로필"><i className="far fa-user"></i></button>
-                {isProfileOpen && (
-                  <div className="profile-dropdown">
-                    <div className="dropdown-item" style={{ fontWeight: 'bold', color: '#ff6f0f' }}>{userInfo.nickname || userInfo.username}님 환영합니다!</div>
-                    <hr /> 
-                    <div className="dropdown-item" onClick={() => navigate('/mypage')}><i className="far fa-id-card"></i> 내 정보 보기</div>
-                    <div className="dropdown-item" onClick={() => navigate('/sales')}><i className="fas fa-box-open"></i> 거래 내역</div>
-                    {/* <div className="dropdown-item" onClick={() => navigate('/purchase')}><i className="fas fa-shopping-bag"></i> 구매 내역</div> */}
-                    <div className="dropdown-item" onClick={() => navigate('/wishlist')}><i className="fas fa-heart"></i> 관심 목록</div>
-                    <hr />
-                    <div className="dropdown-item logout-item" onClick={handleLogout}><i className="fas fa-sign-out-alt"></i> 로그아웃</div>
-                  </div>
-                )}
-              </div>
+              {isLoggedIn && (
+                <div className="user-profile-container" onMouseEnter={() => setIsProfileOpen(true)} onMouseLeave={() => setIsProfileOpen(false)}>
+                  <button className="icon-btn user-avatar" title="내 프로필"><i className="far fa-user"></i></button>
+                  {isProfileOpen && (
+                    <div className="profile-dropdown">
+                      <div className="dropdown-item" style={{ fontWeight: 'bold', color: '#ff6f0f' }}>{userInfo.nickname || userInfo.username}님 환영합니다!</div>
+                      <hr style={{ margin: '5px 0' }} />
+                      <div className="dropdown-item" onClick={() => navigate('/mypage')}><i className="far fa-id-card"></i> 내 정보 보기</div>
+                      <div className="dropdown-item" onClick={() => navigate('/sales')}><i className="fas fa-box-open"></i> 거래 내역</div>
+                      {/* <div className="dropdown-item" onClick={() => navigate('/purchase')}><i className="fas fa-shopping-bag"></i> 구매 내역</div> */}
+                      <div className="dropdown-item" onClick={() => navigate('/wishlist')}><i className="fas fa-heart"></i> 관심 목록</div>
+                      <hr />
+                      <div className="dropdown-item logout-item" onClick={handleLogout}><i className="fas fa-sign-out-alt"></i> 로그아웃</div>
+                    </div>
+                  )}
+                </div>
+              )}
+
 
               <button className="sell-btn" onClick={() => navigate("/products/create")}><i className="fas fa-plus"></i><span>판매하기</span></button>
               {isAdmin && <button className="admin-btn" onClick={() => navigate("/admin/dashboard")}><i className="fas fa-lock"></i><span>관리자 페이지</span></button>}

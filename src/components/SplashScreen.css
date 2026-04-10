@@ -26,50 +26,19 @@
   height: 100%;
 }
 
-/* --- 노선도 애니메이션 --- */
+/* --- 노선도: progress에 맞춰 채움 --- */
 .smile-anim {
-  stroke-dasharray: 125;
-  stroke-dashoffset: 125;
-  animation: drawSmile 2.5s ease-in-out infinite;
+  transition: stroke-dashoffset 0.1s linear;
 }
 
-@keyframes drawSmile {
-  0%       { stroke-dashoffset: 125; opacity: 1; }
-  50%      { stroke-dashoffset: 0;   opacity: 1; }
-  80%      { stroke-dashoffset: 0;   opacity: 1; }
-  90%, 100% { stroke-dashoffset: 0;  opacity: 0; }
-}
-
-.node-anim-1 { opacity: 0; animation: lightNode1 2.5s infinite; }
-@keyframes lightNode1 {
-  0%, 5%    { opacity: 0; }
-  10%, 80%  { opacity: 1; }
-  90%, 100% { opacity: 0; }
-}
-
-.node-anim-2 { opacity: 0; animation: lightNode2 2.5s infinite; }
-@keyframes lightNode2 {
-  0%, 20%   { opacity: 0; }
-  25%, 80%  { opacity: 1; }
-  90%, 100% { opacity: 0; }
-}
-
-.node-anim-3 { opacity: 0; animation: lightNode3 2.5s infinite; }
-@keyframes lightNode3 {
-  0%, 40%   { opacity: 0; }
-  45%, 80%  { opacity: 1; }
-  90%, 100% { opacity: 0; }
+.node-anim-1,
+.node-anim-2,
+.node-anim-3 {
+  transition: opacity 0.2s ease;
 }
 
 .text-market-anim {
-  fill: #E5E7EB;
-  animation: fillText 2.5s ease-in-out infinite;
-}
-
-@keyframes fillText {
-  0%, 45%   { fill: #E5E7EB; }
-  55%, 80%  { fill: #00D27A; }
-  90%, 100% { fill: #E5E7EB; }
+  transition: fill 0.3s ease;
 }
 
 /* --- 게이지 영역 --- */
