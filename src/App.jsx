@@ -54,34 +54,21 @@ function App() {
 
     return (
         <UserProvider>
-        <div className="app-wrapper" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            {!(isAuthPage || isAdminPage) && <Header />}
-            <main style={{ flexGrow: 1 }}>
-                <ScrollToTop />
-                <Routes>
-        
-                    <Route path="/" element={<MainPage />} />
-                    <Route path="/near-me" element={<NearMePage />} />
-                    <Route path="/products/create" element={<ProductCreatePage />} />
-                    <Route path="/products/:productId" element={<ProductDetailPage />} />
-                    <Route path="/products" element={<ProductListPage />} />
-                    <Route path="/products/:productId/edit" element={<ProductEditPage />} />
+            <div className="app-wrapper" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                {!(isAuthPage || isAdminPage) && <Header />}
+                <main style={{ flexGrow: 1 }}>
+                    <ScrollToTop />
+                    <Routes>
 
+                        <Route path="/" element={<MainPage />} />
+                        <Route path="/near-me" element={<NearMePage />} />
+                        <Route path="/products/create" element={<ProductCreatePage />} />
+                        <Route path="/products/:productId" element={<ProductDetailPage />} />
+                        <Route path="/products" element={<ProductListPage />} />
+                        <Route path="/products/:productId/edit" element={<ProductEditPage />} />
+                        <Route path="/info" element={<InfoPage />} />
 
-                    <Route path="/admin" element={<AdminLayout />}>
-                        <Route index element={<AdminDashBoard />} />
-                        <Route path="dashboard" element={<AdminDashBoard />} />
-                        <Route path="statistics" element={<AdminStatistics />} />
-                        <Route path="products" element={<AdminProducts />} />
-                        <Route path="transactions" element={<AdminTransactions />} />
-                        <Route path="categories" element={<AdminCategories />} />
-                        <Route path="users" element={<AdminUsers />} />
-                        <Route path="reports" element={<AdminReports />} />
-                        <Route path="chat" element={<AdminChatManager />} />
-                        {/* <Route path="chat" element={<AdminChatManage />} /> */}
-                        <Route path="notifications" element={<AdminNotifications />} />
-                        <Route path="announcements" element={<AdminAnnouncements />} />
-                    </Route>
+                        <Route path="/login" element={<AuthPage />} />
 
                         <Route path="/admin" element={<AdminLayout />}>
                             <Route index element={<AdminDashBoard />} />
@@ -96,7 +83,6 @@ function App() {
                             {/* <Route path="chat" element={<AdminChatManage />} /> */}
                             <Route path="notifications" element={<AdminNotifications />} />
                             <Route path="announcements" element={<AdminAnnouncements />} />
-                            <Route path="inquiries" element={<AdminInquiries />} />
                         </Route>
 
                         <Route element={<Layout />}>

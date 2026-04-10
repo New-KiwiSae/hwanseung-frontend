@@ -6,20 +6,11 @@ import { FiHeart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { fetchPublicCategories } from "../../api/PublicCategoryAPI";
 
 function formatPrice(price) {
     return Number(price || 0).toLocaleString();
 }
-
-const categoryMap = {
-    digital: "디지털기기",
-    fashion: "의류/잡화",
-    furniture: "가구/인테리어",
-    life: "생활/가전",
-    hobby: "취미/도서",
-    sports: "스포츠/레저",
-    ticket: "티켓/교환권",
-};
 
 const saleStatusLabelMap = {
     SALE: "판매중",
@@ -36,6 +27,17 @@ export default function ProductDetailPage() {
     const [error, setError] = useState("");
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [imageErrorMap, setImageErrorMap] = useState({});
+    const [categories, setCategories] = useState([]);
+
+
+    const categoryLabelMap = categories.reduce((acc, category) => {
+        acc[category.key] = category.displayName;
+        return acc;
+    }, {});
+
+    const getCategoryDisplayName = (categoryKey) => {
+        return categoryLabelMap[categoryKey] || categoryKey;
+    };
 
     const [likeInfo, setLikeInfo] = useState({
         liked: false,
@@ -99,6 +101,23 @@ export default function ProductDetailPage() {
             console.error("찜 상태 조회 실패:", err);
         }
     };
+
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                const data = await fetchPublicCategories();
+                const sortedCategories = Array.isArray(data)
+                    ? [...data].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+                    : [];
+                setCategories(sortedCategories);
+            } catch (error) {
+                console.error("카테고리 목록 조회 실패:", error);
+                setCategories([]);
+            }
+        };
+
+        loadCategories();
+    }, []);
 
     useEffect(() => {
         const fetchProductDetail = async () => {
@@ -496,7 +515,7 @@ export default function ProductDetailPage() {
                     <div className="product-detail-info-card">
                         <div className="detail-chip-row">
                             <span className="detail-chip">
-                                {categoryMap[product.category] || product.category}
+                                {getCategoryDisplayName(product.category)}
                             </span>
 
                             <span className="detail-chip outline">{product.location}</span>
@@ -531,7 +550,7 @@ export default function ProductDetailPage() {
                             <div className="detail-info-item">
                                 <span className="label">카테고리</span>
                                 <span className="value">
-                                    {categoryMap[product.category] || product.category}
+                                    {getCategoryDisplayName(product.category)}
                                 </span>
                             </div>
 
