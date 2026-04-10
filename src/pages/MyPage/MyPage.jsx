@@ -678,7 +678,7 @@ const MyPage = () => {
                     <button type="button" className="btn-address-search" onClick={() => setIsPostcodeOpen(true)}>주소 검색</button>
                   </div>
                   <input type="text" value={editData.address || ''} readOnly className="edit-input" style={{ marginBottom: '8px' }} placeholder="주소를 검색해주세요" />
-                  <input type="text" name="detailAddress" value={editData.detailAddress || ''} onChange={handleChange} className="edit-input" placeholder="상세주소를 입력해주세요" />
+                  <input type="text" name="detailAddress" value={editData.detailAddress || ''} onChange={handleChange} className="edit-input" disabled={!editData.address} placeholder="상세주소를 입력해주세요" />
 
                   {isPostcodeOpen && (
                     <>
@@ -835,18 +835,6 @@ const MyPage = () => {
           </div>
         </>
       )}
-
-      <div className="mypage-pay-section">
-        <div className="pay-banner">
-          <div className="pay-text">
-            <h3>환승Pay 충전</h3>
-            <p>안전한 중고 거래의 시작, 환승Pay를 충전해보세요.</p>
-          </div>
-          <button className="btn-charge" onClick={() => setIsPayModalOpen(true)}>
-            <i className="fas fa-wallet"></i> 충전하기
-          </button>
-        </div>
-      </div>
 
       {isPayModalOpen && <ChargePay onClose={() => setIsPayModalOpen(false)} userInfo={userInfo} />}
 
