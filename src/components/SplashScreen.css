@@ -89,11 +89,24 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* 상태 텍스트 + 퍼센트 한 줄 배치 */
+.splash-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.splash-status-text {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  color: #A0A5B0;
+  transition: opacity 0.3s ease;
+}
+
 /* 퍼센트 텍스트 */
 .splash-percent {
-  display: block;
-  text-align: center;
-  margin-top: 12px;
   font-family: 'Pretendard', sans-serif;
   font-weight: 700;
   font-size: 14px;

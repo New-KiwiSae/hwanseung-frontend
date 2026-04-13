@@ -15,11 +15,23 @@ const menuItems = [
   { path: '/admin/announcements', icon: 'bx-news', label: '공지사항 관리' },
 ];
 
+const getUserRole = () => {
+  const token = sessionStorage.getItem("accessToken");
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.role;
+  } catch (e) {
+    return null;
+  }
+};
+
 const Sidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const role = getUserRole();
 
   useEffect(() => {
     if (isDarkMode) {
@@ -63,7 +75,7 @@ const Sidebar = () => {
           </span>
           <div className={`${styles.text} ${styles.logoText}`}>
             <span className={styles.name}>환승마켓</span>
-            <span className={styles.profession}>관리자 (Admin)</span>
+            <span className={styles.profession}>현재 권한 ({role || 'Unknown'})</span>
           </div>
         </div>
         
