@@ -196,7 +196,7 @@ const MainPage = () => {
                 }));
 
                 setLiveFeedItems(latestProductsForFeed);
-                setDarkFeedItems(latestProductsForFeed.slice(0, 3));
+                setDarkFeedItems(latestProductsForFeed);
             } catch (error) {
                 console.error('실시간 피드 조회 실패:', error);
                 setLiveFeedItems([]);
@@ -550,7 +550,7 @@ const MainPage = () => {
                             </h4>
 
                             <div className="live-feed-list">
-                                {darkFeedItems.map((item, idx) => (
+                                {darkFeedItems.slice(0, 3).map((item, idx) => (
                                     <div
                                         key={`${item.id}-${idx}`}
                                         className="live-feed-item"
