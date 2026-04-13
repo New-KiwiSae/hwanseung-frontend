@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import axios from 'axios'; // 🚩 추가
+import { getHeader } from '../../api/UserAPI'; // 🚩 경로에 맞게 추가
 import styles from './AdminContent.module.css';
 
 function AdminUsers() {
@@ -18,20 +20,21 @@ function AdminUsers() {
             setIsLoading(true);
             setError(null);
             try {
-                console.log('/api/admin/users실행');
-                // 백엔드(Spring Boot)에 페이지와 검색어를 쿼리 파라미터로 전달
-                const response = await fetch(`/api/admin/users?page=${page-1}&size=10&keyword=${encodeURIComponent(searchKeyword)}`);
+                // 🚩 수정: fetch -> axios.get으로 변경하고 getHeader() 적용
+                const response = await axios.get(
+                    `/api/admin/users?page=${page-1}&size=10&keyword=${encodeURIComponent(searchKeyword)}`,
+                    getHeader() 
+                );
                 
-                if (!response.ok) throw new Error('사용자 데이터를 불러오는데 실패했습니다.');
+                // axios는 json() 변환이 필요 없고, data 속성 안에 응답이 들어있습니다.
+                const data = response.data; 
                 
-                const data = await response.json();
-                
-                // API 응답 구조가 { content: [...], totalPages: N } 형태라고 가정
                 setUsers(data.content || []);
                 setTotalPages(data.totalPages || 1);
             } catch (err) {
                 console.error("사용자 로드 에러:", err);
-                setError(err.message);
+                // axios 에러 처리 방식에 맞게 수정
+                setError(err.response?.data?.message || err.message || '사용자 데이터를 불러오는데 실패했습니다.');
             } finally {
                 setIsLoading(false);
             }
@@ -47,29 +50,27 @@ function AdminUsers() {
         setSearchKeyword(searchInput);
     };
 
-    // 사용자 상태 변경 핸들러 (정지/활성)
     const toggleUserStatus = async (userId, currentStatus) => {
         const action = currentStatus === 'ACTIVE' ? '정지' : '활성화';
         if (!window.confirm(`해당 사용자를 ${action} 처리하시겠습니까?`)) return;
 
         try {
-            // 상태 변경 API 호출 (PATCH)
-            const response = await fetch(`/api/admin/users/${userId}/status`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE' })
-            });
+            // 🚩 수정: fetch -> axios.patch로 변경
+            const requestBody = { status: currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE' };
+            const response = await axios.patch(
+                `/api/admin/users/${userId}/status`, 
+                requestBody,
+                getHeader() // 헤더 추가
+            );
 
-            if (!response.ok) throw new Error('상태 변경 실패');
-
-            // 성공 시 로컬 상태 업데이트 (API 재호출 없이 UI 즉시 반영)
+            // 성공 시 로컬 상태 업데이트
             setUsers(users.map(user => 
                 user.id === userId 
                     ? { ...user, status: currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE' } 
                     : user
             ));
         } catch (err) {
-            alert(`처리 중 오류가 발생했습니다: ${err.message}`);
+            alert(`처리 중 오류가 발생했습니다: ${err.response?.data?.message || err.message}`);
         }
     };
 
@@ -106,10 +107,10 @@ function AdminUsers() {
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #eee' }}>
                         <tr>
-                            <th style={{ padding: '12px 15px' }}>ID</th>
-                            <th style={{ padding: '12px 15px' }}>이메일</th>
+                            <th style={{ padding: '12px 15px' }}>회원번호</th>
+                            <th style={{ padding: '12px 15px' }}>아이디</th>
                             <th style={{ padding: '12px 15px' }}>닉네임</th>
-                            <th style={{ padding: '12px 15px' }}>신뢰레벨</th>
+                            <th style={{ padding: '12px 15px' }}>신뢰도 레벨</th>
                             <th style={{ padding: '12px 15px' }}>누적신고</th>
                             <th style={{ padding: '12px 15px' }}>상태</th>
                             <th style={{ padding: '12px 15px' }}>관리</th>
@@ -132,7 +133,7 @@ function AdminUsers() {
                             users.map(user => (
                                 <tr key={user.id} style={{ borderBottom: '1px solid #eee' }}>
                                     <td style={{ padding: '12px 15px' }}>{user.id}</td>
-                                    <td style={{ padding: '12px 15px' }}>{user.email}</td>
+                                    <td style={{ padding: '12px 15px' }}>{user.username}</td>
                                     <td style={{ padding: '12px 15px' }}>{user.nickname}</td>
                                     <td style={{ padding: '12px 15px', color: user.trustScore < 30 ? '#d9534f' : 'inherit' }}>
                                         Lv.{user.trustScore}

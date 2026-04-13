@@ -329,6 +329,11 @@
     display: inline-block;
     min-width: 0;
     word-break: break-all;
+    max-width: 140px;
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: normal;
 }
 
 .product-card-bottom {

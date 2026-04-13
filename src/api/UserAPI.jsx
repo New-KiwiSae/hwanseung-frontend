@@ -3,7 +3,7 @@ import axios from "axios";
 /** * 최신 토큰을 포함한 헤더를 반환하는 함수
  * 호출될 때마다 sessionStorage에서 최신 값을 읽어옵니다.
  */
-const getHeader = () => {
+export const getHeader = () => {
     const accessToken = sessionStorage.getItem("accessToken");
     const refreshToken = sessionStorage.getItem("refreshToken");
 
@@ -60,7 +60,9 @@ axios.interceptors.response.use(
         const originalRequest = error.config;
 
         // 2. 만약 에러가 401(토큰 만료)이고, 아직 재시도를 안 한 요청이라면?
-        if (error.response && error.response.status === 401 && !originalRequest._retry) {
+        // if (error.response && error.response.status === 401 && !originalRequest._retry) {
+        // 만약 에러가 난 곳이 '/api/auth/refresh' 라면 무한 갱신 시도를 하지 않고 멈춥니다!
+            if (error.response && error.response.status === 401 && !originalRequest._retry && originalRequest.url !== '/api/auth/refresh') {
             originalRequest._retry = true; // 무한 루프 방지용 꼬리표 붙이기
 
             try {

@@ -8,6 +8,8 @@ import ProductCreatePage from "./pages/Product/ProductCreatePage";
 import ProductDetailPage from './pages/Product/ProductDetailPage.jsx';
 import ProductListPage from "./pages/Product/ProductListPage";
 import ProductEditPage from "./pages/Product/ProductEditPage";
+import ReportCreatePage from './pages/Report/ReportCreatePage.jsx';
+import ScrollToTop from "./components/ScrollToTop";
 import AuthPage from './pages/Auth/AuthPage.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
 import Purchase from './pages/MyPage/Purchase';
@@ -57,6 +59,7 @@ function App() {
             <div className="app-wrapper" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
                 {!(isAuthPage || isAdminPage || isExtraInfoPage) && <Header />}
                 <main style={{ flexGrow: 1 }}>
+                    <ScrollToTop />
                     <Routes>
                         {/* [누구나 접근 가능] 로그인과 추가 정보 입력 페이지 */}
                         <Route path="/login" element={<AuthPage />} />
@@ -70,6 +73,7 @@ function App() {
                             <Route path="/products/:productId" element={<ProductDetailPage />} />
                             <Route path="/products/create" element={<ProductCreatePage />} />
                             <Route path="/products/:productId/edit" element={<ProductEditPage />} />
+                            <Route path="/reports/create/:productId" element={<ReportCreatePage />} />
 
                             {/* 마이페이지 그룹 */}
                             <Route element={<Layout />}>

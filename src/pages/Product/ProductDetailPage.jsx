@@ -6,20 +6,32 @@ import { FiHeart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { fetchPublicCategories } from "../../api/PublicCategoryAPI";
 
 function formatPrice(price) {
     return Number(price || 0).toLocaleString();
 }
 
-const categoryMap = {
-    digital: "디지털기기",
-    fashion: "의류/잡화",
-    furniture: "가구/인테리어",
-    life: "생활/가전",
-    hobby: "취미/도서",
-    sports: "스포츠/레저",
-    ticket: "티켓/교환권",
-};
+// ✅ 추가: 작성일 표시용 함수
+function formatDate(dateString) {
+    if (!dateString) return "-";
+
+    const now = new Date();
+    const date = new Date(dateString);
+
+    const diff = Math.floor((now - date) / 1000);
+
+    if (diff < 60) return "방금 전";
+    if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}일 전`;
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}.${month}.${day}`;
+}
 
 const saleStatusLabelMap = {
     SALE: "판매중",
@@ -36,6 +48,16 @@ export default function ProductDetailPage() {
     const [error, setError] = useState("");
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [imageErrorMap, setImageErrorMap] = useState({});
+    const [categories, setCategories] = useState([]);
+
+    const categoryLabelMap = categories.reduce((acc, category) => {
+        acc[category.key] = category.displayName;
+        return acc;
+    }, {});
+
+    const getCategoryDisplayName = (categoryKey) => {
+        return categoryLabelMap[categoryKey] || categoryKey;
+    };
 
     const [likeInfo, setLikeInfo] = useState({
         liked: false,
@@ -101,6 +123,23 @@ export default function ProductDetailPage() {
     };
 
     useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                const data = await fetchPublicCategories();
+                const sortedCategories = Array.isArray(data)
+                    ? [...data].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+                    : [];
+                setCategories(sortedCategories);
+            } catch (error) {
+                console.error("카테고리 목록 조회 실패:", error);
+                setCategories([]);
+            }
+        };
+
+        loadCategories();
+    }, []);
+
+    useEffect(() => {
         const fetchProductDetail = async () => {
             try {
                 const response = await fetch(`/api/products/${productId}`);
@@ -155,8 +194,7 @@ export default function ProductDetailPage() {
             const realRoomId = res.data.roomId;
 
             const tempClient = new Client({
-                // webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
-                webSocketFactory: () => new SockJS('/ws-chat'),
+                webSocketFactory: () => new SockJS("/ws-chat"),
                 connectHeaders: { Authorization: `Bearer ${currentToken}` },
                 onConnect: () => {
                     const messageData = {
@@ -230,6 +268,52 @@ export default function ProductDetailPage() {
         } catch (err) {
             console.error("찜 처리 실패:", err);
             alert(err.message || "찜 처리 중 오류 발생");
+        }
+    };
+
+    // ✏️수정: 신고 버튼 클릭 시 서버에 먼저 중복 신고 여부 확인
+    const handleReport = async () => {
+        const token = sessionStorage.getItem("accessToken");
+
+        if (!token) {
+            alert("로그인 후 이용해주세요.");
+            navigate("/login");
+            return;
+        }
+
+        if (isSeller) {
+            alert("본인 상품은 신고할 수 없습니다.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/reports/products/${productId}/check`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const text = await response.text();
+            let result = {};
+
+            if (text) {
+                result = JSON.parse(text);
+            }
+
+            if (!response.ok) {
+                throw new Error(result.message || "신고 가능 여부 확인 실패");
+            }
+
+            if (result.reported) {
+                alert(result.message || "이미 신고한 상품입니다.");
+                return;
+            }
+
+            navigate(`/reports/create/${productId}`);
+        } catch (err) {
+            console.error("신고 가능 여부 확인 실패:", err);
+            alert(err.message || "신고 확인 중 오류 발생");
         }
     };
 
@@ -496,7 +580,7 @@ export default function ProductDetailPage() {
                     <div className="product-detail-info-card">
                         <div className="detail-chip-row">
                             <span className="detail-chip">
-                                {categoryMap[product.category] || product.category}
+                                {getCategoryDisplayName(product.category)}
                             </span>
 
                             <span className="detail-chip outline">{product.location}</span>
@@ -528,10 +612,16 @@ export default function ProductDetailPage() {
                                 <span className="value">{product.location}</span>
                             </div>
 
+                            {/* ✅ 추가: 거래지역 아래 작성일 */}
+                            <div className="detail-info-item">
+                                <span className="label">작성일</span>
+                                <span className="value">{formatDate(product.createdAt)}</span>
+                            </div>
+
                             <div className="detail-info-item">
                                 <span className="label">카테고리</span>
                                 <span className="value">
-                                    {categoryMap[product.category] || product.category}
+                                    {getCategoryDisplayName(product.category)}
                                 </span>
                             </div>
 
@@ -575,7 +665,8 @@ export default function ProductDetailPage() {
                             <button
                                 type="button"
                                 className="btn-report"
-                                onClick={() => alert("신고 기능은 준비 중입니다.")}
+                                onClick={handleReport}
+                                disabled={isSeller}
                             >
                                 신고하기
                             </button>
@@ -587,7 +678,7 @@ export default function ProductDetailPage() {
                             </Link>
                         </div>
 
-                        {canManageProduct && (
+                        {canManageProduct && !isSoldOut && (
                             <div className="detail-owner-buttons">
                                 {canChangeSaleStatus && product.saleStatus === "SALE" && (
                                     <button

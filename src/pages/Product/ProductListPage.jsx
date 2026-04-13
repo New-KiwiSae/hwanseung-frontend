@@ -3,28 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiHeart, FiMessageCircle, FiMapPin } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import "./ProductListPage.css";
-
-const categoryMap = {
-    all: "전체",
-    digital: "디지털기기",
-    fashion: "의류/잡화",
-    furniture: "가구/인테리어",
-    life: "생활/가전",
-    hobby: "취미/도서",
-    sports: "스포츠/레저",
-    ticket: "티켓/교환권",
-};
-
-const categoryOptions = [
-    { key: "all", label: "전체" },
-    { key: "digital", label: "디지털기기" },
-    { key: "fashion", label: "의류/잡화" },
-    { key: "furniture", label: "가구/인테리어" },
-    { key: "life", label: "생활/가전" },
-    { key: "hobby", label: "취미/도서" },
-    { key: "sports", label: "스포츠/레저" },
-    { key: "ticket", label: "티켓/교환권" },
-];
+import { fetchPublicCategories } from "../../api/PublicCategoryAPI";
 
 function formatPrice(price) {
     return Number(price || 0).toLocaleString();
@@ -59,8 +38,47 @@ export default function ProductListPage() {
     const [error, setError] = useState("");
     const [visibleCount, setVisibleCount] = useState(12);
     const [imageErrorMap, setImageErrorMap] = useState({});
+    const [categories, setCategories] = useState([]);
 
     const observerTargetRef = useRef(null); // ✅ 추가: 무한스크롤 감지용 ref
+
+
+    const categoryLabelMap = useMemo(() => {
+        return categories.reduce(
+            (acc, category) => {
+                acc[category.key] = category.displayName;
+                return acc;
+            },
+            { all: "전체" }
+        );
+    }, [categories]);
+
+    const categoryOptions = useMemo(() => {
+        return [
+            { key: "all", label: "전체" },
+            ...categories.map((category) => ({
+                key: category.key,
+                label: category.displayName,
+            })),
+        ];
+    }, [categories]);
+
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                const data = await fetchPublicCategories();
+                const sortedCategories = Array.isArray(data)
+                    ? [...data].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+                    : [];
+                setCategories(sortedCategories);
+            } catch (error) {
+                console.error("카테고리 목록 조회 실패:", error);
+                setCategories([]);
+            }
+        };
+
+        loadCategories();
+    }, []);
 
     const userInfo = getUserInfoFromToken();
     const loginUserId = userInfo?.userId;
@@ -68,15 +86,19 @@ export default function ProductListPage() {
     useEffect(() => {
         const category = searchParams.get("category");
 
-        if (
-            category &&
-            ["digital", "fashion", "furniture", "life", "hobby", "sports", "ticket"].includes(category)
-        ) {
+        if (!category) {
+            setSelectedCategory("all");
+            return;
+        }
+
+        const validCategoryKeys = categories.map((item) => item.key);
+
+        if (validCategoryKeys.includes(category)) {
             setSelectedCategory(category);
         } else {
             setSelectedCategory("all");
         }
-    }, [searchParams]);
+    }, [searchParams, categories]);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -379,7 +401,7 @@ export default function ProductListPage() {
                                         <div className="product-card-body">
                                             <div className="product-card-top">
                                                 <span className="product-category-chip">
-                                                    {categoryMap[product.category] || product.category}
+                                                    {categoryLabelMap[product.category] || product.category}
                                                 </span>
                                             </div>
 

@@ -27,7 +27,7 @@ const CATEGORY_MAP = {
 const STATUS_MAP = {
     SALE: { label: '판매중', style: styles.badgeSale },
     SOLD_OUT: { label: '판매완료', style: styles.badgeSoldOut },
-    PENDING: { label: '승인대기', style: styles.badgePending },
+    RESERVED: { label: '예약중', style: styles.badgePending },
     REJECTED: { label: '반려', style: styles.badgeRejected },
     HIDDEN: { label: '숨김', style: styles.badgeHidden },
 };
@@ -68,7 +68,7 @@ function AdminProducts() {
     const [sortBy, setSortBy] = useState('latest');
 
     // 요약
-    const [summary, setSummary] = useState({ total: 0, sale: 0, soldOut: 0, pending: 0, hidden: 0 });
+    const [summary, setSummary] = useState({ total: 0, sale: 0, soldOut: 0, reserved: 0, hidden: 0 });
 
     // 체크박스 (일괄 처리)
     const [selectedIds, setSelectedIds] = useState(new Set());
@@ -324,8 +324,8 @@ function AdminProducts() {
                 />
                 <SummaryCard
                     icon="bx bx-time-five" iconBg="rgba(234,179,8,0.12)" iconColor="#eab308"
-                    label="승인대기" value={summary.pending}
-                    active={filterStatus === 'PENDING'} onClick={() => handleStatusFilter('PENDING')}
+                    label="예약중" value={summary.reserved}
+                    active={filterStatus === 'RESERVED'} onClick={() => handleStatusFilter('RESERVED')}
                 />
                 <SummaryCard
                     icon="bx bx-check-double" iconBg="rgba(107,114,128,0.12)" iconColor="#6b7280"
@@ -753,7 +753,7 @@ function DetailContent({
                     <div style={{ flex: 1 }}></div>
 
                     {/* 승인대기 상태: 승인 + 반려 */}
-                    {currentStatus === 'PENDING' && !showReasonFor && (
+                    {currentStatus === 'RESERVED' && !showReasonFor && (
                         <>
                             <button
                                 className={styles.btnWarning}

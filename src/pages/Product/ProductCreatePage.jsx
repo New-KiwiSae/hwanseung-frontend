@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DaumPostcode from "react-daum-postcode";
 import "./ProductCreatePage.css";
 import { useUser } from "../../UserContext";
+import { fetchPublicCategories } from "../../api/PublicCategoryAPI";
 
 export default function ProductCreatePage() {
     const navigate = useNavigate();
@@ -24,6 +25,25 @@ export default function ProductCreatePage() {
     const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
     const [imageFiles, setImageFiles] = useState([]);
     const [previewUrls, setPreviewUrls] = useState([]);
+    const [categories, setCategories] = useState([]);
+
+
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                const data = await fetchPublicCategories();
+                const sortedCategories = Array.isArray(data)
+                    ? [...data].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+                    : [];
+                setCategories(sortedCategories);
+            } catch (error) {
+                console.error("카테고리 목록 조회 실패:", error);
+                setCategories([]);
+            }
+        };
+
+        loadCategories();
+    }, []);
 
     const formatPriceWithComma = (value) => {
         if (!value) return "";
@@ -351,7 +371,7 @@ export default function ProductCreatePage() {
                             </label>
                         </section>
 
-                        <section className="product-create-card info-card">
+                        <section className="product-create-card">
                             <div className="section-head">
                                 <h2>기본 정보</h2>
                             </div>
@@ -379,13 +399,11 @@ export default function ProductCreatePage() {
                                         required
                                     >
                                         <option value="">카테고리 선택</option>
-                                        <option value="digital">디지털기기</option>
-                                        <option value="fashion">의류/잡화</option>
-                                        <option value="furniture">가구/인테리어</option>
-                                        <option value="life">생활/가전</option>
-                                        <option value="hobby">취미/도서</option>
-                                        <option value="sports">스포츠/레저</option>
-                                        <option value="ticket">티켓/교환권</option>
+                                        {categories.map((category) => (
+                                            <option key={category.id ?? category.key} value={category.key}>
+                                                {category.displayName}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
 
