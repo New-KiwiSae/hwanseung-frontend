@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 import './Header.css';
 import axios from 'axios';
-import { Client } from '@stomp/stompjs'; 
-import SockJS from 'sockjs-client';       
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
 // 🌟 1. 우리가 만든 전역 창고 도구를 가져옵니다.
 import { useUser } from '../UserContext';
@@ -79,6 +79,20 @@ const Header = () => {
   };
 
   useEffect(() => {
+    const status = sessionStorage.getItem('status');
+    const currentPath = window.location.pathname;
+
+    // 1. 제외할 페이지 리스트 (여기는 PENDING 상태여도 접근 가능해야 함)
+    const allowedPaths = ['/login', '/social-signup-extra', '/oauth/callback'];
+
+    // 2. 상태가 PENDING이고, 현재 페이지가 허용 리스트에 없다면 리다이렉트
+    if (status === 'PENDING' && !allowedPaths.includes(currentPath)) {
+      alert("추가 정보 입력이 필요합니다.");
+      navigate("/social-signup-extra");
+    }
+  }, [navigate]);
+
+  useEffect(() => {
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
@@ -113,7 +127,8 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    if (!token || !currentUser) return;
+    const sessionStatus = sessionStorage.getItem('status');
+    if (!token || !currentUser || sessionStatus === 'PENDING') return;
 
     const fetchHistoryNotifications = async () => {
       try {
@@ -121,7 +136,7 @@ const Header = () => {
         const res = await axios.get(`/api/notifications`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
+
         // 🚀 채팅 알림(CHAT)은 헤더에서 버립니다!
         const systemNotis = res.data.filter(n => n.type !== 'CHAT');
         setNotifications(systemNotis);
@@ -138,7 +153,7 @@ const Header = () => {
       onConnect: () => {
         client.subscribe(`/sub/user/${currentUser}/notification`, (message) => {
           const newNoti = JSON.parse(message.body);
-          if (newNoti.type === 'CHAT') return; 
+          if (newNoti.type === 'CHAT') return;
           setNotifications(prev => [newNoti, ...prev]);
         });
       }
@@ -250,9 +265,9 @@ const Header = () => {
                     ) : (
                       notifications.map((noti) => (
                         /* 🌟 안 읽은 알림 배경색 동적 클래스 추가 (unread) */
-                        <div 
-                          key={noti.id} 
-                          className={`noti-item ${!noti.isRead ? 'unread' : ''}`} 
+                        <div
+                          key={noti.id}
+                          className={`noti-item ${!noti.isRead ? 'unread' : ''}`}
                           onClick={() => handleNotiClick(noti)}
                         >
                           <div className="noti-item-top">
@@ -284,7 +299,7 @@ const Header = () => {
                   <button className="icon-btn user-avatar" title="내 프로필"><i className="far fa-user"></i></button>
                   {isProfileOpen && (
                     <div className="profile-dropdown">
-                      <div className="dropdown-item" style={{ fontWeight: 'bold', color: '#ff6f0f' }}>{userInfo.nickname || userInfo.username}님 환영합니다!</div>
+                      <div className="dropdown-item" style={{ fontWeight: 'bold', color: '#ff6f0f' }}>{(userInfo?.nickname || userInfo?.username || sessionStorage.getItem("username") || "사용자")}님 환영합니다!</div>
                       <hr style={{ margin: '5px 0' }} />
                       <div className="dropdown-item" onClick={() => navigate('/mypage')}><i className="far fa-id-card"></i> 내 정보 보기</div>
                       <div className="dropdown-item" onClick={() => navigate('/sales')}><i className="fas fa-box-open"></i> 거래 내역</div>

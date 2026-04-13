@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./AuthPage.css";
 import { useUser } from "../../UserContext";
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
 
 export default function AuthPage() {
     const navigate = useNavigate();
@@ -25,6 +27,7 @@ export default function AuthPage() {
     const [timeLeft, setTimeLeft] = useState(0); // 남은 시간 (초)
     const [isTimerActive, setIsTimerActive] = useState(false);
     const [isEmailSent, setIsEmailSent] = useState(false);
+    const [isSocialSignup, setIsSocialSignup] = useState(false);
 
 
 
@@ -327,15 +330,15 @@ export default function AuthPage() {
             sessionStorage.setItem('accessToken', response.data.accessToken);
             sessionStorage.setItem('refreshToken', response.data.refreshToken);
             sessionStorage.setItem('username', signInValues.username);
-        window.location.href = "/";
-    }).catch((error) => {
-        // 🌟 서버가 보낸 JSON 객체에서 message 필드를 꺼냅니다.
-        const errorMessage = error.response?.data?.message || "로그인 정보가 올바르지 않습니다.";
-        
-        alert(errorMessage); 
-        console.error("에러 발생:", error.response?.data);
-    });
-};
+            window.location.href = "/";
+        }).catch((error) => {
+            // 🌟 서버가 보낸 JSON 객체에서 message 필드를 꺼냅니다.
+            const errorMessage = error.response?.data?.message || "로그인 정보가 올바르지 않습니다.";
+
+            alert(errorMessage);
+            console.error("에러 발생:", error.response?.data);
+        });
+    };
 
     const onSignUpSubmit = async (e) => {
         e.preventDefault();
@@ -395,6 +398,7 @@ export default function AuthPage() {
             setErrors({});
             setIsSignUpActive(false);
             setIsEmailSent(false);
+            setIsSocialSignup(false);
 
         }).catch(() => {
             alert("가입 중 오류가 발생했습니다.");
@@ -420,7 +424,48 @@ export default function AuthPage() {
         setIsPostcodeOpen(false);
     };
 
+    const handleGoogleSuccess = async (credentialResponse) => {
+        try {
+            // 1. 구글 ID Token을 백엔드로 전송
+            // 백엔드 컨트롤러의 파라미터명에 맞춰 'token' 또는 'idToken'으로 통일하세요.
+            const response = await axios.post("/api/auth/google", {
+                token: credentialResponse.credential
+            });
 
+            // 2. 백엔드 응답에서 토큰과 유저 상태(status) 추출
+            const { accessToken, refreshToken, status, tokenType } = response.data;
+
+            // 3. 토큰 저장 (sessionStorage든 localStorage든 프로젝트 방침에 따라 선택)
+            const decoded = jwtDecode(accessToken);
+            const usernameFromToken = decoded.sub || decoded.username;
+            sessionStorage.setItem('accessToken', accessToken);
+            sessionStorage.setItem('refreshToken', refreshToken); // 리프레시 토큰도 저장 권장
+            sessionStorage.setItem('username', usernameFromToken);
+            sessionStorage.setItem('status', status);
+            sessionStorage.setItem('tokenType', tokenType || 'Bearer');
+
+            // 4. 상태(Status)에 따른 리다이렉트 분기
+            if (status === "PENDING") {
+                // ✨ 추가 정보 입력(연락처 인증 등)이 필요한 경우
+                alert("환영합니다! 원활한 서비스 이용을 위해 추가 정보 입력이 필요합니다.");
+                navigate("/social-signup-extra"); // 추가 정보 입력 페이지 경로
+            } else if (status === "ACTIVE") {
+                // ✨ 모든 가입 절차가 완료된 기존 유저인 경우
+                alert(`${username}님, 반갑습니다!`);
+                navigate("/"); // 또는 "/dashboard"
+            } else {
+                // 정지된 계정 등의 처리
+                alert("접근 권한이 없는 계정입니다.");
+                sessionStorage.clear();
+            }
+
+        } catch (error) {
+            console.error("구글 로그인 처리 중 에러:", error);
+            // 백엔드에서 보낸 에러 메시지가 있다면 표시
+            const errorMsg = error.response?.data?.message || "로그인에 실패했습니다.";
+            alert(errorMsg);
+        }
+    };
 
     return (
         <div className="auth-page-wrapper">
@@ -444,11 +489,13 @@ export default function AuthPage() {
                 <div className="form-container sign-up-container">
                     <form onSubmit={onSignUpSubmit} className="scrollable-form">
                         <h2>회원가입</h2>
-                        {/* <div className="social-login">
-                            <a href="#" className="social-btn"><i className="fab fa-google"></i></a>
+                        <div className="social-login">
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => console.log('Login Failed')}
+                            />
                             <a href="#" className="social-btn"><b>K</b></a>
-                            <a href="#" className="social-btn"><i className="fab fa-apple"></i></a>
-                        </div> */}
+                        </div>
                         <span className="sub-text">기본 정보 입력</span>
 
                         {/* 아이디 + 중복확인 */}
@@ -638,7 +685,7 @@ export default function AuthPage() {
                             </div>
                             <div className="input-group">
                                 <div className="input-wrapper">
-                                    <input type="text" id="detailAddress" placeholder="상세주소" onChange={handleSignUpChange} value={signUpValues.detailAddress} />
+                                    <input type="text" id="detailAddress" placeholder="상세주소" onChange={handleSignUpChange} value={signUpValues.detailAddress} disabled={!signUpValues.address} className={!signUpValues.address ? "disabled-input" : ""} />
                                     <i className="fas fa-building"></i>
                                 </div>
                             </div>
@@ -669,11 +716,13 @@ export default function AuthPage() {
                     <form onSubmit={onSignInSubmit}>
                         <div className="logo"><i className="fas fa-sync-alt"></i></div>
                         <h2>로그인</h2>
-                        {/* <div className="social-login">
-                            <a href="#" className="social-btn"><i className="fab fa-google"></i></a>
+                        <div className="social-login">
+                                <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => console.log('Login Failed')}
+                            />
                             <a href="#" className="social-btn"><b>K</b></a>
-                            <a href="#" className="social-btn"><i className="fab fa-apple"></i></a>
-                        </div> */}
+                        </div>
                         <span className="sub-text">또는 이메일 계정으로 로그인하세요</span>
 
                         <div className="input-group">
