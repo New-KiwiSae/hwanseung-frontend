@@ -433,13 +433,16 @@ export default function AuthPage() {
             });
 
             // 2. 백엔드 응답에서 토큰과 유저 상태(status) 추출
-            const { accessToken, refreshToken, username, status } = response.data;
+            const { accessToken, refreshToken, status, tokenType } = response.data;
 
             // 3. 토큰 저장 (sessionStorage든 localStorage든 프로젝트 방침에 따라 선택)
+            const decoded = jwtDecode(accessToken);
+            const usernameFromToken = decoded.sub || decoded.username;
             sessionStorage.setItem('accessToken', accessToken);
             sessionStorage.setItem('refreshToken', refreshToken); // 리프레시 토큰도 저장 권장
-            sessionStorage.setItem('username', username);
+            sessionStorage.setItem('username', usernameFromToken);
             sessionStorage.setItem('status', status);
+            sessionStorage.setItem('tokenType', tokenType || 'Bearer');
 
             // 4. 상태(Status)에 따른 리다이렉트 분기
             if (status === "PENDING") {

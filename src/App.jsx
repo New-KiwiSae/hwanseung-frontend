@@ -32,11 +32,14 @@ import AdminCategories from './pages/Admin/AdminCategories.jsx';
 import AdminChatManage from './pages/Admin/AdminChatManage.jsx';
 import AdminChatManager from './pages/Chat/AdminChatManager.jsx';
 import AdminAnnouncements from './pages/Admin/AdminAnnouncements.jsx';
+import StatusGuard from './pages/Auth/StatusGuard';
+import SocialSignupExtra from './pages/Auth/SocialSignupExtra';
 
 
 function App() {
     const location = useLocation();
     const isAuthPage = location.pathname === '/login';
+    const isExtraInfoPage = location.pathname === '/social-signup-extra';
     const isAdminPage = location.pathname.startsWith('/admin');
     const [showSplash, setShowSplash] = useState(() => {
         return !sessionStorage.getItem('splashShown');
@@ -52,46 +55,52 @@ function App() {
     return (
         <UserProvider>
             <div className="app-wrapper" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-                {!(isAuthPage || isAdminPage) && <Header />}
+                {!(isAuthPage || isAdminPage || isExtraInfoPage) && <Header />}
                 <main style={{ flexGrow: 1 }}>
                     <Routes>
-
-                        <Route path="/" element={<MainPage />} />
-                        <Route path="/near-me" element={<NearMePage />} />
-                        <Route path="/products/create" element={<ProductCreatePage />} />
-                        <Route path="/products/:productId" element={<ProductDetailPage />} />
-                        <Route path="/products" element={<ProductListPage />} />
-                        <Route path="/products/:productId/edit" element={<ProductEditPage />} />
-                        <Route path="/info" element={<InfoPage />} />
-
+                        {/* [누구나 접근 가능] 로그인과 추가 정보 입력 페이지 */}
                         <Route path="/login" element={<AuthPage />} />
+                        <Route path="/social-signup-extra" element={<SocialSignupExtra />} />
 
-                        <Route path="/admin" element={<AdminLayout />}>
-                            <Route index element={<AdminDashBoard />} />
-                            <Route path="dashboard" element={<AdminDashBoard />} />
-                            <Route path="statistics" element={<AdminStatistics />} />
-                            <Route path="products" element={<AdminProducts />} />
-                            <Route path="transactions" element={<AdminTransactions />} />
-                            <Route path="categories" element={<AdminCategories />} />
-                            <Route path="users" element={<AdminUsers />} />
-                            <Route path="reports" element={<AdminReports />} />
-                            <Route path="chat" element={<AdminChatManager />} />
-                            {/* <Route path="chat" element={<AdminChatManage />} /> */}
-                            <Route path="notifications" element={<AdminNotifications />} />
-                            <Route path="announcements" element={<AdminAnnouncements />} />
+                        {/* [PENDING 차단 구역] 이 안에 있는 모든 라우트는 StatusGuard를 거칩니다 */}
+                        <Route element={<StatusGuard />}>
+                            <Route path="/" element={<MainPage />} />
+                            <Route path="/near-me" element={<NearMePage />} />
+                            <Route path="/products" element={<ProductListPage />} />
+                            <Route path="/products/:productId" element={<ProductDetailPage />} />
+                            <Route path="/products/create" element={<ProductCreatePage />} />
+                            <Route path="/products/:productId/edit" element={<ProductEditPage />} />
+
+                            {/* 마이페이지 그룹 */}
+                            <Route element={<Layout />}>
+                                <Route path="/mypage" element={<MyPage />} />
+                                <Route path="/sales" element={<Sales />} />
+                                <Route path="/purchase" element={<Purchase />} />
+                                <Route path="/wishlist" element={<Wishlist />} />
+                            </Route>
+
+
+                            <Route path="/admin" element={<AdminLayout />}>
+                                <Route index element={<AdminDashBoard />} />
+                                <Route path="dashboard" element={<AdminDashBoard />} />
+                                <Route path="statistics" element={<AdminStatistics />} />
+                                <Route path="products" element={<AdminProducts />} />
+                                <Route path="transactions" element={<AdminTransactions />} />
+                                <Route path="categories" element={<AdminCategories />} />
+                                <Route path="users" element={<AdminUsers />} />
+                                <Route path="reports" element={<AdminReports />} />
+                                <Route path="chat" element={<AdminChatManager />} />
+                                {/* <Route path="chat" element={<AdminChatManage />} /> */}
+                                <Route path="notifications" element={<AdminNotifications />} />
+                                <Route path="announcements" element={<AdminAnnouncements />} />
+                            </Route>
                         </Route>
 
-                        <Route element={<Layout />}>
-                            <Route path="/mypage" element={<MyPage />} />
-                            <Route path="/sales" element={<Sales />} />
-                            <Route path="/purchase" element={<Purchase />} />
-                            <Route path="/wishlist" element={<Wishlist />} />
-                        </Route>
                     </Routes>
                 </main>
-                {!(isAuthPage || isAdminPage) && <Footer />}
+                {!(isAuthPage || isAdminPage || isExtraInfoPage) && <Footer />}
 
-                {!(isAuthPage || isAdminPage) && <FloatingChat />}
+                {!(isAuthPage || isAdminPage || isExtraInfoPage) && <FloatingChat />}
 
             </div>
         </UserProvider>

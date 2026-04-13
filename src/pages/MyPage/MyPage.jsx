@@ -182,7 +182,7 @@ const MyPage = () => {
 
   //   try {
   //     const token = sessionStorage.getItem('accessToken');
-      
+
   //     // 백엔드 API (주소는 실제 백엔드 설정에 맞게 변경하세요)
   //     await axios.post('/api/user/verify-password', 
   //       { password: verifyPassword }, 
@@ -329,7 +329,7 @@ const MyPage = () => {
                 formData.append('userData', new Blob([JSON.stringify(updatedInfo)], { type: 'application/json' }));
 
                 await axios.put(`/api/user`, formData, {
-                  headers: { 
+                  headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data'
                   }
@@ -392,9 +392,10 @@ const MyPage = () => {
         }
       });
       alert("성공적으로 정보가 수정되었습니다! 🎉");
-      await fetchUser();
+      if (fetchUser) await fetchUser();
       setIsEditing(false);
       setSelectedFile(null);
+      window.location.reload();
     } catch (error) {
       alert("정보 수정에 실패했습니다.");
     }
@@ -416,81 +417,81 @@ const MyPage = () => {
   if (!userInfo) return null;
 
   // 회원탈퇴
-    const clearAuthSession = () => {
-        sessionStorage.removeItem('tokenType');
-        sessionStorage.removeItem('accessToken');
-        sessionStorage.removeItem('refreshToken');
-        // 필요한 경우 다른 상태값들도 초기화
-        window.location.href = '/login'; // 로그인 페이지로 강제 이동
-    };
+  const clearAuthSession = () => {
+    sessionStorage.removeItem('tokenType');
+    sessionStorage.removeItem('accessToken');
+    sessionStorage.removeItem('refreshToken');
+    // 필요한 경우 다른 상태값들도 초기화
+    window.location.href = '/login'; // 로그인 페이지로 강제 이동
+  };
 
-    const WithdrawalSection = () => {
-        const [password, setPassword] = useState("");
-        const [isModalOpen, setIsModalOpen] = useState(false);
+  const WithdrawalSection = () => {
+    const [password, setPassword] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-        const handleWithdrawal = async () => {
-            try {
-                // 백엔드 withdraw API 호출
-                const response = await axios.post('/api/auth/withdraw',
-                    { password }, // JSON Body
-                    { headers: { Authorization: `Bearer ${sessionStorage.getItem('accessToken')}` } }
-                );
-
-                if (response.status === 200) {
-                    alert("그동안 이용해주셔서 감사합니다. 회원 탈퇴가 완료되었습니다.");
-                    clearAuthSession(); // 세션 정리 및 이동
-                }
-            } catch (error) {
-                // 백엔드에서 던진 "비밀번호가 일치하지 않습니다" 등의 메시지 처리
-                alert(error.response?.data || "탈퇴 처리 중 오류가 발생했습니다.");
-            }
-        };
-
-        return (
-            <div className="withdrawal-container">
-                <h3>회원 탈퇴</h3>
-                <p>탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.</p>
-                <button onClick={() => setIsModalOpen(true)}>탈퇴하기</button>
-
-                {isModalOpen && (
-                    <div className="modal">
-                        <h4>본인 확인을 위해 비밀번호를 입력해주세요.</h4>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="비밀번호 입력"
-                        />
-                        <button onClick={handleWithdrawal}>정말 탈퇴하기</button>
-                        <button onClick={() => setIsModalOpen(false)}>취소</button>
-                    </div>
-                )}
-            </div>
+    const handleWithdrawal = async () => {
+      try {
+        // 백엔드 withdraw API 호출
+        const response = await axios.post('/api/auth/withdraw',
+          { password }, // JSON Body
+          { headers: { Authorization: `Bearer ${sessionStorage.getItem('accessToken')}` } }
         );
-    };
 
-    const handleWithdraw = async () => {
-        const password = prompt("본인 확인을 위해 비밀번호를 입력해주세요.");
-
-        if (!password) return;
-
-        if (window.confirm("정말로 탈퇴하시겠습니까? 탈퇴 후 데이터는 복구할 수 없습니다.")) {
-            try {
-                await axios.post('/api/user/withdraw',
-                    { password },
-                    { headers: { Authorization: `Bearer ${sessionStorage.getItem('accessToken')}` } }
-                );
-
-                alert("탈퇴 처리가 완료되었습니다. 그동안 이용해주셔서 감사합니다.");
-
-                // 모든 세션 정보 삭제 및 이동
-                sessionStorage.clear();
-                window.location.href = "/";
-            } catch (error) {
-                alert(error.response?.data || "탈퇴 처리 중 오류가 발생했습니다.");
-            }
+        if (response.status === 200) {
+          alert("그동안 이용해주셔서 감사합니다. 회원 탈퇴가 완료되었습니다.");
+          clearAuthSession(); // 세션 정리 및 이동
         }
+      } catch (error) {
+        // 백엔드에서 던진 "비밀번호가 일치하지 않습니다" 등의 메시지 처리
+        alert(error.response?.data || "탈퇴 처리 중 오류가 발생했습니다.");
+      }
     };
+
+    return (
+      <div className="withdrawal-container">
+        <h3>회원 탈퇴</h3>
+        <p>탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.</p>
+        <button onClick={() => setIsModalOpen(true)}>탈퇴하기</button>
+
+        {isModalOpen && (
+          <div className="modal">
+            <h4>본인 확인을 위해 비밀번호를 입력해주세요.</h4>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="비밀번호 입력"
+            />
+            <button onClick={handleWithdrawal}>정말 탈퇴하기</button>
+            <button onClick={() => setIsModalOpen(false)}>취소</button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const handleWithdraw = async () => {
+    const password = prompt("본인 확인을 위해 비밀번호를 입력해주세요.");
+
+    if (!password) return;
+
+    if (window.confirm("정말로 탈퇴하시겠습니까? 탈퇴 후 데이터는 복구할 수 없습니다.")) {
+      try {
+        await axios.post('/api/user/withdraw',
+          { password },
+          { headers: { Authorization: `Bearer ${sessionStorage.getItem('accessToken')}` } }
+        );
+
+        alert("탈퇴 처리가 완료되었습니다. 그동안 이용해주셔서 감사합니다.");
+
+        // 모든 세션 정보 삭제 및 이동
+        sessionStorage.clear();
+        window.location.href = "/";
+      } catch (error) {
+        alert(error.response?.data || "탈퇴 처리 중 오류가 발생했습니다.");
+      }
+    }
+  };
 
 
   return (
@@ -515,7 +516,7 @@ const MyPage = () => {
       {isPayModalOpen && (
         <ChargePay onClose={() => setIsPayModalOpen(false)} userInfo={userInfo} />
       )}
-      <br/>
+      <br />
       <div className="mypage-card">
         <div className="profile-section">
           <div className="profile-avatar-container" style={{ textAlign: 'center', marginBottom: '20px' }}>
@@ -549,23 +550,51 @@ const MyPage = () => {
             <div className="info-item">
               <label>비밀번호</label>
               {isEditing ? (
-                <div className="input-wrapper">
-                  <input type="password" id="password" name="password" className="edit-input" placeholder="비밀번호(변경시만 입력)" onChange={handleChange} value={editData.password || ''} autoComplete="new-password" required />
-                </div>
+                userInfo.provider === 'LOCAL' ? (
+                  <div className="input-wrapper">
+                    <input
+                      type="password"
+                      name="password"
+                      className="edit-input"
+                      placeholder="비밀번호(변경시만 입력)"
+                      onChange={handleChange}
+                      value={editData.password || ''}
+                      autoComplete="new-password"
+                    />
+                  </div>
+                ) : (
+                  <span className="info-value" style={{ color: '#999' }}>소셜 계정은 비밀번호를 사용하지 않습니다.</span>
+                )
               ) : (
-                <span className="info-value">********</span>
+                userInfo.provider === 'LOCAL' ? (
+                  <span className="info-value">********</span>
+                ) : (
+                  /* ⭐ 소셜 계정일 때만 이 메시지가 표시됩니다 */
+                  <span className="info-value" style={{ color: '#999' }}>
+                    소셜 계정은 비밀번호를 사용하지 않습니다.
+                  </span>
+                )
               )}
               {errors.password && <span className="error-msg">{errors.password}</span>}
             </div>
-            {isEditing ? (
+
+            {isEditing && userInfo.provider === 'LOCAL' && (
               <div className="info-item">
-                {/* <label>비밀번호 재확인</label> */}
                 <div className="input-wrapper">
-                  <input type="password" id="password" name="confirmPassword" className="edit-input" placeholder="비밀번호 재확인" onChange={handleChange} value={editData.confirmPassword || ''} required />
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    className="edit-input"
+                    placeholder="비밀번호 재확인"
+                    onChange={handleChange}
+                    value={editData.confirmPassword || ''}
+                  />
                 </div>
               </div>
-            ) : ""}
-            {isEditing && errors.confirmPassword && <span className="error-msg">{errors.confirmPassword}</span>}
+            )}
+            {isEditing && userInfo.provider === 'LOCAL' && errors.confirmPassword && (
+              <span className="error-msg">{errors.confirmPassword}</span>
+            )}
 
 
             <div className="info-item">
@@ -773,7 +802,7 @@ const MyPage = () => {
                 setEditData(userInfo);
                 setNicknameError('');
                 setNicknameMessage('');
-                setIsNicknameChecked(true); 
+                setIsNicknameChecked(true);
                 setIsContactVerified(true);
                 setIsSmsSent(false);
                 setIsSmsSent(false);
@@ -782,12 +811,22 @@ const MyPage = () => {
               </button>
             </>
           ) : (
-            <button className="btn-edit" onClick={() => setIsPasswordModalOpen(true)}
-            // onClick={() => {
-            //   setIsEditing(true);
-            //   setIsNicknameChecked(true); // 수정 모드 진입 시 처음엔 '확인됨'
-            //   setNicknameMessage('');
-            // }}
+            <button className="btn-edit" onClick={() => {
+              // 🌟 소셜 로그인 유저는 비밀번호 확인 없이 바로 수정 모드 진입
+              if (userInfo.provider !== 'LOCAL') {
+                const initialEditData = {
+                  ...userInfo,
+                  password: '',
+                  confirmPassword: ''
+                };
+                setEditData(initialEditData);
+                setIsEditing(true);
+                // setIsNicknameChecked(true);
+              } else {
+                // 일반 유저는 기존처럼 비밀번호 모달 오픈
+                setIsPasswordModalOpen(true);
+              }
+            }}
             >
               <i className="fas fa-pen"></i> 수정하기
             </button>
@@ -795,7 +834,7 @@ const MyPage = () => {
         </div>
       </div>
 
-      
+
 
       {/* 🌟 [추가] 비밀번호 확인 팝업창 (CSS 클래스만 사용) */}
       {isPasswordModalOpen && (
