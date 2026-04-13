@@ -422,7 +422,7 @@ const MainPage = () => {
                                 className={`main-popular-card ${visibleCards.has(idx) ? 'visible' : ''}`}
                                 ref={(el) => (cardsRef.current[idx] = el)}
                                 data-index={idx}
-                                style={{ transitionDelay: `${idx * 0.08}s` }}
+                                style={{ transitionDelay: `${0.08}s` }}
                                 onClick={() => navigate(`/products/${product.productId}`)}
                             >
                                 <div className="main-popular-image">

@@ -193,7 +193,7 @@ function AdminDashBoard() {
                 {/* 3-1. 실시간 AI 및 FDS 시스템 로그 */}
                 <div className={styles.logSection} style={{ flex: 1, background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                        <h3 style={{ fontSize: '1.1rem' }}>AI 및 FDS 실시간 로그</h3>
+                        <h3 style={{ fontSize: '1.1rem' }}>실시간 거래완료 로그</h3>
                         <span style={{ fontSize: '0.8rem', color: '#28a745' }}><i className="bx bx-radio-circle-marked bx-burst"></i> Live</span>
                     </div>
                     <div style={{ height: '250px', overflowY: 'auto', backgroundColor: '#2b2b2b', borderRadius: '6px', padding: '15px', color: '#a9b7c6', fontSize: '0.85rem', fontFamily: 'monospace' }}>
