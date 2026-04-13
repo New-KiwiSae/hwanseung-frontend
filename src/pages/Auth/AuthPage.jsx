@@ -495,7 +495,6 @@ export default function AuthPage() {
                                 onError={() => console.log('Login Failed')}
                             />
                             <a href="#" className="social-btn"><b>K</b></a>
-                            <a href="#" className="social-btn"><i className="fab fa-apple"></i></a>
                         </div>
                         <span className="sub-text">기본 정보 입력</span>
 
@@ -717,11 +716,13 @@ export default function AuthPage() {
                     <form onSubmit={onSignInSubmit}>
                         <div className="logo"><i className="fas fa-sync-alt"></i></div>
                         <h2>로그인</h2>
-                        {/* <div className="social-login">
-                            <a href="#" className="social-btn"><i className="fab fa-google"></i></a>
+                        <div className="social-login">
+                                <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => console.log('Login Failed')}
+                            />
                             <a href="#" className="social-btn"><b>K</b></a>
-                            <a href="#" className="social-btn"><i className="fab fa-apple"></i></a>
-                        </div> */}
+                        </div>
                         <span className="sub-text">또는 이메일 계정으로 로그인하세요</span>
 
                         <div className="input-group">
