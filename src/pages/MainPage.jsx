@@ -16,14 +16,6 @@ const products = [
     { id: 8, title: '나이키 조던 1 레트로 하이 OG', price: 210000, location: '광주 북구', time: '2시간 전', badge: null, likes: 67, chats: 22, img: '👟', color: '#f5f5f0' },
 ];
 
-const liveFeedData = [
-    { user: '망원동 김*님', item: '맥북 에어', icon: 'fas fa-gift', status: '환승 완료' },
-    { user: '성수동 이*님', item: '캠핑 체어', icon: 'fas fa-handshake', status: '매칭' },
-    { user: '논현동 박*님', item: '자전거', icon: 'fas fa-bolt', status: '환승 완료' },
-    { user: '판교동 최*님', item: '에어팟 맥스', icon: 'fas fa-star', status: '방금 업로드' },
-    { user: '잠실동 정*님', item: 'PS5 슬림', icon: 'fas fa-fire', status: '환승 완료' },
-];
-
 const stats = [
     { label: '누적 거래액', value: 3482, suffix: '억+', icon: 'fas fa-chart-line' },
     { label: '오늘의 환승', value: 12402, suffix: '건', icon: 'fas fa-exchange-alt' },
@@ -60,17 +52,23 @@ function useCountUp(target, duration = 2000, startCounting = false) {
     return value;
 }
 
+// 닉네임 두 번째 글자만 마스킹
+const maskNickname = (nickname) => {
+    const safeNickname = String(nickname || '').trim();
+    return safeNickname[0] + '*' + safeNickname.slice(2);
+};
+
 const MainPage = () => {
     const [visibleCards, setVisibleCards] = useState(new Set());
     const [statsVisible, setStatsVisible] = useState(false);
-    const [liveFeedItems, setLiveFeedItems] = useState(liveFeedData.slice(0, 3));
+    const [liveFeedItems, setLiveFeedItems] = useState([]);
+    const [darkFeedItems, setDarkFeedItems] = useState([]);
     const [heroVisible, setHeroVisible] = useState(false);
     const [products, setProducts] = useState([]);
     const [imageErrorMap, setImageErrorMap] = useState({});
 
     const cardsRef = useRef([]);
     const statsRef = useRef(null);
-    const liveFeedIndex = useRef(3);
 
     const navigate = useNavigate();
 
@@ -102,10 +100,6 @@ const MainPage = () => {
     const extraCategoriesList = fetchedCategories.slice(VISIBLE_LIMIT);
     const hasMore = fetchedCategories.length > VISIBLE_LIMIT;
 
-    const statValues1 = stats.map(s => useCountUp(s.value, 2200, statsVisible));
-
-
-
     // 인기 매물 조회
     useEffect(() => {
         const fetchPopularProducts = async () => {
@@ -135,40 +129,83 @@ const MainPage = () => {
         fetchPopularProducts();
     }, []);
 
-    //백엔드에서 진짜 가져오기 
-    const [realProducts, setRealProducts] = useState([]);
-
-    // 🌟 2. 화면이 처음 켜질 때 백엔드 창고에서 물건 가져오기
-   useEffect(() => {
-        const fetchRealProducts = async () => {
+    // 최신 상품 기반 LIVE 피드 가져오기
+    useEffect(() => {
+        const fetchLatestLiveFeed = async () => {
             try {
-                const response = await axios.get('/api/products');
-                
-                // 🚨 기존 코드: 도착한 데이터를 그대로 바구니에 담음 (최신순)
-                // setRealProducts(response.data);
+                // 🔥 최신 상품 + 인기 상품을 함께 가져오기
+                const [latestResponse, popularResponse] = await Promise.all([
+                    axios.get('/api/products'),
+                    axios.get('/api/products/popular'),
+                ]);
 
-                const filteredProducts = response.data.filter(product => {
-                    return (product.likeCount || 0) >= 2;
-                });
+                const latestData = Array.isArray(latestResponse.data) ? latestResponse.data : [];
+                const popularData = Array.isArray(popularResponse.data) ? popularResponse.data : [];
 
+                // 최신 상품 6개 추출
+                const latestProducts = [...latestData]
+                    .filter(product => !product.deletedAt && product.saleStatus === "SALE")
+                    .sort((a, b) => {
+                        const aTime = new Date(a.createdAt || 0).getTime();
+                        const bTime = new Date(b.createdAt || 0).getTime();
+                        return bTime - aTime;
+                    })
+                    .slice(0, 6);
 
-                // 🌟 [수정된 코드] 도착한 데이터를 '찜(likeCount)'이 많은 순서대로 줄 세웁니다!
-                const popularProducts = response.data.sort((a, b) => {
-                    return (b.likeCount || 0) - (a.likeCount || 0); // 내림차순 정렬
-                });
+                // 인기 상품 3개 추출
+                const popularProducts = [...popularData]
+                    .filter(product => !product.deletedAt && product.saleStatus === "SALE")
+                    .slice(0, 3);
 
-                // 1등부터 6등까지만 딱 잘라서(slice) 보여주는 것이 좋습니다!
-                const top6Products = popularProducts.slice(0, 6);
+                // 최신2개 + 인기1개 패턴으로 섞기
+                const mixedProducts = [];
+                let popularIndex = 0;
 
-                // 정렬되고 잘라진 1~6등 상품들을 바구니에 담습니다.
-                setRealProducts(top6Products);
+                for (let i = 0; i < latestProducts.length; i += 2) {
+                    // 최신 상품
+                    if (latestProducts[i]) {
+                        mixedProducts.push({
+                            ...latestProducts[i],
+                            type: 'latest',
+                        });
+                    }
 
+                    if (latestProducts[i + 1]) {
+                        mixedProducts.push({
+                            ...latestProducts[i + 1],
+                            type: 'latest',
+                        });
+                    }
+
+                    // 인기 상품
+                    if (popularProducts.length > 0) {
+                        mixedProducts.push({
+                            ...popularProducts[popularIndex % popularProducts.length],
+                            type: 'popular',
+                        });
+                        popularIndex += 1;
+                    }
+                }
+
+                const latestProductsForFeed = mixedProducts.map((product, index) => ({
+                    id: `${product.productId}-${index}`,
+                    type: product.type,
+                    user: `${maskNickname(product.sellerNickname || product.nickname || product.sellerId)}님`,
+                    item: product.title,
+                    icon: ['fas fa-star', 'fas fa-bolt', 'fas fa-gift', 'fas fa-fire', 'fas fa-handshake'][index % 5],
+                }));
+
+                setLiveFeedItems(latestProductsForFeed);
+                setDarkFeedItems(latestProductsForFeed);
             } catch (error) {
-                console.error("인기 매물을 불러오지 못했습니다.", error);
+                console.error('실시간 피드 조회 실패:', error);
+                setLiveFeedItems([]);
             }
         };
-        fetchRealProducts();
+
+        fetchLatestLiveFeed();
     }, []);
+
     // Hero 등장 애니메이션
     useEffect(() => {
         const timer = setTimeout(() => setHeroVisible(true), 100);
@@ -211,16 +248,19 @@ const MainPage = () => {
         return () => observer.disconnect();
     }, []);
 
-    // 실시간 피드 자동 업데이트
+    // 실시간 피드 자동 순환
     useEffect(() => {
+        if (darkFeedItems.length <= 1) return;
+
         const interval = setInterval(() => {
-            const nextItem = liveFeedData[liveFeedIndex.current % liveFeedData.length];
-            liveFeedIndex.current++;
-            setLiveFeedItems((prev) => [nextItem, ...prev.slice(0, 2)]);
+            setDarkFeedItems((prev) => {
+                if (prev.length <= 1) return prev;
+                return [...prev.slice(1), prev[0]];
+            });
         }, 4000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [darkFeedItems.length]);
 
     const formatPrice = useCallback((price) => {
         return Number(price || 0).toLocaleString();
@@ -311,14 +351,11 @@ const MainPage = () => {
             <section className="category-section">
                 <div className="container">
                     <div className="category-grid">
-                        
-                        {/* 1. 기본 노출 카테고리 */}
                         {mainCategories.map((cat) => (
                             <button
                                 type="button"
                                 key={cat.id}
                                 className="category-item"
-                                // onClick={() => navigate(`/products?category=${cat.key}`)}
                                 onClick={() => {
                                     if (cat.key === 'all') {
                                         setShowAllCategories((prev) => !prev);
@@ -339,7 +376,6 @@ const MainPage = () => {
                             </button>
                         ))}
 
-                        {/* 2. 전체보기 토글 버튼 */}
                         {hasMore && (
                             <button
                                 type="button"
@@ -355,7 +391,6 @@ const MainPage = () => {
                             </button>
                         )}
 
-                        {/* 3. 확장 카테고리 */}
                         {showAllCategories && extraCategoriesList.map((cat) => (
                             <button
                                 type="button"
@@ -381,13 +416,15 @@ const MainPage = () => {
             <section className="live-marquee-section">
                 <div className="marquee-track">
                     <div className="marquee-content">
-                        {[...liveFeedData, ...liveFeedData].map((item, idx) => (
-                            <div key={idx} className="marquee-item">
+                        {[...liveFeedItems, ...liveFeedItems].map((item, idx) => (
+                            <div key={`${item.id}-${idx}`} className="marquee-item">
                                 <span className="marquee-live-dot">
                                     <i className="fas fa-circle"></i> LIVE
                                 </span>
                                 <span className="marquee-text">
-                                    {item.user}이 {item.item}을(를) {item.status}했습니다!
+                                    {item.type === 'popular'
+                                        ? `${item.item}이(가) 현재 인기 급상승 중입니다.`
+                                        : `${item.user}이 ${item.item}을(를) 방금 업로드했습니다.`}
                                 </span>
                             </div>
                         ))}
@@ -405,12 +442,11 @@ const MainPage = () => {
                             </h2>
                             <p className="section-subtitle">지금 이순간, 가장 많이 찾는 상품들이에요.</p>
                         </div>
-                       <span 
-                                className="view-all-link" 
-                                // 🌟 꼬리표(?filter=popular)를 붙여서 이동시킵니다!
-                                onClick={() => navigate('/products?filter=popular')} 
-                                style={{ cursor: 'pointer' }}
-                            >
+                        <span
+                            className="view-all-link"
+                            onClick={() => navigate('/products?filter=popular')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             전체보기 <i className="fas fa-chevron-right"></i>
                         </span>
                     </div>
@@ -514,9 +550,9 @@ const MainPage = () => {
                             </h4>
 
                             <div className="live-feed-list">
-                                {liveFeedItems.map((item, idx) => (
+                                {darkFeedItems.slice(0, 3).map((item, idx) => (
                                     <div
-                                        key={`${item.user}-${idx}`}
+                                        key={`${item.id}-${idx}`}
                                         className="live-feed-item"
                                         style={{ animationDelay: `${idx * 0.1}s` }}
                                     >
@@ -525,10 +561,18 @@ const MainPage = () => {
                                         </div>
 
                                         <div className="feed-item-text">
-                                            <strong>{item.user}</strong>이 <span className="feed-item-highlight">{item.item}</span>을(를)
+                                            {item.type === 'popular' ? (
+                                                <>
+                                                    <span className="feed-item-highlight">{item.item}</span>이(가) 현재 인기 급상승 중입니다.
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <strong>{item.user}</strong>이 <span className="feed-item-highlight">{item.item}</span>을(를) 업로드했습니다.
+                                                </>
+                                            )}
                                         </div>
 
-                                        <span className="feed-item-status">{item.status}</span>
+                                        <span className="feed-item-status">NEW</span>
                                     </div>
                                 ))}
                             </div>
@@ -563,9 +607,6 @@ const MainPage = () => {
                                 </span>
                             </div>
                         </div>
-                        {/* <button className="safety-cta">
-                            가이드 보기 <i className="fas fa-arrow-right"></i>
-                        </button> */}
                     </div>
                 </div>
             </section>
