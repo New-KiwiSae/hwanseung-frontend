@@ -325,11 +325,14 @@ export default function AuthPage() {
 
     const onSignInSubmit = async (e) => {
         e.preventDefault();
-        login(signInValues).then((response) => {
+        login(signInValues).then(async(response) => {
             sessionStorage.setItem('tokenType', response.data.tokenType);
             sessionStorage.setItem('accessToken', response.data.accessToken);
             sessionStorage.setItem('refreshToken', response.data.refreshToken);
             sessionStorage.setItem('username', signInValues.username);
+
+            await fetchUser(); // 🌟 추가
+
             window.location.href = "/";
         }).catch((error) => {
             // 🌟 서버가 보낸 JSON 객체에서 message 필드를 꺼냅니다.
@@ -443,6 +446,9 @@ export default function AuthPage() {
             sessionStorage.setItem('username', usernameFromToken);
             sessionStorage.setItem('status', status);
             sessionStorage.setItem('tokenType', tokenType || 'Bearer');
+
+
+            await fetchUser(); // 🌟 이 줄 추가!
 
             // 4. 상태(Status)에 따른 리다이렉트 분기
             if (status === "PENDING") {
