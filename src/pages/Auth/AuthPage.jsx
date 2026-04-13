@@ -451,7 +451,6 @@ export default function AuthPage() {
                 navigate("/social-signup-extra"); // 추가 정보 입력 페이지 경로
             } else if (status === "ACTIVE") {
                 // ✨ 모든 가입 절차가 완료된 기존 유저인 경우
-                alert(`${username}님, 반갑습니다!`);
                 navigate("/"); // 또는 "/dashboard"
             } else {
                 // 정지된 계정 등의 처리
