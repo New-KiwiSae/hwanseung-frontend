@@ -71,7 +71,6 @@ const SocialSignupExtra = () => {
 
         try {
             // [실제 운영시] 아래 주석 해제하여 사용
-            
             // await axios.post('/api/auth/verify-code', {
             //     key: phone,
             //     code: smsCode
