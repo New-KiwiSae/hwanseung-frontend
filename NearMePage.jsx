@@ -65,12 +65,31 @@ const NearMePage = () => {
 
     // 3️⃣ 🌟 지도 초기화 - GPS 로딩 완료되면 딱 1번만 실행
     useEffect(() => {
-        if (isLoadingLoc || !currentLoc.lat || !mapRef.current) return;
+        console.log("🗺️ 지도 useEffect 진입");
+        console.log("isLoadingLoc:", isLoadingLoc);
+        console.log("currentLoc:", currentLoc);
+        console.log("mapRef.current:", mapRef.current);
+        console.log("kakao:", window.kakao);
+        console.log("kakao.maps:", window.kakao?.maps);
+
+
+        if (isLoadingLoc || !currentLoc.lat || !mapRef.current) {
+            console.log("🚫 조기 return - 조건 불충족");
+            return;
+        }
+
 
         const { kakao } = window;
-        if (!kakao || !kakao.maps) return;
+        if (!kakao || !kakao.maps) {
+            console.log("🚫 kakao 또는 kakao.maps 없음!");
+            return;
+        }
+
+        console.log("✅ kakao.maps.load 호출 직전");
 
         kakao.maps.load(() => {
+            console.log("✅ kakao.maps.load 콜백 진입!");
+            
             const mapOptions = {
                 center: new kakao.maps.LatLng(currentLoc.lat, currentLoc.lng),
                 level: 5
