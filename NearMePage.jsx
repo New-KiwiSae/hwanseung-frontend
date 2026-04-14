@@ -6,10 +6,10 @@ import './near-me.css';
 const NearMePage = () => {
     const [searchParams] = useSearchParams();
     const mapRef = useRef(null);
-    const kakaoMapRef = useRef(null); // 🌟 지도 인스턴스를 ref로 보관
+    const kakaoMapRef = useRef(null);
 
     const [products, setProducts] = useState([]);
-    const [isMapReady, setIsMapReady] = useState(false); // 🌟 지도 준비 완료 상태
+    const [isMapReady, setIsMapReady] = useState(false);
 
     const homeLat = parseFloat(searchParams.get('lat'));
     const homeLng = parseFloat(searchParams.get('lng'));
@@ -63,61 +63,42 @@ const NearMePage = () => {
         }
     }, []);
 
-    // 3️⃣ 🌟 지도 초기화 - GPS 로딩 완료되면 딱 1번만 실행
+    // 3️⃣ 지도 초기화 - autoload=false 제거했으므로 kakao.maps.load() 불필요
     useEffect(() => {
-        console.log("🗺️ 지도 useEffect 진입");
-        console.log("isLoadingLoc:", isLoadingLoc);
-        console.log("currentLoc:", currentLoc);
-        console.log("mapRef.current:", mapRef.current);
-        console.log("kakao:", window.kakao);
-        console.log("kakao.maps:", window.kakao?.maps);
-
-
-        if (isLoadingLoc || !currentLoc.lat || !mapRef.current) {
-            console.log("🚫 조기 return - 조건 불충족");
-            return;
-        }
-
+        if (isLoadingLoc || !currentLoc.lat || !mapRef.current) return;
 
         const { kakao } = window;
         if (!kakao || !kakao.maps) {
-            console.log("🚫 kakao 또는 kakao.maps 없음!");
+            console.error("🚫 kakao 또는 kakao.maps 없음!");
             return;
         }
 
-        console.log("✅ kakao.maps.load 호출 직전");
+        // ✅ kakao.maps.load() 없이 바로 실행
+        const mapOptions = {
+            center: new kakao.maps.LatLng(currentLoc.lat, currentLoc.lng),
+            level: 5
+        };
+        const map = new kakao.maps.Map(mapRef.current, mapOptions);
+        kakaoMapRef.current = map;
 
-        kakao.maps.load(() => {
-            console.log("✅ kakao.maps.load 콜백 진입!");
-            
-            const mapOptions = {
-                center: new kakao.maps.LatLng(currentLoc.lat, currentLoc.lng),
-                level: 5
-            };
-            const map = new kakao.maps.Map(mapRef.current, mapOptions);
-            kakaoMapRef.current = map; // 🌟 인스턴스 저장
+        new kakao.maps.CustomOverlay({
+            position: new kakao.maps.LatLng(currentLoc.lat, currentLoc.lng),
+            content: `<div style="background:#ff6f0f;color:white;padding:6px 12px;border-radius:20px;font-weight:bold;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,0.2);border:2px solid white;transform:translateY(-50%);">📍 현재 내 위치</div>`,
+            map: map
+        });
 
-            // 현재 내 위치 오버레이
+        if (homeLat && homeLng && (homeLat !== currentLoc.lat || homeLng !== currentLoc.lng)) {
             new kakao.maps.CustomOverlay({
-                position: new kakao.maps.LatLng(currentLoc.lat, currentLoc.lng),
-                content: `<div style="background:#ff6f0f;color:white;padding:6px 12px;border-radius:20px;font-weight:bold;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,0.2);border:2px solid white;transform:translateY(-50%);">📍 현재 내 위치</div>`,
+                position: new kakao.maps.LatLng(homeLat, homeLng),
+                content: `<div style="background:#00d26a;color:white;padding:6px 12px;border-radius:20px;font-weight:bold;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,0.2);border:2px solid white;transform:translateY(-50%);">🏠 우리 집</div>`,
                 map: map
             });
+        }
 
-            // 우리 집 오버레이
-            if (homeLat && homeLng && (homeLat !== currentLoc.lat || homeLng !== currentLoc.lng)) {
-                new kakao.maps.CustomOverlay({
-                    position: new kakao.maps.LatLng(homeLat, homeLng),
-                    content: `<div style="background:#00d26a;color:white;padding:6px 12px;border-radius:20px;font-weight:bold;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,0.2);border:2px solid white;transform:translateY(-50%);">🏠 우리 집</div>`,
-                    map: map
-                });
-            }
+        setIsMapReady(true);
+    }, [isLoadingLoc, currentLoc]);
 
-            setIsMapReady(true); // 🌟 지도 준비 완료 신호
-        });
-    }, [isLoadingLoc, currentLoc]); // GPS 완료 후 1번만
-
-    // 4️⃣ 🌟 매물 핀 찍기 - 지도와 매물 데이터 둘 다 준비됐을 때만 실행
+    // 4️⃣ 매물 핀 찍기
     useEffect(() => {
         if (!isMapReady || products.length === 0) return;
 
@@ -167,7 +148,7 @@ const NearMePage = () => {
                 });
             });
         });
-    }, [isMapReady, products]); // 🌟 둘 다 준비됐을 때만
+    }, [isMapReady, products]);
 
     return (
         <div className="near-me-container">
