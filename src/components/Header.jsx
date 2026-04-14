@@ -209,9 +209,7 @@ const Header = () => {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("accessToken");
-    sessionStorage.removeItem("refreshToken");
-    sessionStorage.removeItem("tokenType");
+    sessionStorage.clear();
     setUserInfo(null);
     window.location.href = '/';
   };
