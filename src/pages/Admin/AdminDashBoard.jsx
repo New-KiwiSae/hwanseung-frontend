@@ -2,10 +2,14 @@ import styles from './AdminContent.module.css';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+// Recharts 라이브러리 추가
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 function AdminDashBoard() {
     const navigate = useNavigate();
-    const [counts, setCounts] = useState({ users: 0, products: 0, sellproducts: 0 });
+    const [counts, setCounts] = useState({ users: 0, products: 0, sellproducts: 0 , activeTransactions: 0, completedTransactions: 0, pendingReports: 0});
+    // 주간 트렌드 데이터를 저장할 상태 추가
+    const [trendData, setTrendData] = useState([]);
     // 권고사항 2: 로딩 및 에러 상태 관리 추가
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -27,7 +31,7 @@ function AdminDashBoard() {
                 setError(null); // 재호출 시 이전 에러 초기화
 
                 // HTTP 응답 상태(res.ok)를 1차적으로 검증하는 로직 추가
-                const [userData, productData, sellData] = await Promise.all([
+                const [userData, productData, sellData, summaryData, trendRes] = await Promise.all([
 
                     axios.get('/api/user/count', getHeader()).then(res => {
                         console.log('사용자 통계 API 응답 상태:', res.status);
@@ -41,26 +45,33 @@ function AdminDashBoard() {
                     axios.get('/api/products/sellcount', getHeader()).then(res => {
                         if (!res.status) throw new Error('판매 상품 통계 API 응답 오류');
                         return res.data;
+                    }),
+                    axios.get('/api/admin/dashboard/summary', getHeader()).then(res => {
+                        if (!res.status) throw new Error('대시보드 요약 API 응답 오류');
+                        return res.data;
+                    }),
+                    axios.get('/api/admin/dashboard/weekly-trend', getHeader()).then(res => {
+                        if (res.status !== 200) throw new Error('주간 트렌드 API 응답 오류');
+                        return res.data;
                     })
-                    // fetch('/api/user/count').then(res => {
-                    //     if (!res.ok) throw new Error('사용자 통계 API 응답 오류');
-                    //     return res.json();
-                    // }),
-                    // fetch('/api/products/count').then(res => {
-                    //     if (!res.ok) throw new Error('상품 통계 API 응답 오류');
-                    //     return res.json();
-                    // }),
-                    // fetch('/api/products/sellcount').then(res => {
-                    //     if (!res.ok) throw new Error('판매 상품 통계 API 응답 오류');
-                    //     return res.json();
-                    // })
                 ]);
 
                 setCounts({
                     users: userData.totalCount,
                     products: productData.totalCount,
-                    sellproducts: sellData.sellCount
+                    sellproducts: sellData.sellCount,
+                    ...summaryData
                 });
+
+                // 백엔드 데이터(3개의 배열)를 Recharts용 객체 배열로 변환
+                if (trendRes && trendRes.labels) {
+                    const formattedTrendData = trendRes.labels.map((label, index) => ({
+                        name: label,
+                        거래건수: trendRes.transactions[index] || 0,
+                        가입자수: trendRes.signups[index] || 0
+                    }));
+                    setTrendData(formattedTrendData);
+                }
             } catch (err) {
                 console.error("대시보드 통계 데이터 로드 실패:", err);
                 setError("데이터를 불러오는 중 문제가 발생했습니다.");
@@ -132,7 +143,7 @@ function AdminDashBoard() {
                     </div>
                     <div className={styles.cardInfo}>
                         <span className={styles.cardLabel}>진행 중 거래</span>
-                        <span className={styles.cardValue}>-</span>
+                        <span className={styles.cardValue}>{counts.activeTransactions?.toLocaleString() || 0}건</span>
                     </div>
                 </div>
                 <div className={styles.card}>
@@ -142,7 +153,7 @@ function AdminDashBoard() {
                     </div>
                     <div className={styles.cardInfo}>
                         <span className={styles.cardLabel}>거래 완료</span>
-                        <span className={styles.cardValue}>-</span>
+                        <span className={styles.cardValue}>{counts.completedTransactions?.toLocaleString() || 0}건</span>
                     </div>
                 </div>
                 <div className={styles.card}>
@@ -151,7 +162,7 @@ function AdminDashBoard() {
                     </div>
                     <div className={styles.cardInfo}>
                         <span className={styles.cardLabel}>미처리 신고</span>
-                        <span className={styles.cardValue}>-</span>
+                        <span className={styles.cardValue}>{counts.pendingReports?.toLocaleString() || 0}건</span>
                     </div>
                 </div>
             </div>
@@ -163,11 +174,41 @@ function AdminDashBoard() {
 
             {/* --- 하단 시각화 레이아웃 영역 (이전 제안 기반) --- */}
             <div className={styles.dashboardBody} style={{ marginTop: '40px', display: 'flex', gap: '20px' }}>
-                {/* 1. 통계 그래프 섹션 (추후 Recharts 연동 영역) */}
-                <div className={styles.chartSection} style={{ flex: 2, background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                {/* 1. 통계 그래프 섹션 (Recharts 연동) */}
+                <div className={styles.chartSection} style={{ flex: 2, minWidth: 0 ,background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                     <h3 style={{ fontSize: '1.1rem', marginBottom: '15px' }}>주간 거래 및 가입 추이</h3>
-                    <div style={{ height: '300px', backgroundColor: '#f9f9f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa' }}>
-                        [ Area Chart 렌더링 영역 ]
+                    
+                    {/* 그래프 무한 확장 버그 방지를 위해 height 300px 고정 및 width 100% 명시 */}
+                    <div style={{ width: '100%', height: '300px', backgroundColor: '#fff' }}>
+                        {isLoading ? (
+                            <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#aaa' }}>
+                                데이터를 불러오는 중...
+                            </div>
+                        ) : (
+                            <ResponsiveContainer width="100%" height="100%" debounce={50}>
+                                <AreaChart data={trendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorTx" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
+                                            <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                                        </linearGradient>
+                                        <linearGradient id="colorSignup" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8}/>
+                                            <stop offset="95%" stopColor="#82ca9d" stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#666' }} axisLine={false} tickLine={false} />
+                                    <YAxis tick={{ fontSize: 12, fill: '#666' }} axisLine={false} tickLine={false} />
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                                    <Tooltip 
+                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                    />
+                                    <Legend verticalAlign="top" height={36}/>
+                                    <Area type="monotone" dataKey="거래건수" stroke="#8884d8" strokeWidth={2} fillOpacity={1} fill="url(#colorTx)" />
+                                    <Area type="monotone" dataKey="가입자수" stroke="#82ca9d" strokeWidth={2} fillOpacity={1} fill="url(#colorSignup)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </div>
 

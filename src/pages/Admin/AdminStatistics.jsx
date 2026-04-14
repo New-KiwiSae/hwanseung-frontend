@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import styles from './AdminStatistics.module.css';
 import {
-    fetchOnlineUsers,
     fetchUserStats,
     fetchTransactionStats,
     fetchProductStats,
@@ -20,7 +19,6 @@ function AdminStatistics() {
     const [lastUpdated, setLastUpdated] = useState(null);
 
     // 각 섹션 데이터
-    const [onlineUsers, setOnlineUsers] = useState(0);
     const [userStats, setUserStats] = useState(null);
     const [txStats, setTxStats] = useState(null);
     const [productStats, setProductStats] = useState(null);
@@ -34,7 +32,6 @@ function AdminStatistics() {
 
         // 각 API를 독립적으로 호출하여 하나가 실패해도 나머지는 표시
         const results = await Promise.allSettled([
-            fetchOnlineUsers(),
             fetchUserStats(),
             fetchTransactionStats(),
             fetchProductStats(),
@@ -42,22 +39,19 @@ function AdminStatistics() {
             fetchReportStats(),
         ]);
 
-        if (results[0].status === 'fulfilled') setOnlineUsers(results[0].value);
-        else newErrors.online = '실시간 접속자 데이터를 불러올 수 없습니다.';
-
-        if (results[1].status === 'fulfilled') setUserStats(results[1].value);
+        if (results[0].status === 'fulfilled') setUserStats(results[0].value);
         else newErrors.user = '사용자 통계를 불러올 수 없습니다.';
 
-        if (results[2].status === 'fulfilled') setTxStats(results[2].value);
+        if (results[1].status === 'fulfilled') setTxStats(results[1].value);
         else newErrors.tx = '거래 통계를 불러올 수 없습니다.';
 
-        if (results[3].status === 'fulfilled') setProductStats(results[3].value);
+        if (results[2].status === 'fulfilled') setProductStats(results[2].value);
         else newErrors.product = '상품 통계를 불러올 수 없습니다.';
 
-        if (results[4].status === 'fulfilled') setSearchStats(results[4].value);
+        if (results[3].status === 'fulfilled') setSearchStats(results[3].value);
         else newErrors.search = '검색 통계를 불러올 수 없습니다.';
 
-        if (results[5].status === 'fulfilled') setReportStats(results[5].value);
+        if (results[4].status === 'fulfilled') setReportStats(results[4].value);
         else newErrors.report = '신고 통계를 불러올 수 없습니다.';
 
         setErrors(newErrors);
@@ -134,30 +128,6 @@ function AdminStatistics() {
                 </div>
             )}
 
-            {/* ====== 1. 실시간 대시보드 - 현재 접속자 수 ====== */}
-            <div className={styles.section}>
-                {errors.online ? (
-                    <SectionError message={errors.online} />
-                ) : (
-                    <div className={styles.liveBanner}>
-                        <div className={styles.liveBannerLeft}>
-                            <div className={styles.liveBannerIcon}>
-                                <i className="bx bx-pulse"></i>
-                            </div>
-                            <div>
-                                <div className={styles.liveBannerLabel}>현재 접속자 수</div>
-                                <div className={styles.liveBannerValue}>
-                                    {fmt(onlineUsers?.count ?? onlineUsers ?? 0)}명
-                                </div>
-                            </div>
-                        </div>
-                        <div className={styles.liveBannerRight}>
-                            <div className={styles.pulseDot}></div>
-                            <span>실시간</span>
-                        </div>
-                    </div>
-                )}
-            </div>
 
             {/* ====== 2. 사용자(User) 관련 통계 ====== */}
             <div className={styles.section}>
@@ -383,13 +353,6 @@ function AdminStatistics() {
                                     iconStyle={styles.iconPink}
                                     label="전체 찜 수"
                                     value={`${fmt(searchStats?.totalWishlist)}건`}
-                                />
-                                <StatCard
-                                    icon="bx bx-heart-circle"
-                                    iconStyle={styles.iconRed}
-                                    label="오늘 찜"
-                                    value={`${fmt(searchStats?.dailyWishlist)}건`}
-                                    sub="일간"
                                 />
                             </div>
                         </div>
