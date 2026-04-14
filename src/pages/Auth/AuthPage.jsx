@@ -768,7 +768,7 @@ export default function AuthPage() {
                             <input type="password" id="password" placeholder="비밀번호" onChange={handleSignInChange} value={signInValues.password} required />
                             <i className="fas fa-lock"></i>
                         </div>
-                        <a href="#" className="footer-link">비밀번호를 잊으셨나요?</a>
+                        {/* <a href="#" className="footer-link">비밀번호를 잊으셨나요?</a> */}
                         <button type="submit" className="btn primary-btn" style={{ marginTop: "20px" }}>로그인</button>
                     </form>
                 </div>
