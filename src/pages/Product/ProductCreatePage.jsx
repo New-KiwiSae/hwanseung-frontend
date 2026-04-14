@@ -188,6 +188,11 @@ export default function ProductCreatePage() {
                 });
                 markerInstance.current = marker;
 
+                setTimeout(() => {
+                    map.relayout();
+                    map.setCenter(coords);
+                }, 0);
+
                 setForm((prev) => ({ ...prev, location: initialAddress }));
 
                 window.kakao.maps.event.addListener(map, "click", function (mouseEvent) {
