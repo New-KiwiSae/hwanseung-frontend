@@ -13,11 +13,13 @@ export default defineConfig({
     port: 80, 
     proxy: {
       '/api': {
-        target: 'http://localhost:8080', 
+        // target: 'http://localhost:8080', 
+        target: 'http://backend:8080',
         changeOrigin: true
       },
       '/ws-chat': {
-        target: 'http://localhost:8080',
+        // target: 'http://localhost:8080',
+        target: 'http://backend:8080',
         ws: true,
         changeOrigin: true
       }

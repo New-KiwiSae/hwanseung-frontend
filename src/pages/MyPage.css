@@ -469,3 +469,14 @@
   background-color: #00B569;
 }
 
+.edit-input:disabled {
+    background-color: #f5f5f5 !important; /* 가끔 다른 스타일이 덮어쓸 수 있으므로 확인 */
+    cursor: not-allowed;
+    color: #999;
+    border: 1px solid #ddd; /* 비활성화 느낌을 더 주기 위해 추가 */
+}
+
+/* 플레이스홀더 수정 */
+.edit-input:disabled::placeholder {
+    color: #ccc;
+}
