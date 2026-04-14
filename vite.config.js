@@ -12,10 +12,6 @@ export default defineConfig({
   server: {
     host: true, 
     port: 80,
-    headers: {
-      'Cross-Origin-Embedder-Policy': 'unsafe-none',
-      'Cross-Origin-Opener-Policy': 'unsafe-none',
-    }, 
     proxy: {
       '/api': {
         target: targetUrl, 
