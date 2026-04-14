@@ -25,7 +25,6 @@ import InfoPage from '../InfoPage.jsx';
 import AdminLayout from './pages/Admin/AdminLayout.jsx';
 import AdminDashBoard from './pages/Admin/AdminDashBoard.jsx';
 import AdminStatistics from './pages/Admin/AdminStatistics.jsx';
-import AdminNotifications from './pages/Admin/AdminNotifications.jsx';
 import AdminReports from './pages/Admin/AdminReports.jsx';
 import AdminUsers from './pages/Admin/AdminUsers.jsx';
 import AdminProducts from './pages/Admin/AdminProducts.jsx';
@@ -84,22 +83,28 @@ function App() {
                             </Route>
 
 
-                            <Route path="/admin" element={<AdminLayout />}>
-                                <Route index element={<AdminDashBoard />} />
-                                <Route path="dashboard" element={<AdminDashBoard />} />
-                                <Route path="statistics" element={<AdminStatistics />} />
-                                <Route path="products" element={<AdminProducts />} />
-                                <Route path="transactions" element={<AdminTransactions />} />
-                                <Route path="categories" element={<AdminCategories />} />
-                                <Route path="users" element={<AdminUsers />} />
-                                <Route path="reports" element={<AdminReports />} />
-                                <Route path="chat" element={<AdminChatManager />} />
-                                {/* <Route path="chat" element={<AdminChatManage />} /> */}
-                                <Route path="notifications" element={<AdminNotifications />} />
-                                <Route path="announcements" element={<AdminAnnouncements />} />
-                            </Route>
+                        <Route path="/admin" element={<AdminLayout />}>
+                            <Route index element={<AdminDashBoard />} />
+                            <Route path="dashboard" element={<AdminDashBoard />} />
+                            <Route path="statistics" element={<AdminStatistics />} />
+                            <Route path="products" element={<AdminProducts />} />
+                            <Route path="transactions" element={<AdminTransactions />} />
+                            <Route path="categories" element={<AdminCategories />} />
+                            <Route path="users" element={<AdminUsers />} />
+                            <Route path="reports" element={<AdminReports />} />
+                            <Route path="chat" element={<AdminChatManager />} />
+                            {/* <Route path="chat" element={<AdminChatManage />} /> */}
+                            <Route path="announcements" element={<AdminAnnouncements />} />
                         </Route>
 
+                        <Route element={<Layout />}>
+                            <Route path="/mypage" element={<MyPage />} />
+                            <Route path="/sales" element={<Sales />} />
+                            <Route path="/purchase" element={<Purchase />} />
+                            <Route path="/wishlist" element={<Wishlist />} />
+                        </Route>
+
+                        </Route>
                     </Routes>
                 </main>
                 {!(isAuthPage || isAdminPage || isExtraInfoPage) && <Footer />}

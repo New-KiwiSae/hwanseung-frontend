@@ -14,13 +14,6 @@ const getHeader = () => {
     };
 };
 
-/** 실시간 접속자 수 */
-export const fetchOnlineUsers = async () => {
-    // 기존 '/api/stats/active-users' 에서 아래 경로로 변경
-    const response = await axios.get('/api/admin/statistics/online-users', getHeader());
-    return response.data;
-};
-
 /** 사용자 통계 (전체 가입자, 일간/월간 신규) */
 export const fetchUserStats = async () => {
     const response = await axios.get('/api/admin/statistics/users', getHeader());

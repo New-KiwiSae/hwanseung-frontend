@@ -11,7 +11,6 @@ const menuItems = [
   { path: '/admin/users', icon: 'bx-group', label: '사용자 관리' },
   { path: '/admin/reports', icon: 'bx-user-x', label: '신고/정지' },
   { path: '/admin/chat', icon: 'bx-message-dots', label: '채팅 관리' },
-  { path: '/admin/notifications', icon: 'bx-bell', label: '알림' },
   { path: '/admin/announcements', icon: 'bx-news', label: '공지사항 관리' },
 ];
 
@@ -27,7 +26,6 @@ const getUserRole = () => {
 };
 
 const Sidebar = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,14 +38,6 @@ const Sidebar = () => {
       document.body.classList.remove('dark');
     }
   }, [isDarkMode]);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(prev => !prev);
-  };
-
-  const openSidebar = () => {
-    setIsSidebarOpen(true);
-  };
 
   const toggleDarkMode = () => {
     setIsDarkMode(prev => !prev);
@@ -67,7 +57,7 @@ const Sidebar = () => {
   };
 
   return (
-    <nav className={`${styles.sidebar} ${!isSidebarOpen ? styles.close : ''}`}>
+    <nav className={`${styles.sidebar}`}>
       <header>
         <div className={styles.imageText}>
           <span className={styles.image}>
@@ -78,17 +68,10 @@ const Sidebar = () => {
             <span className={styles.profession}>현재 권한 ({role || 'Unknown'})</span>
           </div>
         </div>
-        
-        <i className={`bx bx-chevron-right ${styles.toggle}`} onClick={toggleSidebar}></i>
       </header>
 
       <div className={styles.menuBar}>
         <div className={styles.menu}>
-          <li className={styles.searchBox} onClick={openSidebar}>
-            <i className={`bx bx-search ${styles.icon}`}></i>
-            <input type="text" placeholder="Search..." />
-          </li>
-
           <ul className={styles.menuLinks} style={{ listStyle: 'none', padding: 0 }}>
             {menuItems.map((item) => (
               <li

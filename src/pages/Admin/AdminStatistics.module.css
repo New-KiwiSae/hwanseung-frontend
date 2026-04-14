@@ -176,7 +176,7 @@
 /* --- 통계 카드 그리드 --- */
 .statsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 16px;
     margin-bottom: 8px;
 }
@@ -427,16 +427,16 @@
 }
 
 .donutChart {
-    width: 120px;
-    height: 120px;
+    width: 160px;
+    height: 160px;
     border-radius: 50%;
     position: relative;
     flex-shrink: 0;
 }
 
 .donutHole {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     background: var(--sidebar-color);
     border-radius: 50%;
     position: absolute;
@@ -461,8 +461,8 @@
 }
 
 .legendDot {
-    width: 10px;
-    height: 10px;
+    width: 20px;
+    height: 20px;
     border-radius: 3px;
     flex-shrink: 0;
 }
