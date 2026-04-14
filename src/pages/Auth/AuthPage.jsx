@@ -325,7 +325,7 @@ export default function AuthPage() {
 
     const onSignInSubmit = async (e) => {
         e.preventDefault();
-        login(signInValues).then(async(response) => {
+        login(signInValues).then(async (response) => {
             sessionStorage.setItem('tokenType', response.data.tokenType);
             sessionStorage.setItem('accessToken', response.data.accessToken);
             sessionStorage.setItem('refreshToken', response.data.refreshToken);
@@ -429,44 +429,45 @@ export default function AuthPage() {
 
     const handleGoogleSuccess = async (credentialResponse) => {
         try {
-            // 1. 구글 ID Token을 백엔드로 전송
-            // 백엔드 컨트롤러의 파라미터명에 맞춰 'token' 또는 'idToken'으로 통일하세요.
+            // 1. 로그인 시도 전 세션 찌꺼기 제거
+            sessionStorage.clear();
+
+            // 2. 구글 ID Token(JWT)을 백엔드로 전송
+            // axios 인터셉터가 REFRESH_TOKEN 헤더를 강제하지 않도록 설정을 추가합니다.
             const response = await axios.post("/api/auth/google", {
                 token: credentialResponse.credential
+            }, {
+                headers: {
+                    'Authorization': '',
+                    'REFRESH_TOKEN': ''
+                }
             });
 
-            // 2. 백엔드 응답에서 토큰과 유저 상태(status) 추출
             const { accessToken, refreshToken, status, tokenType } = response.data;
 
-            // 3. 토큰 저장 (sessionStorage든 localStorage든 프로젝트 방침에 따라 선택)
+            // 3. 토큰 정보 저장
             const decoded = jwtDecode(accessToken);
             const usernameFromToken = decoded.sub || decoded.username;
+
             sessionStorage.setItem('accessToken', accessToken);
-            sessionStorage.setItem('refreshToken', refreshToken); // 리프레시 토큰도 저장 권장
+            sessionStorage.setItem('refreshToken', refreshToken);
             sessionStorage.setItem('username', usernameFromToken);
             sessionStorage.setItem('status', status);
             sessionStorage.setItem('tokenType', tokenType || 'Bearer');
 
+            // 전역 유저 상태 업데이트
+            await fetchUser();
 
-            await fetchUser(); // 🌟 이 줄 추가!
-
-            // 4. 상태(Status)에 따른 리다이렉트 분기
+            // 4. 상태에 따른 페이지 이동
             if (status === "PENDING") {
-                // ✨ 추가 정보 입력(연락처 인증 등)이 필요한 경우
-                alert("환영합니다! 원활한 서비스 이용을 위해 추가 정보 입력이 필요합니다.");
-                navigate("/social-signup-extra"); // 추가 정보 입력 페이지 경로
-            } else if (status === "ACTIVE") {
-                // ✨ 모든 가입 절차가 완료된 기존 유저인 경우
-                navigate("/"); // 또는 "/dashboard"
+                alert("추가 정보 입력이 필요합니다.");
+                navigate("/social-signup-extra");
             } else {
-                // 정지된 계정 등의 처리
-                alert("접근 권한이 없는 계정입니다.");
-                sessionStorage.clear();
+                navigate("/");
             }
 
         } catch (error) {
             console.error("구글 로그인 처리 중 에러:", error);
-            // 백엔드에서 보낸 에러 메시지가 있다면 표시
             const errorMsg = error.response?.data?.message || "로그인에 실패했습니다.";
             alert(errorMsg);
         }
@@ -495,11 +496,17 @@ export default function AuthPage() {
                     <form onSubmit={onSignUpSubmit} className="scrollable-form">
                         <h2>회원가입</h2>
                         <div className="social-login">
-                            <GoogleLogin
-                                onSuccess={handleGoogleSuccess}
-                                onError={() => console.log('Login Failed')}
-                            />
-                            <a href="#" className="social-btn"><b>K</b></a>
+                            <div className="social-login" style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                                <GoogleLogin
+                                    onSuccess={handleGoogleSuccess}
+                                    onError={() => console.log('Login Failed')}
+                                    // 🌟 디자인을 동그란 아이콘으로 만드는 설정
+                                    type="icon"
+                                    shape="circle"
+                                    theme="outline"
+                                    size="large"
+                                />
+                            </div>
                         </div>
                         <span className="sub-text">기본 정보 입력</span>
 
@@ -722,11 +729,15 @@ export default function AuthPage() {
                         <div className="logo"><i className="fas fa-sync-alt"></i></div>
                         <h2>로그인</h2>
                         <div className="social-login">
-                                <GoogleLogin
-                                onSuccess={handleGoogleSuccess}
-                                onError={() => console.log('Login Failed')}
-                            />
-                            <a href="#" className="social-btn"><b>K</b></a>
+                            <GoogleLogin
+                                    onSuccess={handleGoogleSuccess}
+                                    onError={() => console.log('Login Failed')}
+                                    // 🌟 디자인을 동그란 아이콘으로 만드는 설정
+                                    type="icon"
+                                    shape="circle"
+                                    theme="outline"
+                                    size="large"
+                                />
                         </div>
                         <span className="sub-text">또는 이메일 계정으로 로그인하세요</span>
 

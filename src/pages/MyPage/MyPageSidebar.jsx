@@ -4,7 +4,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 
 export default function MyPageSidebar({ userInfo }) {
     const navigate = useNavigate();
-    const IMG_BASE_URL = "http://localhost:8080";
+    // const IMG_BASE_URL = "http://localhost:8080";
+    const IMG_BASE_URL = "";
 
     const handleLogout = () => {
         sessionStorage.removeItem("accessToken");
