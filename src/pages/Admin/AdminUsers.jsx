@@ -103,9 +103,9 @@ function AdminUsers() {
             {error && <div style={{ color: '#d9534f', marginBottom: '15px' }}><i className="bx bx-error"></i> {error}</div>}
 
             {/* 데이터 테이블 섹션 */}
-            <div className={styles.tableContainer} style={{ background: '#fff', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+            <div className={styles.tableContainer} style={{ background: 'var(--sidebar-color)', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #eee' }}>
+                    <thead style={{ backgroundColor: 'var(--primary-color)', borderBottom: '2px solid #eee' }}>
                         <tr>
                             <th style={{ padding: '12px 15px' }}>회원번호</th>
                             <th style={{ padding: '12px 15px' }}>아이디</th>
@@ -131,7 +131,7 @@ function AdminUsers() {
                             </tr>
                         ) : (
                             users.map(user => (
-                                <tr key={user.id} style={{ borderBottom: '1px solid #eee' }}>
+                                <tr key={user.id} style={{ borderBottom: '1px solid #eee', color: 'var(--text-color)' }}>
                                     <td style={{ padding: '12px 15px' }}>{user.id}</td>
                                     <td style={{ padding: '12px 15px' }}>{user.username}</td>
                                     <td style={{ padding: '12px 15px' }}>{user.nickname}</td>
@@ -140,7 +140,7 @@ function AdminUsers() {
                                     </td>
                                     <td style={{ padding: '12px 15px' }}>
                                         {user.reportCount > 0 ? (
-                                            <span style={{ color: '#d9534f', fontWeight: 'bold' }}>{user.reportCount}건</span>
+                                            <span style={{ color: 'var(--text-color)', fontWeight: 'bold' }}>{user.reportCount}건</span>
                                         ) : '0건'}
                                     </td>
                                     <td style={{ padding: '12px 15px' }}>

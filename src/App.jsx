@@ -35,6 +35,7 @@ import AdminChatManager from './pages/Chat/AdminChatManager.jsx';
 import AdminAnnouncements from './pages/Admin/AdminAnnouncements.jsx';
 import StatusGuard from './pages/Auth/StatusGuard';
 import SocialSignupExtra from './pages/Auth/SocialSignupExtra';
+import AdminManage from './pages/Admin/AdminManage.jsx';
 
 
 function App() {
@@ -93,6 +94,7 @@ function App() {
                             <Route path="categories" element={<AdminCategories />} />
                             <Route path="users" element={<AdminUsers />} />
                             <Route path="reports" element={<AdminReports />} />
+                            <Route path="/admin/admin-manage" element={<AdminManage />} />
                             <Route path="chat" element={<AdminChatManager />} />
                             {/* <Route path="chat" element={<AdminChatManage />} /> */}
                             <Route path="announcements" element={<AdminAnnouncements />} />

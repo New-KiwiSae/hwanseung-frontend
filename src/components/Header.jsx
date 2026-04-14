@@ -5,19 +5,20 @@ import './Header.css';
 import axios from 'axios';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-
-// 🌟 1. 우리가 만든 전역 창고 도구를 가져옵니다.
 import { useUser } from '../UserContext';
 
 const Header = () => {
   const { userInfo, setUserInfo } = useUser();
-  // const isLoggedIn = !!userInfo;
-
   const [isLoggedIn, setisLoggedIn] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // ★ 검색 관련 state 추가
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [popularKeywords, setPopularKeywords] = useState([]);
+  const [recentSearches, setRecentSearches] = useState([]);
 
   // 알림 관련 상태값들
   const [isNotiOpen, setIsNotiOpen] = useState(false);
@@ -27,9 +28,88 @@ const Header = () => {
   const searchRef = useRef(null);
   const navigate = useNavigate();
 
-  // 💡 Context API(userInfo)에서 아이디를 먼저 찾고, 없으면 sessionStorage에서 찾도록 튼튼하게 보강!
   const token = sessionStorage.getItem("accessToken");
   const currentUser = userInfo?.username || userInfo?.userId || sessionStorage.getItem("username");
+
+  // ★ 인기 검색어 로드
+  const fetchPopularKeywords = async () => {
+    try {
+      const res = await axios.get('/api/search/popular');
+      setPopularKeywords(res.data || []);
+    } catch (e) {
+      console.error('인기 검색어 로드 실패:', e);
+    }
+  };
+
+  // ★ localStorage에서 최근 검색어 로드
+  const loadRecentSearches = () => {
+    try {
+      const saved = localStorage.getItem('recentSearches');
+      setRecentSearches(saved ? JSON.parse(saved) : []);
+    } catch (e) {
+      setRecentSearches([]);
+    }
+  };
+
+  // ★ 검색 실행
+  const handleSearch = async (keyword) => {
+    const trimmed = (keyword || searchKeyword).trim();
+    if (!trimmed) return;
+
+    // 최근 검색어 저장 (중복 제거, 최대 10개)
+    try {
+      const prev = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+      const updated = [trimmed, ...prev.filter(k => k !== trimmed)].slice(0, 10);
+      localStorage.setItem('recentSearches', JSON.stringify(updated));
+      setRecentSearches(updated);
+    } catch (e) {
+      // localStorage 접근 실패 시 무시
+    }
+
+    // 키워드 카운트 증가 (실패해도 검색은 진행)
+    axios.post('/api/search/log', { keyword: trimmed }).catch(() => {});
+
+    setIsSearchOpen(false);
+    setSearchKeyword('');
+    navigate(`/products?keyword=${encodeURIComponent(trimmed)}`);
+  };
+
+  // ★ 최근 검색어 개별 삭제
+  const removeRecentSearch = (e, keyword) => {
+    e.stopPropagation();
+    try {
+      const updated = recentSearches.filter(k => k !== keyword);
+      localStorage.setItem('recentSearches', JSON.stringify(updated));
+      setRecentSearches(updated);
+    } catch (err) {
+      // localStorage 접근 실패 시 무시
+    }
+  };
+
+  // ★ 최근 검색어 전체 삭제
+  const clearAllRecentSearches = () => {
+    try {
+      localStorage.removeItem('recentSearches');
+    } catch (e) {}
+    setRecentSearches([]);
+  };
+
+  // ★ Enter 키 검색
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  // ★ 검색창 열릴 때 데이터 로드
+  useEffect(() => {
+    if (isSearchOpen) {
+      fetchPopularKeywords();
+      loadRecentSearches();
+    }
+  }, [isSearchOpen]);
+
+  // --- 아래부터 기존 코드 그대로 유지 ---
 
   const handleNearMeClick = () => {
     if (userInfo && userInfo.address) {
@@ -81,11 +161,7 @@ const Header = () => {
   useEffect(() => {
     const status = sessionStorage.getItem('status');
     const currentPath = window.location.pathname;
-
-    // 1. 제외할 페이지 리스트 (여기는 PENDING 상태여도 접근 가능해야 함)
     const allowedPaths = ['/login', '/social-signup-extra', '/oauth/callback'];
-
-    // 2. 상태가 PENDING이고, 현재 페이지가 허용 리스트에 없다면 리다이렉트
     if (status === 'PENDING' && !allowedPaths.includes(currentPath)) {
       alert("추가 정보 입력이 필요합니다.");
       navigate("/social-signup-extra");
@@ -132,12 +208,9 @@ const Header = () => {
 
     const fetchHistoryNotifications = async () => {
       try {
-        // const res = await axios.get(`http://localhost/api/notifications`, {
         const res = await axios.get(`/api/notifications`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-
-        // 🚀 채팅 알림(CHAT)은 헤더에서 버립니다!
         const systemNotis = res.data.filter(n => n.type !== 'CHAT');
         setNotifications(systemNotis);
       } catch (error) {
@@ -147,7 +220,6 @@ const Header = () => {
     fetchHistoryNotifications();
 
     const client = new Client({
-      // webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
       webSocketFactory: () => new SockJS('/ws-chat'),
       connectHeaders: { Authorization: `Bearer ${token}` },
       onConnect: () => {
@@ -172,13 +244,10 @@ const Header = () => {
   const handleNotiClick = async (noti) => {
     setIsNotiOpen(false);
     setNotifications(prev => prev.map(n => n.id === noti.id ? { ...n, isRead: true, read: true } : n));
-
     if (noti.type === 'FAVORITE' && noti.relatedItemId) {
       navigate(`/products/${noti.relatedItemId}`);
     }
-
     try {
-      // await axios.put(`http://localhost/api/notifications/${noti.id}/read`, {}, {
       await axios.put(`/api/notifications/${noti.id}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -188,7 +257,6 @@ const Header = () => {
   const handleReadAll = async () => {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true, read: true })));
     try {
-      // await axios.put(`http://localhost/api/notifications/read-all`, {}, {
       await axios.put(`/api/notifications/read-all`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -199,7 +267,6 @@ const Header = () => {
     e.stopPropagation();
     setNotifications(prev => prev.filter(n => n.id !== notiId));
     try {
-      // await axios.delete(`http://localhost/api/notifications/${notiId}`, {
       await axios.delete(`/api/notifications/${notiId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -224,12 +291,93 @@ const Header = () => {
           <span><span className="logo-brand">환승</span>마켓</span>
         </a>
 
+        {/* ★ 검색 영역 전체 교체 */}
         <div className="search-area" ref={searchRef}>
           <div className={`search-input-wrapper ${isSearchOpen ? 'active' : ''}`}>
-            <i className="fas fa-search search-icon"></i>
-            <input type="text" placeholder="어떤 물건을 환승할까요?" onFocus={() => setIsSearchOpen(true)} />
+            <i className="fas fa-search search-icon" onClick={() => handleSearch()} style={{ cursor: 'pointer' }}></i>
+            <input
+              type="text"
+              placeholder="어떤 물건을 환승할까요?"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onFocus={() => setIsSearchOpen(true)}
+              onKeyDown={handleSearchKeyDown}
+            />
+            {searchKeyword && (
+              <i
+                className="fas fa-times search-clear-btn"
+                onClick={() => setSearchKeyword('')}
+              ></i>
+            )}
           </div>
+
+          {/* ★ 검색 드롭다운 */}
+          {isSearchOpen && (
+            <div className="search-dropdown">
+              <div className="search-dropdown-grid">
+
+                {/* 좌측: 최근 검색어 */}
+                <div className="search-dropdown-col">
+                  <div className="dropdown-label-row">
+                    <span className="dropdown-label">최근 검색어</span>
+                    {recentSearches.length > 0 && (
+                      <span className="dropdown-clear-all" onClick={clearAllRecentSearches}>
+                        전체 삭제
+                      </span>
+                    )}
+                  </div>
+                  {recentSearches.length === 0 ? (
+                    <div className="search-empty">최근 검색어가 없습니다.</div>
+                  ) : (
+                    <div className="recent-search-list">
+                      {recentSearches.map((keyword, idx) => (
+                        <div
+                          key={idx}
+                          className="recent-search-item"
+                          onClick={() => handleSearch(keyword)}
+                        >
+                          <div className="recent-search-left">
+                            <i className="fas fa-clock recent-search-icon"></i>
+                            <span>{keyword}</span>
+                          </div>
+                          <button
+                            className="recent-search-delete"
+                            onClick={(e) => removeRecentSearch(e, keyword)}
+                            title="삭제"
+                          >
+                            <i className="fas fa-times"></i>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 우측: 실시간 인기 검색어 */}
+                <div className="search-dropdown-col search-dropdown-col-right">
+                  <div className="dropdown-label">실시간 인기 검색어</div>
+                  {popularKeywords.length === 0 ? (
+                    <div className="search-empty">인기 검색어가 없습니다.</div>
+                  ) : (
+                    <div className="trending-list">
+                      {popularKeywords.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="trending-item"
+                          onClick={() => handleSearch(item.keyword)}
+                        >
+                          <span className="trending-rank">{idx + 1}</span>
+                          <span className="trending-keyword">{item.keyword}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
+        {/* ★ 검색 영역 끝 */}
 
         <div className="header-actions">
           <div className="nav-links">
@@ -264,7 +412,6 @@ const Header = () => {
                       <div className="noti-empty">새로운 알림이 없습니다.</div>
                     ) : (
                       notifications.map((noti) => (
-                        /* 🌟 안 읽은 알림 배경색 동적 클래스 추가 (unread) */
                         <div
                           key={noti.id}
                           className={`noti-item ${!noti.isRead ? 'unread' : ''}`}
@@ -286,14 +433,10 @@ const Header = () => {
                         </div>
                       ))
                     )}
-                    <div className="dropdown-item noti-view-all" onClick={() => navigate('/notifications')}>
-                      알림 전체보기
-                    </div>
                   </div>
                 )}
               </div>
 
-              {/* 프로필 버튼 */}
               {isLoggedIn && (
                 <div className="user-profile-container" onMouseEnter={() => setIsProfileOpen(true)} onMouseLeave={() => setIsProfileOpen(false)}>
                   <button className="icon-btn user-avatar" title="내 프로필"><i className="far fa-user"></i></button>
@@ -303,7 +446,6 @@ const Header = () => {
                       <hr style={{ margin: '5px 0' }} />
                       <div className="dropdown-item" onClick={() => navigate('/mypage')}><i className="far fa-id-card"></i> 내 정보 보기</div>
                       <div className="dropdown-item" onClick={() => navigate('/sales')}><i className="fas fa-box-open"></i> 거래 내역</div>
-                      {/* <div className="dropdown-item" onClick={() => navigate('/purchase')}><i className="fas fa-shopping-bag"></i> 구매 내역</div> */}
                       <div className="dropdown-item" onClick={() => navigate('/wishlist')}><i className="fas fa-heart"></i> 관심 목록</div>
                       <hr />
                       <div className="dropdown-item logout-item" onClick={handleLogout}><i className="fas fa-sign-out-alt"></i> 로그아웃</div>
@@ -311,7 +453,6 @@ const Header = () => {
                   )}
                 </div>
               )}
-
 
               <button className="sell-btn" onClick={() => navigate("/products/create")}><i className="fas fa-plus"></i><span>판매하기</span></button>
               {isAdmin && <button className="admin-btn" onClick={() => navigate("/admin/dashboard")}><i className="fas fa-lock"></i><span>관리자 페이지</span></button>}
