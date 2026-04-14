@@ -102,8 +102,8 @@ export default function ProductDetailPage() {
                 method: "GET",
                 headers: token
                     ? {
-                          Authorization: `Bearer ${token}`,
-                      }
+                        Authorization: `Bearer ${token}`,
+                    }
                     : {},
             });
 
@@ -239,6 +239,12 @@ export default function ProductDetailPage() {
             navigate("/login");
             return;
         }
+
+        if (isSeller) {
+            alert("본인이 등록한 상품에는 찜할 수 없습니다.");
+            return;
+        }
+
 
         try {
             const response = await fetch(`/api/products/${productId}/like`, {
@@ -643,7 +649,6 @@ export default function ProductDetailPage() {
                                 type="button"
                                 className={`btn-like ${likeInfo.liked ? "active" : ""}`}
                                 onClick={handleLikeToggle}
-                                disabled={isSeller}
                             >
                                 {likeInfo.liked ? (
                                     <FaHeart className="like-icon active" />
@@ -666,7 +671,6 @@ export default function ProductDetailPage() {
                                 type="button"
                                 className="btn-report"
                                 onClick={handleReport}
-                                disabled={isSeller}
                             >
                                 신고하기
                             </button>

@@ -492,8 +492,16 @@ export default function AuthPage() {
             <div className={`container ${isSignUpActive ? "right-panel-active" : ""}`} id="container">
 
                 {/* 회원가입 영역 */}
-                <div className="form-container sign-up-container">
-                    <form onSubmit={onSignUpSubmit} className="scrollable-form">
+                <div className={`form-container sign-up-container ${isSignUpActive ? "active" : ""}`}>
+                    <form onSubmit={onSignUpSubmit}>
+
+                        {/* [추가] 모바일 전용 헤더: 여기에 전환 버튼이 있습니다 */}
+                        <div className="mobile-overlay-header">
+                            <h1>처음이신가요?</h1>
+                            <p>환승마켓에 가입해보세요.</p>
+                            <button type="button" className="btn ghost-green" onClick={() => setIsSignUpActive(false)}>로그인으로 이동</button>
+                        </div>
+            <div className="scrollable-form">
                         <h2>회원가입</h2>
                         <div className="social-login">
                             <div className="social-login" style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
@@ -718,14 +726,22 @@ export default function AuthPage() {
                                 <input type="radio" name="gender" value="FEMALE" checked={signUpValues.gender === "FEMALE"} onChange={handleSignUpChange} /> 여성
                             </label>
                         </div>
-
+            </div>
                         <button type="submit" className="btn primary-btn">가입하기</button>
                     </form>
                 </div>
 
                 {/* 로그인 영역 */}
-                <div className="form-container sign-in-container">
+                <div className={`form-container sign-in-container ${isSignUpActive ? "" : "active"}`}>
                     <form onSubmit={onSignInSubmit}>
+
+                        {/* [추가] 모바일 전용 헤더 */}
+                        <div className="mobile-overlay-header">
+                            <h1>다시 오셨군요!</h1>
+                            <p>가치 있는 환승을 시작하세요.</p>
+                            <button type="button" className="btn ghost-green" onClick={() => setIsSignUpActive(true)}>회원가입으로 이동</button>
+                        </div>
+
                         <div className="logo"><i className="fas fa-sync-alt"></i></div>
                         <h2>로그인</h2>
                         <div className="social-login">

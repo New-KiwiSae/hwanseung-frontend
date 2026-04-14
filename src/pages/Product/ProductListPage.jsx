@@ -32,7 +32,7 @@ export default function ProductListPage() {
 
     const [products, setProducts] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("all");
-    const [keyword, setKeyword] = useState("");
+    const [keyword, setKeyword] = useState(searchParams.get("keyword") || "");
     const [sortType, setSortType] = useState("latest");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -100,6 +100,14 @@ export default function ProductListPage() {
         }
     }, [searchParams, categories]);
 
+    // ★ Header 검색 등 URL의 keyword 파라미터 동기화
+    useEffect(() => {
+        const kw = searchParams.get("keyword");
+        if (kw !== null) {
+            setKeyword(kw);
+        }
+    }, [searchParams]);
+
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -112,8 +120,8 @@ export default function ProductListPage() {
                     method: "GET",
                     headers: token
                         ? {
-                              Authorization: `Bearer ${token}`,
-                          }
+                            Authorization: `Bearer ${token}`,
+                        }
                         : {},
                 });
 
@@ -169,10 +177,10 @@ export default function ProductListPage() {
                 prev.map((item) =>
                     item.productId === product.productId
                         ? {
-                              ...item,
-                              liked: result.liked,
-                              likeCount: result.likeCount,
-                          }
+                            ...item,
+                            liked: result.liked,
+                            likeCount: result.likeCount,
+                        }
                         : item
                 )
             );
@@ -204,7 +212,7 @@ export default function ProductListPage() {
                 (product.location &&
                     product.location.toLowerCase().includes(lowerKeyword));
 
-                    const matchPopular = filterParam === "popular" ? ((product.likeCount || 0) >= 2): true;
+            const matchPopular = filterParam === "popular" ? ((product.likeCount || 0) >= 2) : true;
 
             return matchCategory && matchKeyword && matchPopular;
         });
@@ -376,7 +384,7 @@ export default function ProductListPage() {
                                             {product.thumbnailUrl && !hasBrokenImage ? (
                                                 <img
                                                     // src={`http://localhost:8080${product.thumbnailUrl}`}
-                                                src={`${product.thumbnailUrl}`}
+                                                    src={`${product.thumbnailUrl}`}
                                                     alt={product.title}
                                                     onError={() => {
                                                         setImageErrorMap((prev) => ({
@@ -427,23 +435,21 @@ export default function ProductListPage() {
 
                                             <div className="product-card-bottom">
                                                 <div
-                                                    className={`product-sale-status-text ${
-                                                        isReserved ? "reserved" : ""
-                                                    }`}
+                                                    className={`product-sale-status-text ${isReserved ? "reserved" : ""
+                                                        }`}
                                                 >
                                                     {isSoldOut
                                                         ? "판매완료"
                                                         : isReserved
-                                                        ? "예약중"
-                                                        : "판매중"}
+                                                            ? "예약중"
+                                                            : "판매중"}
                                                 </div>
 
                                                 <div className="product-count-group">
                                                     <button
                                                         type="button"
-                                                        className={`product-like-btn ${
-                                                            product.liked ? "active" : ""
-                                                        }`}
+                                                        className={`product-like-btn ${product.liked ? "active" : ""
+                                                            }`}
                                                         disabled={disableLike}
                                                         onClick={(e) => handleLikeToggle(e, product)}
                                                     >

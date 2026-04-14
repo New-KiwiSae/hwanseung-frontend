@@ -12,16 +12,8 @@ import {
     bulkDelete,
 } from '../../api/AdminProductsAPI';
 
-// 카테고리 매핑
-const CATEGORY_MAP = {
-    digital: '디지털기기',
-    fashion: '의류/잡화',
-    furniture: '가구/인테리어',
-    life: '생활/가전',
-    hobby: '취미/도서',
-    sports: '스포츠/레저',
-    ticket: '티켓/교환권',
-};
+// 추가할 카테고리 API
+import { fetchCategories } from '../../api/AdminCategoriesAPI';
 
 // 상태 매핑
 const STATUS_MAP = {
@@ -67,6 +59,10 @@ function AdminProducts() {
     const [filterCategory, setFilterCategory] = useState('');
     const [sortBy, setSortBy] = useState('latest');
 
+    // 👉 [추가] 동적 카테고리 관리를 위한 상태
+    const [activeCategories, setActiveCategories] = useState([]); // 드롭다운용 (활성)
+    const [categoryMap, setCategoryMap] = useState({}); // 테이블 및 상세 표시용 (전체)
+
     // 요약
     const [summary, setSummary] = useState({ total: 0, sale: 0, soldOut: 0, reserved: 0, hidden: 0 });
 
@@ -105,6 +101,29 @@ function AdminProducts() {
             setIsLoading(false);
         }
     }, [page, searchKeyword, filterStatus, filterCategory, sortBy]);
+
+    // 👉 [추가] 컴포넌트 마운트 시 카테고리 데이터 로드
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                const categoryList = await fetchCategories();
+
+                // 1. 드롭다운에 표시할 '활성화된' 카테고리만 필터링 (정렬은 백엔드에서 sortOrder 기준으로 이미 됨)
+                const activeOnly = categoryList.filter(c => c.active === true);
+                setActiveCategories(activeOnly);
+
+                // 2. 테이블/모달에서 key값을 한글명(displayName)으로 변환할 매핑 객체 생성
+                const mapObj = {};
+                categoryList.forEach(c => {
+                    mapObj[c.key] = c.displayName;
+                });
+                setCategoryMap(mapObj);
+            } catch (err) {
+                console.error('카테고리 로드 실패:', err);
+            }
+        };
+        loadCategories();
+    }, []);
 
     useEffect(() => {
         loadProducts();
@@ -361,8 +380,11 @@ function AdminProducts() {
                         onChange={(e) => { setFilterCategory(e.target.value); setPage(1); }}
                     >
                         <option value="">전체 카테고리</option>
-                        {Object.entries(CATEGORY_MAP).map(([key, label]) => (
-                            <option key={key} value={key}>{label}</option>
+                        {/* 👉 동적으로 불러온 활성 카테고리 배열로 렌더링 */}
+                        {activeCategories.map((cat) => (
+                            <option key={cat.key} value={cat.key}>
+                                {cat.displayName}
+                            </option>
                         ))}
                     </select>
                 </div>
@@ -482,7 +504,7 @@ function AdminProducts() {
                                         </td>
                                         <td>
                                             <span className={styles.categoryTag}>
-                                                {CATEGORY_MAP[p.category] || p.category || '-'}
+                                                {categoryMap[p.category] || p.category || '-'}
                                             </span>
                                         </td>
                                         <td>
@@ -576,6 +598,7 @@ function AdminProducts() {
                         ) : detail && (
                             <DetailContent
                                 detail={detail}
+                                categoryMap={categoryMap} // 👉 프롭스 추가
                                 closeDetail={closeDetail}
                                 showReasonFor={showReasonFor}
                                 setShowReasonFor={setShowReasonFor}
@@ -613,7 +636,7 @@ function SummaryCard({ icon, iconBg, iconColor, label, value, active, onClick })
 }
 
 function DetailContent({
-    detail, closeDetail, showReasonFor, setShowReasonFor,
+    detail, categoryMap, closeDetail, showReasonFor, setShowReasonFor,
     actionReason, setActionReason, isActioning,
     onApprove, onReject, onHide, onUnhide, onDelete,
 }) {
@@ -665,7 +688,7 @@ function DetailContent({
                     <div className={styles.detailItem}>
                         <div className={styles.detailItemLabel}>카테고리</div>
                         <div className={styles.detailItemValue}>
-                            {CATEGORY_MAP[detail.category] || detail.category || '-'}
+                            {categoryMap[detail.category] || detail.category || '-'}
                         </div>
                     </div>
                     <div className={styles.detailItem}>
