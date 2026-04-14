@@ -836,18 +836,6 @@ const MyPage = () => {
         </>
       )}
 
-      <div className="mypage-pay-section">
-        <div className="pay-banner">
-          <div className="pay-text">
-            <h3>환승Pay 충전</h3>
-            <p>안전한 중고 거래의 시작, 환승Pay를 충전해보세요.</p>
-          </div>
-          <button className="btn-charge" onClick={() => setIsPayModalOpen(true)}>
-            <i className="fas fa-wallet"></i> 충전하기
-          </button>
-        </div>
-      </div>
-
       {isPayModalOpen && <ChargePay onClose={() => setIsPayModalOpen(false)} userInfo={userInfo} />}
 
       {/* 회원 탈퇴 구역  */}

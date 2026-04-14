@@ -25,7 +25,6 @@ import InfoPage from '../InfoPage.jsx';
 import AdminLayout from './pages/Admin/AdminLayout.jsx';
 import AdminDashBoard from './pages/Admin/AdminDashBoard.jsx';
 import AdminStatistics from './pages/Admin/AdminStatistics.jsx';
-import AdminNotifications from './pages/Admin/AdminNotifications.jsx';
 import AdminReports from './pages/Admin/AdminReports.jsx';
 import AdminUsers from './pages/Admin/AdminUsers.jsx';
 import AdminProducts from './pages/Admin/AdminProducts.jsx';
@@ -60,7 +59,6 @@ function App() {
                 <main style={{ flexGrow: 1 }}>
                     <ScrollToTop />
                     <Routes>
-
                         <Route path="/" element={<MainPage />} />
                         <Route path="/near-me" element={<NearMePage />} />
                         <Route path="/products/create" element={<ProductCreatePage />} />
@@ -83,7 +81,6 @@ function App() {
                             <Route path="reports" element={<AdminReports />} />
                             <Route path="chat" element={<AdminChatManager />} />
                             {/* <Route path="chat" element={<AdminChatManage />} /> */}
-                            <Route path="notifications" element={<AdminNotifications />} />
                             <Route path="announcements" element={<AdminAnnouncements />} />
                         </Route>
 
