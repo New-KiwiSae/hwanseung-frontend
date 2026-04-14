@@ -640,3 +640,120 @@
   font-size: 0.85em;
   border-top: 1px solid #eee;
 }
+
+/* ========================================= */
+/* 검색 드롭다운 확장 스타일                    */
+/* ========================================= */
+
+/* 라벨 행 (제목 + 전체 삭제) */
+.dropdown-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dropdown-clear-all {
+  font-size: 12px;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.dropdown-clear-all:hover {
+  color: #ef4444;
+}
+
+/* 우측 컬럼 */
+.search-dropdown-col-right {
+  width: 180px;
+  flex: none !important;
+  border-left: 1px solid #f0f0f0;
+  padding-left: 24px;
+}
+
+/* 검색어 없을 때 */
+.search-empty {
+  font-size: 13px;
+  color: #bbb;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* 최근 검색어 목록 */
+.recent-search-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.recent-search-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.recent-search-item:hover {
+  background-color: #f8f9fa;
+}
+
+.recent-search-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #333;
+  min-width: 0;
+}
+
+.recent-search-left span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-search-icon {
+  color: #ccc;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.recent-search-delete {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.recent-search-delete:hover {
+  color: #ef4444;
+}
+
+/* 인기 검색어 키워드 텍스트 */
+.trending-keyword {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 검색창 clear 버튼 (x) */
+.search-clear-btn {
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.search-clear-btn:hover {
+  color: #333;
+}

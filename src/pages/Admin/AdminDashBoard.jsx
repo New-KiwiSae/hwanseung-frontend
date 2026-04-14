@@ -7,12 +7,16 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 function AdminDashBoard() {
     const navigate = useNavigate();
-    const [counts, setCounts] = useState({ users: 0, products: 0, sellproducts: 0 , activeTransactions: 0, completedTransactions: 0, pendingReports: 0});
+    const [counts, setCounts] = useState({ users: 0, products: 0, sellproducts: 0, activeTransactions: 0, completedTransactions: 0, pendingReports: 0 });
     // 주간 트렌드 데이터를 저장할 상태 추가
     const [trendData, setTrendData] = useState([]);
     // 권고사항 2: 로딩 및 에러 상태 관리 추가
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const [pendingReports, setPendingReports] = useState([]);
+    const [transactionLogs, setTransactionLogs] = useState([]);
+    const [recentProducts, setRecentProducts] = useState([]);
 
     const getHeader = () => {
         const accessToken = sessionStorage.getItem("accessToken");
@@ -31,30 +35,37 @@ function AdminDashBoard() {
                 setError(null); // 재호출 시 이전 에러 초기화
 
                 // HTTP 응답 상태(res.ok)를 1차적으로 검증하는 로직 추가
-                const [userData, productData, sellData, summaryData, trendRes] = await Promise.all([
-
-                    axios.get('/api/user/count', getHeader()).then(res => {
-                        console.log('사용자 통계 API 응답 상태:', res.status);
-                        if (!res.status) throw new Error('사용자 통계 API 응답 오류');
-                        return res.data;
-                    }),
-                    axios.get('/api/products/count', getHeader()).then(res => {
-                        if (!res.status) throw new Error('상품 통계 API 응답 오류');
-                        return res.data;
-                    }),
-                    axios.get('/api/products/sellcount', getHeader()).then(res => {
-                        if (!res.status) throw new Error('판매 상품 통계 API 응답 오류');
-                        return res.data;
-                    }),
-                    axios.get('/api/admin/dashboard/summary', getHeader()).then(res => {
-                        if (!res.status) throw new Error('대시보드 요약 API 응답 오류');
-                        return res.data;
-                    }),
-                    axios.get('/api/admin/dashboard/weekly-trend', getHeader()).then(res => {
-                        if (res.status !== 200) throw new Error('주간 트렌드 API 응답 오류');
-                        return res.data;
-                    })
-                ]);
+                const [userData, productData, sellData, summaryData, trendRes,
+                    pendingReportsRes, txLogsRes, recentProductsRes] = await Promise.all([
+                        // ── 기존 5개 유지 (변경 없음) ──
+                        axios.get('/api/user/count', getHeader()).then(res => {
+                            if (!res.status) throw new Error('사용자 통계 API 응답 오류');
+                            return res.data;
+                        }),
+                        axios.get('/api/products/count', getHeader()).then(res => {
+                            if (!res.status) throw new Error('상품 통계 API 응답 오류');
+                            return res.data;
+                        }),
+                        axios.get('/api/products/sellcount', getHeader()).then(res => {
+                            if (!res.status) throw new Error('판매 상품 통계 API 응답 오류');
+                            return res.data;
+                        }),
+                        axios.get('/api/admin/dashboard/summary', getHeader()).then(res => {
+                            if (!res.status) throw new Error('대시보드 요약 API 응답 오류');
+                            return res.data;
+                        }),
+                        axios.get('/api/admin/dashboard/weekly-trend', getHeader()).then(res => {
+                            if (res.status !== 200) throw new Error('주간 트렌드 API 응답 오류');
+                            return res.data;
+                        }),
+                        // ── 추가 3개 (개별 catch로 하나 실패해도 나머지 정상 동작) ──
+                        axios.get('/api/admin/dashboard/pending-reports', getHeader())
+                            .then(res => res.data).catch(() => []),
+                        axios.get('/api/admin/dashboard/transaction-logs', getHeader())
+                            .then(res => res.data).catch(() => []),
+                        axios.get('/api/admin/dashboard/recent-products', getHeader())
+                            .then(res => res.data).catch(() => []),
+                    ]);
 
                 setCounts({
                     users: userData.totalCount,
@@ -62,6 +73,10 @@ function AdminDashBoard() {
                     sellproducts: sellData.sellCount,
                     ...summaryData
                 });
+
+                setPendingReports(Array.isArray(pendingReportsRes) ? pendingReportsRes : []);
+                setTransactionLogs(Array.isArray(txLogsRes) ? txLogsRes : []);
+                setRecentProducts(Array.isArray(recentProductsRes) ? recentProductsRes : []);
 
                 // 백엔드 데이터(3개의 배열)를 Recharts용 객체 배열로 변환
                 if (trendRes && trendRes.labels) {
@@ -177,7 +192,7 @@ function AdminDashBoard() {
                 {/* 1. 통계 그래프 섹션 (Recharts 연동) */}
                 <div className={styles.chartSection} style={{ flex: 2, minWidth: 0, background: 'var(--sidebar-color)', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                     <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: 'var(--text-color)' }}>주간 거래 및 가입 추이</h3>
-                    
+
                     {/* 그래프 무한 확장 버그 방지를 위해 height 300px 고정 및 width 100% 명시 */}
                     <div style={{ width: '100%', height: '300px', backgroundColor: 'var(--sidebar-color)' }}>
                         {isLoading ? (
@@ -189,21 +204,21 @@ function AdminDashBoard() {
                                 <AreaChart data={trendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="colorTx" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                                            <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                                            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+                                            <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
                                         </linearGradient>
                                         <linearGradient id="colorSignup" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8}/>
-                                            <stop offset="95%" stopColor="#82ca9d" stopOpacity={0}/>
+                                            <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
+                                            <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
                                     <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#666' }} axisLine={false} tickLine={false} />
                                     <YAxis tick={{ fontSize: 12, fill: '#666' }} axisLine={false} tickLine={false} />
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
-                                    <Tooltip 
+                                    <Tooltip
                                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                                     />
-                                    <Legend verticalAlign="top" height={36}/>
+                                    <Legend verticalAlign="top" height={36} />
                                     <Area type="monotone" dataKey="거래건수" stroke="#8884d8" strokeWidth={2} fillOpacity={1} fill="url(#colorTx)" />
                                     <Area type="monotone" dataKey="가입자수" stroke="#82ca9d" strokeWidth={2} fillOpacity={1} fill="url(#colorSignup)" />
                                 </AreaChart>
@@ -218,12 +233,30 @@ function AdminDashBoard() {
                         <h3 style={{ fontSize: '1.1rem', color: 'var(--text-color)' }}>🚨미처리 신고 내역</h3>
                         <span style={{ fontSize: '0.8rem', color: '#007bff', cursor: 'pointer' }} onClick={() => navigate('/admin/reports')}>전체 보기</span>
                     </div>
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                        {/* API 연동 전 UI 스켈레톤 */}
-                        <li style={{ padding: '10px 0', borderBottom: '1px solid var(--primary-color-light)', display: 'flex', justifyContent: 'space-between' }}>
-                            <span><strong style={{ color: '#d9534f' }}>사기 의심</strong> (user_123)</span>
-                            <span style={{ color: 'var(--text-color)', opacity: 0.6, fontSize: '0.9rem' }}>대기중</span>
-                        </li>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, maxHeight: '280px', overflowY: 'auto' }}>
+                        {pendingReports.length === 0 ? (
+                            <li style={{ padding: '10px 0', color: 'var(--text-color)', opacity: 0.5, textAlign: 'center' }}>
+                                미처리 신고가 없습니다.
+                            </li>
+                        ) : (
+                            pendingReports.map((report) => (
+                                <li key={report.id}
+                                    style={{
+                                        padding: '10px 0', borderBottom: '1px solid var(--primary-color-light)',
+                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                                    }}>
+                                    <span>
+                                        <strong style={{ color: '#d9534f' }}>{report.reasonCategory}</strong>
+                                        <span style={{ color: 'var(--text-color)', opacity: 0.7, fontSize: '0.85rem', marginLeft: '6px' }}>
+                                            ({report.reportedNickname})
+                                        </span>
+                                    </span>
+                                    <span style={{ color: 'var(--text-color)', opacity: 0.6, fontSize: '0.8rem' }}>
+                                        {report.createdAt}
+                                    </span>
+                                </li>
+                            ))
+                        )}
                     </ul>
                 </div>
             </div>
@@ -237,20 +270,30 @@ function AdminDashBoard() {
                         <h3 style={{ fontSize: '1.1rem', color: 'var(--text-color)' }}>실시간 거래완료 로그</h3>
                         <span style={{ fontSize: '0.8rem', color: '#28a745' }}><i className="bx bx-radio-circle-marked bx-burst"></i> Live</span>
                     </div>
-                    <div style={{ height: '250px', overflowY: 'auto', backgroundColor: '#2b2b2b', borderRadius: '6px', padding: '15px', color: '#a9b7c6', fontSize: '0.85rem', fontFamily: 'monospace' }}>
-                        {/* API 연동 전 가상 로그 데이터 */}
-                        <div style={{ marginBottom: '8px' }}>
-                            <span style={{ color: '#6a8759' }}>[2026-04-03 14:25:11]</span> [AI_IMG] user_8821 상품 이미지 분석 완료 (위변조 확률: 2%)
-                        </div>
-                        <div style={{ marginBottom: '8px' }}>
-                            <span style={{ color: '#6a8759' }}>[2026-04-03 14:26:05]</span> <span style={{ color: '#cc7832' }}>[FDS_WARN]</span> user_104 단기간 다중 접속 감지 (IP: 192.168.***)
-                        </div>
-                        <div style={{ marginBottom: '8px' }}>
-                            <span style={{ color: '#6a8759' }}>[2026-04-03 14:26:30]</span> [AI_TEXT] PRD_9932 상품명 자동 추출 성공 ('아이폰 15 프로')
-                        </div>
-                        <div style={{ marginBottom: '8px' }}>
-                            <span style={{ color: '#6a8759' }}>[2026-04-03 14:27:01]</span> <span style={{ color: '#cc4b37', fontWeight: 'bold' }}>[AI_IMG_FAIL]</span> PRD_9935 이미지 필터링 서버(FastAPI) 응답 지연
-                        </div>
+                    <div style={{
+                        height: '250px', overflowY: 'auto', backgroundColor: '#2b2b2b',
+                        borderRadius: '6px', padding: '15px', color: '#a9b7c6',
+                        fontSize: '0.85rem', fontFamily: 'monospace'
+                    }}>
+                        {transactionLogs.length === 0 ? (
+                            <div style={{ textAlign: 'center', opacity: 0.5, paddingTop: '100px' }}>
+                                거래완료 로그가 없습니다.
+                            </div>
+                        ) : (
+                            transactionLogs.map((log) => (
+                                <div key={log.productId} style={{ marginBottom: '8px' }}>
+                                    <span style={{ color: '#6a8759' }}>[{log.completedAt}]</span>
+                                    {' '}
+                                    <span style={{ color: '#cc7832' }}>[거래완료]</span>
+                                    {' '}
+                                    <span>{log.sellerNickname}</span>
+                                    {' '}
+                                    <span style={{ color: '#ffc66d' }}>"{log.title}"</span>
+                                    {' '}
+                                    <span style={{ color: '#6897bb' }}>{log.price?.toLocaleString()}원</span>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 
@@ -261,18 +304,57 @@ function AdminDashBoard() {
                         <span style={{ fontSize: '0.8rem', color: '#007bff', cursor: 'pointer' }} onClick={() => navigate('/admin/products')}>상품 관리로 이동</span>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
-                        {/* 더미 상품 카드 1 */}
-                        <div style={{ display: 'flex', gap: '10px', padding: '10px', border: '1px solid var(--primary-color-light)', borderRadius: '6px' }}>
-                            <div style={{ width: '60px', height: '60px', backgroundColor: 'var(--primary-color-light)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <i className="bx bx-image" style={{ color: '#adb5bd', fontSize: '1.5rem' }}></i>
+                        {recentProducts.length === 0 ? (
+                            <div style={{
+                                gridColumn: '1 / -1', textAlign: 'center',
+                                color: 'var(--text-color)', opacity: 0.5, padding: '20px 0'
+                            }}>
+                                등록된 상품이 없습니다.
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--text-color)' }}>아이폰 15 프로</span>
-                                <span style={{ fontSize: '0.8rem', color: 'var(--text-color)', opacity: 0.6 }}>1,050,000원</span>
-                                <span style={{ fontSize: '0.75rem', color: '#17a2b8' }}><i className="bx bx-bot"></i> 이름 자동추출됨</span>
-                            </div>
-                        </div>
-                        
+                        ) : (
+                            recentProducts.map((product) => (
+                                <div key={product.productId}
+                                    style={{
+                                        display: 'flex', gap: '10px', padding: '10px',
+                                        border: '1px solid var(--primary-color-light)', borderRadius: '6px'
+                                    }}>
+                                    <div style={{
+                                        width: '60px', height: '60px',
+                                        backgroundColor: 'var(--primary-color-light)',
+                                        borderRadius: '4px', display: 'flex',
+                                        alignItems: 'center', justifyContent: 'center',
+                                        overflow: 'hidden', flexShrink: 0
+                                    }}>
+                                        {product.imageUrl ? (
+                                            <img src={product.imageUrl} alt={product.title}
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ) : (
+                                            <i className="bx bx-image"
+                                                style={{ color: '#adb5bd', fontSize: '1.5rem' }}></i>
+                                        )}
+                                    </div>
+                                    <div style={{
+                                        display: 'flex', flexDirection: 'column',
+                                        justifyContent: 'center', minWidth: 0
+                                    }}>
+                                        <span style={{
+                                            fontWeight: 'bold', fontSize: '0.9rem',
+                                            color: 'var(--text-color)',
+                                            overflow: 'hidden', textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                        }}>
+                                            {product.title}
+                                        </span>
+                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-color)', opacity: 0.6 }}>
+                                            {product.price?.toLocaleString()}원
+                                        </span>
+                                        <span style={{ fontSize: '0.75rem', color: '#6c757d' }}>
+                                            {product.createdAt}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 

@@ -29,3 +29,29 @@ export const fetchDashboardSummary = async () => {
   return response.data;
 };
 
+/** 미처리 신고 내역 (최근 7건) */
+export const fetchPendingReports = async () => {
+  const response = await axios.get(
+    "/api/admin/dashboard/pending-reports",
+    getHeader()
+  );
+  return response.data;
+};
+
+/** 최근 거래완료 로그 (최근 10건) */
+export const fetchTransactionLogs = async () => {
+  const response = await axios.get(
+    "/api/admin/dashboard/transaction-logs",
+    getHeader()
+  );
+  return response.data;
+};
+
+/** 최근 등록 상품 (최근 6건) */
+export const fetchRecentProducts = async () => {
+  const response = await axios.get(
+    "/api/admin/dashboard/recent-products",
+    getHeader()
+  );
+  return response.data;
+};

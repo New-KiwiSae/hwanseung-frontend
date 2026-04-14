@@ -16,9 +16,9 @@ const products = [
     { id: 8, title: '나이키 조던 1 레트로 하이 OG', price: 210000, location: '광주 북구', time: '2시간 전', badge: null, likes: 67, chats: 22, img: '👟', color: '#f5f5f0' },
 ];
 
-const stats = [
-    { label: '누적 거래액', value: 3482, suffix: '억+', icon: 'fas fa-chart-line' },
-    { label: '오늘의 환승', value: 12402, suffix: '건', icon: 'fas fa-exchange-alt' },
+const DEFAULT_STATS = [
+    { label: '누적 거래액', value: 0, suffix: '억+', icon: 'fas fa-chart-line' },
+    { label: '오늘의 환승', value: 0, suffix: '건', icon: 'fas fa-exchange-alt' },
     { label: '안전 결제 비중', value: 98.4, suffix: '%', icon: 'fas fa-shield-alt' },
 ];
 
@@ -67,6 +67,9 @@ const MainPage = () => {
     const [products, setProducts] = useState([]);
     const [imageErrorMap, setImageErrorMap] = useState({});
 
+    // 통계 데이터 (API에서 받아온 실제 값)
+    const [statsData, setStatsData] = useState(DEFAULT_STATS);
+
     const cardsRef = useRef([]);
     const statsRef = useRef(null);
 
@@ -77,7 +80,7 @@ const MainPage = () => {
     const [showAllCategories, setShowAllCategories] = useState(false);
 
     // 숫자 롤링
-    const statValues = stats.map(s => useCountUp(s.value, 2200, statsVisible));
+    const statValues = statsData.map(s => useCountUp(s.value, 2200, statsVisible));
 
     // 동적 카테고리 로드
     useEffect(() => {
@@ -92,6 +95,26 @@ const MainPage = () => {
             }
         };
         loadCategories();
+    }, []);
+
+    // 공개 통계 데이터 로드 (누적 거래액, 오늘 거래 수)
+    useEffect(() => {
+        const fetchPublicStats = async () => {
+            try {
+                const res = await axios.get('/api/public/statistics');
+                const { totalGMV, dailyTransactions } = res.data;
+
+                setStatsData(prev => [
+                    { ...prev[0], value: totalGMV ? Math.round(totalGMV / 100000000) : 0 },
+                    { ...prev[1], value: dailyTransactions || 0 },
+                    { ...prev[2] }, // 안전 결제 비중은 기존 값 유지
+                ]);
+            } catch (err) {
+                console.error('메인 통계 로드 실패:', err);
+                // 실패 시 기본값 유지
+            }
+        };
+        fetchPublicStats();
     }, []);
 
     // 화면에 보여줄 카테고리 분리 연산
@@ -524,7 +547,7 @@ const MainPage = () => {
                         </h2>
 
                         <div className="stats-grid">
-                            {stats.map((stat, idx) => (
+                            {statsData.map((stat, idx) => (
                                 <div
                                     key={idx}
                                     className={`stat-card ${statsVisible ? 'visible' : ''}`}

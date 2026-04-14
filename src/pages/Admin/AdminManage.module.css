@@ -1,0 +1,255 @@
+/* ===== AdminManage ===== */
+.container {
+  padding: 30px;
+  width: 95%;
+  margin: 0 auto 0 auto;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.createBtn {
+  padding: 10px 20px;
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.createBtn:hover {
+  opacity: 0.85;
+}
+
+.info {
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.errorText {
+  color: #e74c3c;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+/* ===== Table ===== */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--sidebar-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+.table thead {
+  background-color: var(--primary-color);
+}
+.table thead th {
+  padding: 14px 16px;
+  text-align: left;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+.table tbody tr {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: background-color 0.15s;
+}
+.table tbody tr:hover {
+  background-color: var(--primary-color-light);
+}
+.table tbody td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-color);
+  vertical-align: middle;
+}
+.emptyRow {
+  text-align: center;
+  padding: 30px 0;
+  color: #999;
+}
+
+/* ===== Role Badge ===== */
+.roleBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+.ROLE_SUPER {
+  background-color: #e74c3c;
+}
+.ROLE_ADMIN {
+  background-color: #3498db;
+}
+.ROLE_SUB {
+  background-color: #95a5a6;
+}
+
+.roleSelect {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  outline: none;
+}
+
+/* ===== Action Buttons ===== */
+.actionBtns {
+  display: flex;
+  gap: 6px;
+}
+.editBtn,
+.saveBtn,
+.cancelBtn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+.editBtn {
+  background-color: #3498db;
+  color: #fff;
+}
+.saveBtn {
+  background-color: #27ae60;
+  color: #fff;
+}
+.cancelBtn {
+  background-color: #e0e0e0;
+  color: #333;
+}
+.editBtn:hover,
+.saveBtn:hover,
+.cancelBtn:hover {
+  opacity: 0.8;
+}
+
+/* ===== Modal Overlay ===== */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  background: var(--sidebar-color, #fff);
+  border-radius: 10px;
+  width: 440px;
+  max-width: 92vw;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+.modalHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+.closeBtn:hover {
+  color: #e74c3c;
+}
+.modalBody {
+  padding: 22px;
+}
+.denyContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 100px);
+}
+.denyMessage {
+  text-align: center;
+  font-size: 18px;
+  color: #999;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ===== Form ===== */
+.formGroup {
+  margin-bottom: 16px;
+}
+.formGroup label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+.formGroup input,
+.formGroup select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.formGroup input:focus,
+.formGroup select:focus {
+  border-color: var(--primary-color);
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity 0.2s;
+}
+.submitBtn:hover {
+  opacity: 0.85;
+}
