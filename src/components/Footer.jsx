@@ -26,7 +26,7 @@ const Footer = () => {
               <h1>Team Infomation</h1>
               <span style={{fontWeight: 'bold'}}> 팀명 : Next-Level </span><br/>
               <span style={{fontWeight: 'bold'}}> 팀장 : 김태헌</span><br/>
-              <span style={{fontWeight: 'bold'}}> 팀원 : 강태준, 강석영, 김민석, 송은설</span>
+              <span style={{fontWeight: 'bold'}}> 팀원 : 김덕식, 강태준, 강석영, 김민석, 송은설</span>
             </div>
           </div>
         </div>
