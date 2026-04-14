@@ -175,13 +175,13 @@ function AdminDashBoard() {
             {/* --- 하단 시각화 레이아웃 영역 (이전 제안 기반) --- */}
             <div className={styles.dashboardBody} style={{ marginTop: '40px', display: 'flex', gap: '20px' }}>
                 {/* 1. 통계 그래프 섹션 (Recharts 연동) */}
-                <div className={styles.chartSection} style={{ flex: 2, minWidth: 0 ,background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-                    <h3 style={{ fontSize: '1.1rem', marginBottom: '15px' }}>주간 거래 및 가입 추이</h3>
+                <div className={styles.chartSection} style={{ flex: 2, minWidth: 0, background: 'var(--sidebar-color)', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                    <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: 'var(--text-color)' }}>주간 거래 및 가입 추이</h3>
                     
                     {/* 그래프 무한 확장 버그 방지를 위해 height 300px 고정 및 width 100% 명시 */}
-                    <div style={{ width: '100%', height: '300px', backgroundColor: '#fff' }}>
+                    <div style={{ width: '100%', height: '300px', backgroundColor: 'var(--sidebar-color)' }}>
                         {isLoading ? (
-                            <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#aaa' }}>
+                            <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: 'var(--text-color)' }}>
                                 데이터를 불러오는 중...
                             </div>
                         ) : (
@@ -213,16 +213,16 @@ function AdminDashBoard() {
                 </div>
 
                 {/* 2. 빠른 처리 요망 섹션 */}
-                <div className={styles.listSection} style={{ flex: 1, background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                <div className={styles.listSection} style={{ flex: 1, background: 'var(--sidebar-color)', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                        <h3 style={{ fontSize: '1.1rem' }}>🚨미처리 신고 내역</h3>
+                        <h3 style={{ fontSize: '1.1rem', color: 'var(--text-color)' }}>🚨미처리 신고 내역</h3>
                         <span style={{ fontSize: '0.8rem', color: '#007bff', cursor: 'pointer' }} onClick={() => navigate('/admin/reports')}>전체 보기</span>
                     </div>
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                         {/* API 연동 전 UI 스켈레톤 */}
-                        <li style={{ padding: '10px 0', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
+                        <li style={{ padding: '10px 0', borderBottom: '1px solid var(--primary-color-light)', display: 'flex', justifyContent: 'space-between' }}>
                             <span><strong style={{ color: '#d9534f' }}>사기 의심</strong> (user_123)</span>
-                            <span style={{ color: '#888', fontSize: '0.9rem' }}>대기중</span>
+                            <span style={{ color: 'var(--text-color)', opacity: 0.6, fontSize: '0.9rem' }}>대기중</span>
                         </li>
                     </ul>
                 </div>
@@ -232,9 +232,9 @@ function AdminDashBoard() {
             <div className={styles.dashboardFooter} style={{ marginTop: '20px', display: 'flex', gap: '20px' }}>
 
                 {/* 3-1. 실시간 거래완료 로그 */}
-                <div className={styles.logSection} style={{ flex: 1, background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                <div className={styles.logSection} style={{ flex: 1, background: 'var(--sidebar-color)', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                        <h3 style={{ fontSize: '1.1rem' }}>실시간 거래완료 로그</h3>
+                        <h3 style={{ fontSize: '1.1rem', color: 'var(--text-color)' }}>실시간 거래완료 로그</h3>
                         <span style={{ fontSize: '0.8rem', color: '#28a745' }}><i className="bx bx-radio-circle-marked bx-burst"></i> Live</span>
                     </div>
                     <div style={{ height: '250px', overflowY: 'auto', backgroundColor: '#2b2b2b', borderRadius: '6px', padding: '15px', color: '#a9b7c6', fontSize: '0.85rem', fontFamily: 'monospace' }}>
@@ -255,34 +255,24 @@ function AdminDashBoard() {
                 </div>
 
                 {/* 3-2. 최근 등록 상품 */}
-                <div className={styles.recentProductSection} style={{ flex: 1, background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                <div className={styles.recentProductSection} style={{ flex: 1, background: 'var(--sidebar-color)', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                        <h3 style={{ fontSize: '1.1rem' }}>최근 등록 상품 모니터링</h3>
+                        <h3 style={{ fontSize: '1.1rem', color: 'var(--text-color)' }}>최근 등록 상품 모니터링</h3>
                         <span style={{ fontSize: '0.8rem', color: '#007bff', cursor: 'pointer' }} onClick={() => navigate('/admin/products')}>상품 관리로 이동</span>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
                         {/* 더미 상품 카드 1 */}
-                        <div style={{ display: 'flex', gap: '10px', padding: '10px', border: '1px solid #eee', borderRadius: '6px' }}>
-                            <div style={{ width: '60px', height: '60px', backgroundColor: '#e9ecef', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ display: 'flex', gap: '10px', padding: '10px', border: '1px solid var(--primary-color-light)', borderRadius: '6px' }}>
+                            <div style={{ width: '60px', height: '60px', backgroundColor: 'var(--primary-color-light)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <i className="bx bx-image" style={{ color: '#adb5bd', fontSize: '1.5rem' }}></i>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>아이폰 15 프로</span>
-                                <span style={{ fontSize: '0.8rem', color: '#888' }}>1,050,000원</span>
+                                <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--text-color)' }}>아이폰 15 프로</span>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-color)', opacity: 0.6 }}>1,050,000원</span>
                                 <span style={{ fontSize: '0.75rem', color: '#17a2b8' }}><i className="bx bx-bot"></i> 이름 자동추출됨</span>
                             </div>
                         </div>
-                        {/* 더미 상품 카드 2 */}
-                        <div style={{ display: 'flex', gap: '10px', padding: '10px', border: '1px solid #eee', borderRadius: '6px' }}>
-                            <div style={{ width: '60px', height: '60px', backgroundColor: '#e9ecef', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <i className="bx bx-image" style={{ color: '#adb5bd', fontSize: '1.5rem' }}></i>
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>나이키 조던 1</span>
-                                <span style={{ fontSize: '0.8rem', color: '#888' }}>200,000원</span>
-                                <span style={{ fontSize: '0.75rem', color: '#28a745' }}><i className="bx bx-check-shield"></i> 이미지 정상</span>
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
 
