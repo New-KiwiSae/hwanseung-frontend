@@ -74,6 +74,7 @@ function App() {
                             <Route path="/products/create" element={<ProductCreatePage />} />
                             <Route path="/products/:productId/edit" element={<ProductEditPage />} />
                             <Route path="/reports/create/:productId" element={<ReportCreatePage />} />
+                            <Route path="/info" element={<InfoPage />} />
 
                             {/* 마이페이지 그룹 */}
                             <Route element={<Layout />}>

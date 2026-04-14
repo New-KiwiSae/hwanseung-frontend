@@ -157,6 +157,7 @@ export default function ProductCreatePage() {
     };
 
     useEffect(() => {
+        console.log("카카오 키:", import.meta.env.VITE_KAKAO_KEY);
         if (!window.kakao || !window.kakao.maps || !userInfo) return;
 
         window.kakao.maps.load(() => {
@@ -187,6 +188,11 @@ export default function ProductCreatePage() {
                     map: map,
                 });
                 markerInstance.current = marker;
+
+                setTimeout(() => {
+                    map.relayout();
+                    map.setCenter(coords);
+                }, 0);
 
                 setForm((prev) => ({ ...prev, location: initialAddress }));
 
