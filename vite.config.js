@@ -2,7 +2,8 @@ import { defineConfig } from 'vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 
-// https://vite.dev/config/
+const targetUrl = process.env.API_TARGET || 'http://localhost:8080';
+
 export default defineConfig({
   plugins: [
     react(),
@@ -13,17 +14,14 @@ export default defineConfig({
     port: 80, 
     proxy: {
       '/api': {
-        // target: 'http://localhost:8080', 
-        target: 'http://backend:8080',
+        target: targetUrl, 
         changeOrigin: true
       },
       '/ws-chat': {
-        // target: 'http://localhost:8080',
-        target: 'http://backend:8080',
+        target: targetUrl, 
         ws: true,
         changeOrigin: true
       }
     }
   }
-}
-);
+});
