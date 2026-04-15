@@ -60,7 +60,7 @@ axios.interceptors.response.use(
 export const getInquiries = (params) => {
     let res = null;
     try {
-        res = axios.get(`${API_BASE}/all`, { params, headers: headersAuth });
+        res = axios.get(`${API_BASE}/all`, { params, withCredentials: true, headers: headersAuth });
     } catch (error) {
         console.log('공지사항 목록을 불러오지 못했습니다.');
     }
