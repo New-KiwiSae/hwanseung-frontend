@@ -12,6 +12,7 @@ const menuItems = [
   { path: '/admin/reports', icon: 'bx-user-x', label: '신고/정지' },
   { path: '/admin/chat', icon: 'bx-message-dots', label: '채팅 관리' },
   { path: '/admin/announcements', icon: 'bx-news', label: '공지사항 관리' },
+  { path: '/admin/inquiries', icon: 'bx-question-mark', label: '자주묻는 질문' },
   { path: '/admin/admin-manage', icon: 'bx-shield-quarter', label: '관리자 관리' },
 ];
 
@@ -66,7 +67,7 @@ const Sidebar = () => {
           </span>
           <div className={`${styles.text} ${styles.logoText}`}>
             <span className={styles.name}>환승마켓</span>
-            <span className={styles.profession}>현재 권한 ({role || 'Unknown'})</span>
+            <span className={styles.profession}>현재 권한 ({role === 'ROLE_SUPER' ? '최고 관리자' : role === 'ROLE_SUB' ? '중간 관리자' : 'Unknown'})</span>
           </div>
         </div>
       </header>

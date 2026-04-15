@@ -1,0 +1,339 @@
+/* 메인 컬러: #1ABC9C (민트) */
+.faq-container {
+    padding: 20px 60px;
+    margin: 0;
+    max-width: none;
+}
+
+/* 상단 헤더 */
+.faq-container .faq-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.faq-container .title {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 24px;
+}
+
+.faq-container .btn-register {
+    background-color: #1ABC9C;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.faq-container .category-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.faq-container .tab {
+    border: 1px solid #1ABC9C;
+    color: #1ABC9C;
+    padding: 5px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    background: white;
+}
+
+.faq-container .tab.active {
+    background-color: #1ABC9C;
+    color: white;
+}
+
+.faq-container .faq-item {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    /* margin-bottom: 10px; */
+    overflow: hidden;
+    width: 100%;
+    background: white;
+}
+
+.faq-container .faq-question {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    cursor: pointer;
+    align-items: flex-start;
+}
+
+
+.faq-container .faq-question strong {
+    color: var(--text-color);
+}
+
+.faq-container .faq-list {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    cursor: pointer;
+    align-items: flex-start;
+}
+
+.faq-container .faq-answer {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-top: 1px solid #eee;
+    white-space: pre-wrap;
+    line-height: 1.6;
+}
+
+.faq-container .badge-pay {
+    background: #e0f7f4;
+    color: #1ABC9C;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-right: 10px;
+}
+
+
+/* 빈 상태 */
+.container.faq-container .faq-list .empty {
+    text-align: center;
+    color: #aaa;
+    margin: auto;
+}
+
+.faq-container .faq-list .empty i {
+    font-size: 32px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+
+/* [추가] 페이징 */
+.faq-container .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.faq-container .pagination button {
+    border: 1px solid #ddd;
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    min-width: 36px;
+}
+
+.faq-container .pagination button:hover {
+    background-color: #f3f4f6;
+}
+
+.faq-container .pagination button.active {
+    background-color: #10b981;
+    color: #fff;
+    border-color: #10b981;
+}
+
+.faq-container .btnBox {
+    display : flex;
+    justify-content: flex-end;
+    gap : 5px;
+}
+.faq-container .btnall {
+    padding : 8px 15px;
+    border-radius: 5px;
+}
+
+.faq-container .btn-submit, .faq-container .btn-modi {
+    background-color: #fff;
+    border: 1px solid #10b981;
+    color: #10b981;
+}
+
+.faq-container .btn-submit, .faq-container .btn-modi:hover {
+    background-color: #10b981;
+    color: #fff;
+}
+
+.faq-container .btn-cancel, .faq-container .btn-delete {
+    background-color: #fff;
+    border: 1px solid #f00;
+    color: #f00;
+}
+
+.faq-container .btn-cancel:hover, .faq-container .btn-delete:hover {
+    background-color: #f00;
+    color: #fff;
+}
+
+
+/* 모달 배경 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* 모달 컨텐츠 박스 */
+.faq-register-modal {
+    background: white;
+    width: 450px;
+    max-width : 100%;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* 모달 헤더 */
+.faq-register-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.faq-register-modal .modal-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.faq-register-modal .plus-icon {
+    color: #1ABC9C;
+    border: 2px solid #1ABC9C;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+}
+
+.faq-register-modal .close-x {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #999;
+    cursor: pointer;
+}
+
+.faq-register-modal .btn-submit {
+    background-color: #fff;
+    border: 1px solid #1ABC9C;
+    color: #1ABC9C;
+}
+
+.faq-register-modal .btn-submit:hover {
+    background-color: #1ABC9C;
+    color: #fff;
+}
+
+.faq-register-modal .btn-modi {
+    background-color: #fff;
+    border: 1px solid #f00;
+    color: #f00;
+}
+
+.faq-register-modal .btn-modi:hover {
+    background-color: #f00;
+    color: #fff;
+}
+
+/* 폼 스타일 */
+.faq-register-modal .form-group {
+    margin-bottom: 20px;
+}
+
+.faq-register-modal label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #4D4D4D;
+}
+
+.faq-register-modal .required {
+    color: #e74c3c;
+}
+
+.faq-register-modal input[type="text"],
+.faq-register-modal textarea {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    box-sizing: border-box; /* 패딩 포함 크기 조절 */
+}
+
+.faq-register-modal textarea {
+    height: 200px;
+    resize: none;
+}
+
+/* 카테고리 체크박스 영역 */
+.faq-register-modal .category-selection {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.faq-register-modal .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.faq-register-modal input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+
+/* 하단 버튼 영역 */
+.faq-register-modal .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap : 5px;
+    margin-top: 10px;
+}
+
+
+/* [추가] 반응형 페이징 */
+@media (max-width: 768px) {
+    .faq-container .pagination button {
+        padding: 6px 8px;
+        font-size: 12px;
+        min-width: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .faq-container .pagination {
+        gap: 4px;
+    }
+
+    .faq-container .pagination button {
+        padding: 5px 6px;
+        font-size: 11px;
+    }
+}

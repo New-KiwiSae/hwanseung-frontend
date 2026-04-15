@@ -1,5 +1,4 @@
 import axios from "axios";
-const API_BASE = '/api/inquiries';
 
 const headersAuth = {
     'Authorization': `${sessionStorage.getItem("tokenType")} ${sessionStorage.getItem("accessToken")}`,
@@ -9,6 +8,7 @@ const headers = {
     'Authorization': `${sessionStorage.getItem("tokenType")} ${sessionStorage.getItem("accessToken")}`,
 };
 
+
 // --- Axios 인터셉터 (자동 토큰 갱신 마법사) ---
 axios.interceptors.response.use(
     (response) => {
@@ -16,10 +16,6 @@ axios.interceptors.response.use(
         return response;
     },
     async (error) => {
-        if (sessionStorage.getItem("tokenType") === null || sessionStorage.getItem("tokenType") === undefined || sessionStorage.getItem("tokenType") === '') {
-            window.location.href = "/login";
-            return Promise.reject(error);
-        }
         // 방금 실패한 원래의 API 요청 정보를 가져옵니다.
         const originalRequest = error.config;
 
@@ -50,31 +46,28 @@ axios.interceptors.response.use(
             }
         }
 
-
         // 401 에러가 아니면 그냥 에러를 발생시킵니다.
         return Promise.reject(error);
     }
 );
 
 
-export const getInquiries = (params) => {
+export const getNoticesList = () => {
     let res = null;
     try {
-        res = axios.get(`${API_BASE}/all`, { params, headers: headersAuth });
+        res = axios.get(`/api/notices/all`, { headers});
     } catch (error) {
         console.log('공지사항 목록을 불러오지 못했습니다.');
     }
 
     return res;
 }
-
-
-export const fetchInquiries = (params) =>
-    axios.get(API_BASE, { params, headers: headersAuth });
-
-export const createInquiry = (data) => axios.post(API_BASE, data, { withCredentials: true, headers });
-
-export const updateInquiry = (id, data) => axios.put(`${API_BASE}/${id}`, data, { withCredentials: true, headers });
-
-export const deleteInquiry = (id) => axios.delete(`${API_BASE}/${id}`, { withCredentials: true, headers });
-
+export const getNotices = (params) => {
+    return axios.get("/api/notices", { params, headers: headersAuth });
+}
+export const getNotice = (id) => axios.get(`/api/notices/${id}`, { withCredentials: true, headers });
+export const createNotice = (data) => axios.post("/api/notices", data, { withCredentials: true, headers });
+export const updateNotice = (id, data) => {
+    axios.put(`/api/notices/${id}`, data, { withCredentials: true, headers } )
+};
+export const deleteNotice = (id) => axios.delete(`/api/notices/${id}`, { withCredentials: true, headers });

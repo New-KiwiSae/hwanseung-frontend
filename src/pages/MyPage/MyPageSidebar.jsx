@@ -103,12 +103,15 @@ export default function MyPageSidebar({ userInfo }) {
 
                 <p className="nav-label" style={{ marginTop: '20px' }}>고객지원</p>
 
-                <button onClick={() => window.location.href = '/faq'}>
+                <button onClick={() => window.location.href = '/inquiries'}>
                     <i className="fas fa-question-circle"></i> 자주 묻는 질문
                 </button>
-                <button onClick={() => window.location.href = '/notice'}>
-                    <i className="fas fa-bullhorn"></i> 공지사항
-                </button>
+                
+                <NavLink to="/notices" className={({ isActive }) => (isActive ? 'active' : '')}>
+                    <button>
+                        <i className="fas fa-heart"></i> 공지사항
+                    </button>
+                </NavLink>
             </nav>
 
             <button className="sidebar-logout" onClick={handleLogout}>
