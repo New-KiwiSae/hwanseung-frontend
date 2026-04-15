@@ -380,7 +380,7 @@ const Header = () => {
         <div className="header-actions">
           <div className="nav-links">
             <button className="nav-link" onClick={handleNearMeClick}>내 근처</button>
-            <button className="nav-link">인기매물</button>
+            <button className="nav-link" onClick={() => navigate('/products?filter=popular')}>인기매물</button>
           </div>
 
           {isLoggedIn && (

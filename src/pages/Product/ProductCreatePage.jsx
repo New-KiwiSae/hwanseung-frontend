@@ -27,7 +27,6 @@ export default function ProductCreatePage() {
     const [previewUrls, setPreviewUrls] = useState([]);
     const [categories, setCategories] = useState([]);
 
-
     useEffect(() => {
         const loadCategories = async () => {
             try {
@@ -82,7 +81,6 @@ export default function ProductCreatePage() {
         }));
     };
 
-    // ✅ 수정: 이미지 누적 추가
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files || []);
 
@@ -111,7 +109,6 @@ export default function ProductCreatePage() {
         e.target.value = "";
     };
 
-    // ✅ 추가: 등록 페이지용 이미지 바로 삭제
     const handleRemoveImage = (index) => {
         setImageFiles((prev) => prev.filter((_, i) => i !== index));
 
@@ -215,7 +212,6 @@ export default function ProductCreatePage() {
         });
     }, [userInfo]);
 
-    // ✅ 추가: 미리보기 URL 메모리 정리
     useEffect(() => {
         return () => {
             previewUrls.forEach((url) => URL.revokeObjectURL(url));
@@ -497,15 +493,19 @@ export default function ProductCreatePage() {
                     </section>
 
                     <div className="product-create-submit">
-                        <div className="submit-buttons">
+                        <div className="product-create-submit-buttons">
                             <button
                                 type="button"
-                                className="cancel-btn"
+                                className="product-create-cancel-btn"
                                 onClick={() => navigate("/")}
                             >
                                 취소
                             </button>
-                            <button type="submit" className="submit-btn">
+
+                            <button
+                                type="submit"
+                                className="product-create-submit-btn"
+                            >
                                 상품 등록하기
                             </button>
                         </div>

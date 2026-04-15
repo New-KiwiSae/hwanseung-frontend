@@ -167,10 +167,14 @@ export default function ProductDetailPage() {
         fetchProductDetail();
     }, [productId, navigate]);
 
-    const currentUser = sessionStorage.getItem("username");
+    // const currentUser = sessionStorage.getItem("username");
 
     const startChat = async () => {
-        if (currentUser === product.sellerId) {
+        // if (currentUser === product.sellerId) {
+        //     alert("본인이 등록한 상품에는 채팅을 걸 수 없습니다.");
+        //     return;
+        // }
+        if (isSeller) {
             alert("본인이 등록한 상품에는 채팅을 걸 수 없습니다.");
             return;
         }
@@ -199,9 +203,12 @@ export default function ProductDetailPage() {
                 onConnect: () => {
                     const messageData = {
                         roomId: realRoomId,
-                        sender: currentUser,
-                        senderId: currentUser,
-                        content: `${currentUser}님이 [${product.title}] 상품에 대해 채팅을 시작했습니다!`,
+                        // sender: currentUser,
+                        // senderId: currentUser,
+                        // content: `${currentUser}님이 [${product.title}] 상품에 대해 채팅을 시작했습니다!`,
+                        sender: loginUserId, 
+                        senderId: loginUserId, 
+                        content: `${loginUserId}님이 [${product.title}] 상품에 대해 채팅을 시작했습니다!`,
                         receiverId: product.sellerId,
                     };
 
@@ -219,7 +226,8 @@ export default function ProductDetailPage() {
                 new CustomEvent("openTradeChat", {
                     detail: {
                         roomId: realRoomId,
-                        buyerId: currentUser,
+                        // buyerId: currentUser,
+                        buyerId: loginUserId,
                         sellerId: product.sellerId,
                         itemName: product.title,
                     },

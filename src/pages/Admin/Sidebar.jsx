@@ -66,7 +66,7 @@ const Sidebar = () => {
           </span>
           <div className={`${styles.text} ${styles.logoText}`}>
             <span className={styles.name}>환승마켓</span>
-            <span className={styles.profession}>현재 권한 ({role || 'Unknown'})</span>
+            <span className={styles.profession}>현재 권한 ({role === 'ROLE_SUPER' ? '최고 관리자' : role === 'ROLE_SUB' ? '중간 관리자' : 'Unknown'})</span>
           </div>
         </div>
       </header>
