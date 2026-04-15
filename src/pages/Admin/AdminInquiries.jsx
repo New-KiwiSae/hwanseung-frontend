@@ -157,86 +157,86 @@ const AdminInquiries = () => {
         )}
       </div>
     );
+  };
+};
 
-    // 등록/수정 모달 컴포넌트
-    const InquiryModal = ({ data, onClose, refresh }) => {
-      const [form, setForm] = useState(data || { category: null, question: '', answer: '' });
 
-      const handleSubmit = async () => {
-        if (!form.question || !form.answer) {
-          alert("질문과 답변을 모두 입력해주세요.");
-          return;
-        }
-        if (data) await api.updateInquiry(data.id, form);
-        else await api.createInquiry(form);
-        refresh();
-        onClose();
-      };
+// 등록/수정 모달 컴포넌트
+const InquiryModal = ({ data, onClose, refresh }) => {
+  const [form, setForm] = useState(data || { category: null, question: '', answer: '' });
 
-      return (
-        <div className="modal-overlay" onClick={onClose}>
-          <div className="modal-content faq-register-modal" onClick={(e) => e.stopPropagation()}>
-            {/* 헤더 부분 */}
-            <div className="modal-header">
-              <div className="modal-title">
-                <span className="plus-icon">+</span> 자주묻는 질문 {data ? '수정' : '등록'}
-              </div>
-              <button className="close-x" onClick={onClose}>&times;</button>
-            </div>
+  const handleSubmit = async () => {
+    if (!form.question || !form.answer) {
+      alert("질문과 답변을 모두 입력해주세요.");
+      return;
+    }
+    if (data) await api.updateInquiry(data.id, form);
+    else await api.createInquiry(form);
+    refresh();
+    onClose();
+  };
 
-            <div className="modal-body">
-              {/* 질문 입력 */}
-              <div className="form-group">
-                <label>질문 <span className="required">*</span></label>
-                <input
-                  type="text"
-                  placeholder="질문을 입력하세요"
-                  value={form.question}
-                  onChange={e => setForm({ ...form, question: e.target.value })}
-                />
-              </div>
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content faq-register-modal" onClick={(e) => e.stopPropagation()}>
+        {/* 헤더 부분 */}
+        <div className="modal-header">
+          <div className="modal-title">
+            <span className="plus-icon">+</span> 자주묻는 질문 {data ? '수정' : '등록'}
+          </div>
+          <button className="close-x" onClick={onClose}>&times;</button>
+        </div>
 
-              {/* 카테고리 선택 (체크박스 형태) */}
-              <div className="category-selection">
-                <label className="checkbox-label">
-                  <input type="checkbox" checked={form.category === 'pay'} onChange={() => setForm({ ...form, category: 'pay' })} />
-                  <span>페이</span>
-                </label>
-                <label className="checkbox-label">
-                  <input type="checkbox" checked={form.category === 'user'} onChange={() => setForm({ ...form, category: 'user' })} />
-                  <span>회원</span>
-                </label>
-                <label className="checkbox-label">
-                  <input type="checkbox" checked={form.category === 'product'} onChange={() => setForm({ ...form, category: 'product' })} />
-                  <span>상품/거래</span>
-                </label>
-              </div>
+        <div className="modal-body">
+          {/* 질문 입력 */}
+          <div className="form-group">
+            <label>질문 <span className="required">*</span></label>
+            <input
+              type="text"
+              placeholder="질문을 입력하세요"
+              value={form.question}
+              onChange={e => setForm({ ...form, question: e.target.value })}
+            />
+          </div>
 
-              {/* 답변 입력 */}
-              <div className="form-group">
-                <label>답변 <span className="required">*</span></label>
-                <textarea
-                  placeholder="답변 내용을 입력 하세요"
-                  value={form.answer}
-                  onChange={e => setForm({ ...form, answer: e.target.value })}
-                />
-              </div>
-            </div>
+          {/* 카테고리 선택 (체크박스 형태) */}
+          <div className="category-selection">
+            <label className="checkbox-label">
+              <input type="checkbox" checked={form.category === 'pay'} onChange={() => setForm({ ...form, category: 'pay' })} />
+              <span>페이</span>
+            </label>
+            <label className="checkbox-label">
+              <input type="checkbox" checked={form.category === 'user'} onChange={() => setForm({ ...form, category: 'user' })} />
+              <span>회원</span>
+            </label>
+            <label className="checkbox-label">
+              <input type="checkbox" checked={form.category === 'product'} onChange={() => setForm({ ...form, category: 'product' })} />
+              <span>상품/거래</span>
+            </label>
+          </div>
 
-            {/* 하단 버튼 */}
-            <div className="modal-footer">
-              <button className="btnall btn-modi" onClick={onClose}>취소</button>
-              <button className="btnall btn-submit" onClick={handleSubmit}>
-                {data ? (<><i className="bx bx-edit-alt"></i>수정</>) : (<><i className="bx bx-check"></i>등록하기</>)}
-              </button>
-            </div>
+          {/* 답변 입력 */}
+          <div className="form-group">
+            <label>답변 <span className="required">*</span></label>
+            <textarea
+              placeholder="답변 내용을 입력 하세요"
+              value={form.answer}
+              onChange={e => setForm({ ...form, answer: e.target.value })}
+            />
           </div>
         </div>
 
-      );
-    }
+        {/* 하단 버튼 */}
+        <div className="modal-footer">
+          <button className="btnall btn-modi" onClick={onClose}>취소</button>
+          <button className="btnall btn-submit" onClick={handleSubmit}>
+            {data ? (<><i className="bx bx-edit-alt"></i>수정</>) : (<><i className="bx bx-check"></i>등록하기</>)}
+          </button>
+        </div>
+      </div>
+    </div>
 
-  };
-};
+  );
+}
 
 export default AdminInquiries;
