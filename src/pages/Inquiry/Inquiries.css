@@ -1,0 +1,203 @@
+/* 메인 컬러: #1ABC9C (민트) */
+.inquiry-container {
+    padding: 40px;
+}
+
+/* 상단 헤더 */
+.inquiry-container .inquiry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.inquiry-container .title {
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+    font-size: 22px;
+    color: var(--text-main, #333);
+}
+
+.inquiry-container .title i {
+    margin-right: 10px;
+    color: var(--accent-color, #00d26a);
+}
+
+.inquiry-container .btn-register {
+    background-color: #1ABC9C;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.inquiry-container .category-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.inquiry-container .tab {
+    border: 1px solid #1ABC9C;
+    color: #1ABC9C;
+    padding: 5px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    background: white;
+}
+
+.inquiry-container .tab.active {
+    background-color: #1ABC9C;
+    color: white;
+}
+
+.inquiry-container .inquiry-item {
+    display: flex;
+    border: 1px solid #eeeeee;
+    border-radius: 16px;
+    padding: 20px;
+    cursor: pointer;
+    background: var(--white, #ffffff);
+    transition: all 0.2s ease;
+    flex-direction: column;
+}
+
+.inquiry-container .inquiry-question {
+    display: flex;
+    padding: 15px;
+    cursor: pointer;
+    width : 100%;
+}
+
+
+.inquiry-container .inquiry-question strong {
+    color: var(--text-color);
+}
+
+.inquiry-container .inquiry-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.inquiry-container .inquiry-answer {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    white-space: pre-wrap;
+    line-height: 1.6;
+}
+
+.inquiry-container .badge-pay {
+    background: #e0f7f4;
+    color: #1ABC9C;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-right: 10px;
+}
+.container.inquiry-container .inquiry-list .upDownIcon{
+    margin-left: auto;
+}
+
+/* 빈 상태 */
+.container.inquiry-container .inquiry-list .empty {
+    text-align: center;
+    color: #aaa;
+    margin: auto;
+}
+
+.inquiry-container .inquiry-list .empty i {
+    font-size: 32px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+
+/* [추가] 페이징 */
+.inquiry-container .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.inquiry-container .pagination button {
+    border: 1px solid #ddd;
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    min-width: 36px;
+}
+
+.inquiry-container .pagination button:hover {
+    background-color: #f3f4f6;
+}
+
+.inquiry-container .pagination button.active {
+    background-color: #10b981;
+    color: #fff;
+    border-color: #10b981;
+}
+
+.inquiry-container .btnBox {
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+}
+
+.inquiry-container .btnall {
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
+.inquiry-container .btn-submit,
+.inquiry-container .btn-modi {
+    background-color: #fff;
+    border: 1px solid #10b981;
+    color: #10b981;
+}
+
+.inquiry-container .btn-submit,
+.inquiry-container .btn-modi:hover {
+    background-color: #10b981;
+    color: #fff;
+}
+
+.inquiry-container .btn-cancel,
+.inquiry-container .btn-delete {
+    background-color: #fff;
+    border: 1px solid #f00;
+    color: #f00;
+}
+
+.inquiry-container .btn-cancel:hover,
+.inquiry-container .btn-delete:hover {
+    background-color: #f00;
+    color: #fff;
+}
+
+
+/* [추가] 반응형 페이징 */
+@media (max-width: 768px) {
+    .inquiry-container .pagination button {
+        padding: 6px 8px;
+        font-size: 12px;
+        min-width: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .inquiry-container .pagination {
+        gap: 4px;
+    }
+
+    .inquiry-container .pagination button {
+        padding: 5px 6px;
+        font-size: 11px;
+    }
+}

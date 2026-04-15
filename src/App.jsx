@@ -37,6 +37,11 @@ import StatusGuard from './pages/Auth/StatusGuard';
 import SocialSignupExtra from './pages/Auth/SocialSignupExtra';
 import AdminManage from './pages/Admin/AdminManage.jsx';
 
+import AdminInquiries from './pages/Admin/AdminInquiries';
+import NoticeDetailPage from "./pages/Notice/NoticeDetailPage";
+import NoticeListPage from "./pages/Notice/NoticeListPage";
+import Inquiries from "./pages/Inquiry/Inquiries";
+
 
 function App() {
     const location = useLocation();
@@ -85,27 +90,33 @@ function App() {
                             </Route>
 
 
-                        <Route path="/admin" element={<AdminLayout />}>
-                            <Route index element={<AdminDashBoard />} />
-                            <Route path="dashboard" element={<AdminDashBoard />} />
-                            <Route path="statistics" element={<AdminStatistics />} />
-                            <Route path="products" element={<AdminProducts />} />
-                            <Route path="transactions" element={<AdminTransactions />} />
-                            <Route path="categories" element={<AdminCategories />} />
-                            <Route path="users" element={<AdminUsers />} />
-                            <Route path="reports" element={<AdminReports />} />
-                            <Route path="/admin/admin-manage" element={<AdminManage />} />
-                            <Route path="chat" element={<AdminChatManager />} />
-                            {/* <Route path="chat" element={<AdminChatManage />} /> */}
-                            <Route path="announcements" element={<AdminAnnouncements />} />
-                        </Route>
+                            <Route path="/admin" element={<AdminLayout />}>
+                                <Route index element={<AdminDashBoard />} />
+                                <Route path="dashboard" element={<AdminDashBoard />} />
+                                <Route path="statistics" element={<AdminStatistics />} />
+                                <Route path="products" element={<AdminProducts />} />
+                                <Route path="transactions" element={<AdminTransactions />} />
+                                <Route path="categories" element={<AdminCategories />} />
+                                <Route path="users" element={<AdminUsers />} />
+                                <Route path="reports" element={<AdminReports />} />
+                                <Route path="/admin/admin-manage" element={<AdminManage />} />
+                                <Route path="chat" element={<AdminChatManager />} />
+                                {/* <Route path="chat" element={<AdminChatManage />} /> */}
+                                <Route path="announcements" element={<AdminAnnouncements />} />
+                                <Route path="inquiries" element={<AdminInquiries />} />
+                            </Route>
 
-                        <Route element={<Layout />}>
-                            <Route path="/mypage" element={<MyPage />} />
-                            <Route path="/sales" element={<Sales />} />
-                            <Route path="/purchase" element={<Purchase />} />
-                            <Route path="/wishlist" element={<Wishlist />} />
-                        </Route>
+                            <Route element={<Layout />}>
+                                <Route path="/mypage" element={<MyPage />} />
+                                <Route path="/sales" element={<Sales />} />
+                                <Route path="/purchase" element={<Purchase />} />
+                                <Route path="/wishlist" element={<Wishlist />} />
+                                {/* 공지사항 상세 */}
+                                <Route path="/notices/:id" element={<NoticeDetailPage handler={null} value={null} />} />
+                                {/* 공지사항 목록 */}
+                                <Route path="/notices" element={<NoticeListPage />} />
+                                <Route path="inquiries" element={<Inquiries />} />
+                            </Route>
 
                         </Route>
                     </Routes>
