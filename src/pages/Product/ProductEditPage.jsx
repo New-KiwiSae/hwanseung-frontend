@@ -575,15 +575,19 @@ export default function ProductEditPage() {
                     <div className="product-create-submit">
                         <p>수정한 내용은 저장 후 바로 상품 상세페이지에 반영돼요.</p>
 
-                        <div className="submit-buttons">
+                        <div className="product-create-submit-buttons">
                             <button
                                 type="button"
-                                className="cancel-btn"
+                                className="product-create-cancel-btn"
                                 onClick={() => navigate(`/products/${productId}`)}
                             >
                                 취소
                             </button>
-                            <button type="submit" className="submit-btn">
+
+                            <button
+                                type="submit"
+                                className="product-create-submit-btn"
+                            >
                                 상품 수정하기
                             </button>
                         </div>
