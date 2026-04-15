@@ -1,12 +1,18 @@
 import axios from "axios";
 
-const headersAuth = {
-    'Authorization': `${sessionStorage.getItem("tokenType")} ${sessionStorage.getItem("accessToken")}`,
-};
-const headers = {
-    'Content-Type': 'application/json',
-    'Authorization': `${sessionStorage.getItem("tokenType")} ${sessionStorage.getItem("accessToken")}`,
-};
+
+function getToken(auth) {
+    const headersAuth = {
+        'Authorization': `${sessionStorage.getItem("tokenType")} ${sessionStorage.getItem("accessToken")}`,
+    };
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `${sessionStorage.getItem("tokenType")} ${sessionStorage.getItem("accessToken")}`,
+    };
+
+    return auth === 'auth' ? headersAuth : headers;
+}
+
 
 
 // --- Axios 인터셉터 (자동 토큰 갱신 마법사) ---
@@ -55,7 +61,7 @@ axios.interceptors.response.use(
 export const getNoticesList = () => {
     let res = null;
     try {
-        res = axios.get(`/api/notices/all`, { headers});
+        res = axios.get(`/api/notices/all/list`, { withCredentials: true, headers: getToken('auth') });
     } catch (error) {
         console.log('공지사항 목록을 불러오지 못했습니다.');
     }
@@ -63,11 +69,11 @@ export const getNoticesList = () => {
     return res;
 }
 export const getNotices = (params) => {
-    return axios.get("/api/notices", { params, headers: headersAuth });
+    return axios.get("/api/notices", { params, headers: getToken('auth') });
 }
-export const getNotice = (id) => axios.get(`/api/notices/${id}`, { withCredentials: true, headers });
-export const createNotice = (data) => axios.post("/api/notices", data, { withCredentials: true, headers });
+export const getNotice = (id) => axios.get(`/api/notices/${id}`, { withCredentials: true, headers : getToken('content')});
+export const createNotice = (data) => axios.post("/api/notices", data, { withCredentials: true, headers : getToken('content')});
 export const updateNotice = (id, data) => {
-    axios.put(`/api/notices/${id}`, data, { withCredentials: true, headers } )
+    axios.put(`/api/notices/${id}`, data, { withCredentials: true, headers : getToken('content')})
 };
-export const deleteNotice = (id) => axios.delete(`/api/notices/${id}`, { withCredentials: true, headers });
+export const deleteNotice = (id) => axios.delete(`/api/notices/${id}`, { withCredentials: true, headers : getToken('content') });
