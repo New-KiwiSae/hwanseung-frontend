@@ -61,7 +61,7 @@ axios.interceptors.response.use(
 export const getNoticesList = () => {
     let res = null;
     try {
-        res = axios.get(`/api/notices/all`, { withCredentials: true, headers: getToken('auth') });
+        res = axios.get(`/api/notices/all/list`, { withCredentials: true, headers: getToken('auth') });
     } catch (error) {
         console.log('공지사항 목록을 불러오지 못했습니다.');
     }
