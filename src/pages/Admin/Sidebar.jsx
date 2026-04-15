@@ -12,6 +12,7 @@ const menuItems = [
   { path: '/admin/reports', icon: 'bx-user-x', label: '신고/정지' },
   { path: '/admin/chat', icon: 'bx-message-dots', label: '채팅 관리' },
   { path: '/admin/announcements', icon: 'bx-news', label: '공지사항 관리' },
+  { path: '/admin/inquiries', icon: 'bx-question-mark', label: '자주묻는 질문' },
   { path: '/admin/admin-manage', icon: 'bx-shield-quarter', label: '관리자 관리' },
 ];
 
