@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './chargePay.css'; 
+import './chargePay.css';
 
 const ChargePay = ({ onClose, userInfo }) => {
-    const [amount, setAmount] = useState(''); 
-    const [displayAmount, setDisplayAmount] = useState(''); 
+    const [amount, setAmount] = useState('');
+    const [displayAmount, setDisplayAmount] = useState('');
 
     const handleInputChange = (e) => {
-        const rawValue = e.target.value.replace(/[^0-9]/g, ''); 
+        const rawValue = e.target.value.replace(/[^0-9]/g, '');
         if (!rawValue) {
             setAmount('');
             setDisplayAmount('');
@@ -15,7 +15,7 @@ const ChargePay = ({ onClose, userInfo }) => {
         }
         const numValue = parseInt(rawValue, 10);
         setAmount(numValue);
-        setDisplayAmount(numValue.toLocaleString()); 
+        setDisplayAmount(numValue.toLocaleString());
     };
 
     const handleQuickSelect = (addValue) => {
@@ -25,23 +25,24 @@ const ChargePay = ({ onClose, userInfo }) => {
         setDisplayAmount(newAmount.toLocaleString());
     };
 
-   const requestPay = () => {
+    const requestPay = () => {
         if (!amount || amount < 100) {
             alert('최소 100원 이상의 금액을 입력해 주세요.');
             return;
         }
 
         const { IMP } = window;
-        const impCode = import.meta.env.VITE_IAMPORT_CODE; 
-        
+        const impCode = import.meta.env.VITE_IAMPORT_CODE;
+        console.log("프론트 IMP 코드:", impCode);
+
         if (!impCode) {
             alert("포트원 식별코드를 찾을 수 없습니다. .env 파일을 확인해주세요.");
             return;
         }
-        
-        IMP.init(impCode); 
 
-       const data = {
+        IMP.init(impCode);
+
+        const data = {
             pg: "html5_inicis", // 테스트용 PG사 (카카오페이면 'kakaopay', 토스면 'tosspay' 등으로 변경 가능)
             pay_method: "card", // 결제 수단
             merchant_uid: `mid_${new Date().getTime()}`, // 🌟 주문번호 (결제할 때마다 겹치지 않게 현재 시간으로 생성)
@@ -58,7 +59,13 @@ const ChargePay = ({ onClose, userInfo }) => {
             if (success) {
                 try {
                     const token = sessionStorage.getItem('accessToken');
-                    const res = await axios.post('/api/pay/verify', {
+
+                    if (!token) {
+                        alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+                        return;
+                    }
+
+                    const res = await axios.post('/api/v1/pay/verify', {
                         imp_uid: imp_uid,
                         merchant_uid: merchant_uid,
                         amount: paid_amount
@@ -66,18 +73,17 @@ const ChargePay = ({ onClose, userInfo }) => {
                         headers: { Authorization: `Bearer ${token}` }
                     });
 
-                    // 🌟 무전기 코드는 결제 성공 응답을 받은 바로 이 자리에 와야 합니다!
                     if (res.data === 'success') {
-                        alert('환승Pay 충전이 완벽하게 완료되었습니다! 🎉');
-                        onClose(); 
+                        alert('환승Pay 충전이 완료되었습니다.');
+                        onClose();
                         window.dispatchEvent(new Event('updateBalance'));
+                    } else {
+                        alert('결제 검증에 실패했습니다.');
                     }
                 } catch (err) {
                     console.error(err);
-                    alert('결제는 되었으나 서버 검증에 실패했습니다.');
+                    alert('결제는 완료되었지만 검증에 실패했습니다.');
                 }
-            } else {
-                alert(`결제 취소 또는 실패: ${error_msg}`);
             }
         });
     };

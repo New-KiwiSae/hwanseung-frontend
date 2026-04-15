@@ -1,0 +1,241 @@
+/* 전체 컨테이너 */
+.container.adminNotice {
+    padding: 20px 60px;
+    margin : 0;
+    max-width :none;
+}
+
+/* 상단 헤더 */
+.adminNotice .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.adminNotice .title {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 24px;
+}
+
+/* 우측 버튼 */
+.adminNotice .addButton {
+  background-color: #10b981;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.adminNotice .addButton:hover {
+  background-color: #059669;
+}
+
+/* 에러 박스 */
+.adminNotice .errorBox {
+  background-color: #fdecec;
+  border: 1px solid #f5c2c2;
+  color: #d32f2f;
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+/* 통계 영역 */
+.adminNotice .stats {
+  display: flex;
+  gap: 20px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  color: #666;
+}
+
+.adminNotice .stats span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.adminNotice .stats strong {
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* 테이블 카드 */
+.adminNotice .tableCard {
+  background: #f9f9f9;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #eee;
+}
+
+/* 테이블 헤더 */
+.adminNotice .tableHeader {
+  display: grid;
+  grid-template-columns: 80px 1fr 2fr 140px;
+  padding: 14px 20px;
+  font-size: 13px;
+  color: #888;
+  border-bottom: 1px solid #eee;
+}
+
+/* 테이블 row */
+.adminNotice .tableRow {
+  display: grid;
+  grid-template-columns: 80px 1fr 2fr 140px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  background-color: #fff;
+}
+
+.adminNotice .tableRow:last-child {
+  border-bottom: none;
+}
+
+.adminNotice .tableRow .no span {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 10px;
+  opacity: 0.5;
+  color: var(--text-color);
+}
+
+/* 제목 */
+.adminNotice .titleText {
+  font-weight: 600;
+  font-size: 14.5px;
+  color: var(--text-color);
+}
+
+/* 내용 */
+.adminNotice .contentText {
+  color: #666;
+  font-size: 14px;
+}
+
+/* 날짜 */
+.adminNotice .dateText {
+  font-size: 13px;
+  color: #999;
+}
+
+/* 빈 상태 */
+.adminNotice .empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #aaa;
+}
+
+.adminNotice .empty i {
+  font-size: 32px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.adminNotice span.sales-status-badge.selling {
+  padding: 3px 8px;
+}
+
+/* =========================
+    반응형
+========================= */
+@media (max-width: 768px) {
+  .adminNotice .tableHeader {
+    display: none;
+  }
+
+  .adminNotice .tableRow {
+    display: block;
+    padding: 16px;
+  }
+
+  .adminNotice .tableRow div {
+    margin-bottom: 6px;
+  }
+
+  .adminNotice .dateText {
+    font-size: 12px;
+  }
+
+  .adminNotice .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .adminNotice .addButton {
+    width: 100%;
+  }
+
+  .adminNotice .stats {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+
+/* 공지사항 상세보기 */
+.adminNotice .notice-detail-page-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--sidebar-color);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+/* [추가] 페이징 */
+.adminNotice .pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.adminNotice .pagination button {
+  border: 1px solid #ddd;
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  min-width: 36px;
+}
+
+.adminNotice .pagination button:hover {
+  background-color: #f3f4f6;
+}
+
+.adminNotice .pagination button.active {
+  background-color: #10b981;
+  color: #fff;
+  border-color: #10b981;
+}
+
+/* [추가] 반응형 페이징 */
+@media (max-width: 768px) {
+  .adminNotice .pagination button {
+    padding: 6px 8px;
+    font-size: 12px;
+    min-width: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .adminNotice .pagination {
+    gap: 4px;
+  }
+
+  .adminNotice .pagination button {
+    padding: 5px 6px;
+    font-size: 11px;
+  }
+}
