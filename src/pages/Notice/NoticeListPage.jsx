@@ -24,7 +24,6 @@ function NoticeListPage() {
       getNoticesList()
         .then(res => {
           allList = res.data;
-          console.log('allList', allList);
 
           if (allList.length === 0) {
             setHasMore(false); // 데이터가 없으면 버튼 숨김
