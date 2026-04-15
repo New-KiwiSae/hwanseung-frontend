@@ -1,13 +1,18 @@
 import axios from "axios";
 const API_BASE = '/api/inquiries';
 
-const headersAuth = {
-    'Authorization': `${sessionStorage.getItem("tokenType")} ${sessionStorage.getItem("accessToken")}`,
-};
-const headers = {
-    'Content-Type': 'application/json',
-    'Authorization': `${sessionStorage.getItem("tokenType")} ${sessionStorage.getItem("accessToken")}`,
-};
+
+function getToken(auth) {
+    const headersAuth = {
+        'Authorization': `${sessionStorage.getItem("tokenType")} ${sessionStorage.getItem("accessToken")}`,
+    };
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `${sessionStorage.getItem("tokenType")} ${sessionStorage.getItem("accessToken")}`,
+    };
+
+    return auth === 'auth' ? headersAuth : headers;
+}
 
 // --- Axios 인터셉터 (자동 토큰 갱신 마법사) ---
 axios.interceptors.response.use(
@@ -60,7 +65,7 @@ axios.interceptors.response.use(
 export const getInquiries = (params) => {
     let res = null;
     try {
-        res = axios.get(`${API_BASE}/all`, { params, withCredentials: true, headers: headersAuth });
+        res = axios.get(`${API_BASE}/all`, { params, withCredentials: true, headers: getToken('auth') });
     } catch (error) {
         console.log('공지사항 목록을 불러오지 못했습니다.');
     }
@@ -70,11 +75,11 @@ export const getInquiries = (params) => {
 
 
 export const fetchInquiries = (params) =>
-    axios.get(API_BASE, { params, headers: headersAuth });
+    axios.get(API_BASE, { params, headers: getToken('auth') });
 
-export const createInquiry = (data) => axios.post(API_BASE, data, { withCredentials: true, headers });
+export const createInquiry = (data) => axios.post(API_BASE, data, { withCredentials: true, headers : getToken('content') });
 
-export const updateInquiry = (id, data) => axios.put(`${API_BASE}/${id}`, data, { withCredentials: true, headers });
+export const updateInquiry = (id, data) => axios.put(`${API_BASE}/${id}`, data, { withCredentials: true, headers : getToken('content') });
 
-export const deleteInquiry = (id) => axios.delete(`${API_BASE}/${id}`, { withCredentials: true, headers });
+export const deleteInquiry = (id) => axios.delete(`${API_BASE}/${id}`, { withCredentials: true, headers : getToken('content') });
 
