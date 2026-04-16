@@ -6,7 +6,6 @@ function ReportCreatePage() {
     const { productId } = useParams();
     const navigate = useNavigate();
 
-    // 신고 유형 옵션 (데이터 기반)
     const REPORT_REASON_OPTIONS = [
         { value: "FRAUD", label: "사기 의심" },
         { value: "SPAM", label: "스팸 / 광고" },
@@ -21,7 +20,6 @@ function ReportCreatePage() {
     const [reason, setReason] = useState("");
     const [content, setContent] = useState("");
 
-    // 선택된 신고 유형 라벨
     const getReasonLabel = (value) => {
         const found = REPORT_REASON_OPTIONS.find(
             (option) => option.value === value
@@ -47,8 +45,8 @@ function ReportCreatePage() {
                 Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-                reasonCategory: reason,   // 신고 유형 코드값
-                reason: content.trim(),   // 상세 내용
+                reasonCategory: reason, 
+                reason: content.trim(),
             }),
         });
 
@@ -83,7 +81,6 @@ function ReportCreatePage() {
 
                     <form onSubmit={handleSubmit} className="report-form">
 
-                        {/* 신고 유형 */}
                         <div className="report-form-group">
                             <label className="report-label">신고 유형</label>
 
@@ -103,7 +100,6 @@ function ReportCreatePage() {
                             </select>
                         </div>
 
-                        {/* 선택된 유형 표시 */}
                         {reason && (
                             <p className="report-preview">
                                 선택한 신고 유형:{" "}
@@ -111,7 +107,6 @@ function ReportCreatePage() {
                             </p>
                         )}
 
-                        {/* 상세 내용 */}
                         <div className="report-form-group">
                             <label className="report-label">상세 내용</label>
 
@@ -124,7 +119,6 @@ function ReportCreatePage() {
                             />
                         </div>
 
-                        {/* 버튼 */}
                         <div className="report-button-group">
                             <button
                                 type="button"

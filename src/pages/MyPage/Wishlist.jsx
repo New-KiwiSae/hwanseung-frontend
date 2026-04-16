@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './wishlist.css'; // 전용 CSS 임포트
+import './wishlist.css';
 import MyPageSidebar from './MyPageSidebar'; 
 import { useUser } from '../../UserContext';
 
@@ -21,7 +21,6 @@ export default function Wishlist() {
             }
 
             try {
-                // 🚀 새로 만든 찜 목록 API 호출!
                 const response = await axios.get('/api/products/wishlist', {
                     headers: { Authorization: `Bearer ${token}` }
                 });

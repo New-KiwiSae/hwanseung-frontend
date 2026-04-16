@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { loginChk } from "../../api/LoginChk"; // 본인 경로에 맞게 수정
-// import './NotificationListPage.css'; // 필요시 CSS 파일 생성
+import { loginChk } from "../../api/LoginChk";
 
 function NotificationListPage() {
   if (loginChk()) {
@@ -11,11 +10,10 @@ function NotificationListPage() {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const navigate = useNavigate();
-    const limitno = 10; // 알림은 한 번에 10개씩 보여주기
+    const limitno = 10;
 
     const token = sessionStorage.getItem("accessToken");
 
-    // 데이터 로드 함수
     const fetchNotifications = async () => {
       setLoading(true);
       try {
@@ -23,13 +21,11 @@ function NotificationListPage() {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        // CHAT 타입 제외한 시스템/관심매물 알림만 필터링
         const allList = res.data.filter(n => n.type !== 'CHAT');
 
         if (allList.length === 0) {
           setHasMore(false);
         } else {
-          // 프론트엔드 슬라이싱 기법 (NoticeListPage와 동일)
           const newData = allList.slice(0, page * limitno);
           setList(newData);
 
@@ -53,9 +49,7 @@ function NotificationListPage() {
       fetchNotifications();
     };
 
-    // 개별 알림 클릭 (읽음 처리 + 이동)
     const handleNotiClick = async (noti) => {
-      // 읽음 상태 업데이트 (화면 즉각 반영)
       setList(prev => prev.map(n => n.id === noti.id ? { ...n, isRead: true, read: true } : n));
       
       try {
@@ -66,19 +60,15 @@ function NotificationListPage() {
         console.error("읽음 처리 실패", e); 
       }
 
-      // 알림 타입에 따른 페이지 이동
       if (noti.type === 'FAVORITE' && noti.relatedItemId) {
         navigate(`/products/${noti.relatedItemId}`);
       } else if (noti.type === 'NOTICE') {
-        // 공지사항 페이지로 이동하고 싶다면 추가
-        // navigate(`/notices/${noti.relatedItemId}`);
       }
     };
 
-    // 알림 개별 삭제
     const handleDeleteNoti = async (e, notiId) => {
       e.stopPropagation();
-      setList(prev => prev.filter(n => n.id !== notiId)); // 화면에서 즉시 삭제
+      setList(prev => prev.filter(n => n.id !== notiId));
       try {
         await axios.delete(`/api/notifications/${notiId}`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -106,7 +96,7 @@ function NotificationListPage() {
                   display: 'flex', 
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  backgroundColor: (!noti.isRead && !noti.read) ? '#fff9f5' : '#fff' // 안 읽은 알림 배경색 강조
+                  backgroundColor: (!noti.isRead && !noti.read) ? '#fff9f5' : '#fff'
                 }}
               >
                 <div className="notice-item-info" style={{ flex: 1 }}>
@@ -120,7 +110,6 @@ function NotificationListPage() {
                   </div>
                 </div>
                 
-                {/* 삭제 버튼 */}
                 <button 
                   onClick={(e) => handleDeleteNoti(e, noti.id)} 
                   style={{ background: 'none', border: 'none', color: '#ccc', cursor: 'pointer', padding: '10px' }}
@@ -156,7 +145,7 @@ function NotificationListPage() {
       </div>
     );
   }
-  return null; // loginChk가 실패하면 자동으로 로그인 페이지로 튕기므로 null 반환
+  return null;
 }
 
 export default NotificationListPage;

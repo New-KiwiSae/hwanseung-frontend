@@ -1,15 +1,12 @@
-/* Header.css */
 :root {
-    /* 환승마켓 Signature Theme */
-    --bg-color: #f4f6f8;            /* Very light gray background */
-    --form-bg: #ffffff;             /* Clean white for forms */
-    --text-main: #333333;           /* Dark gray for primary text */
-    --text-secondary: #888888;      /* Lighter text */
-    --accent-color: #00d26a;        /* Vibrant Green from mockups */
-    --accent-hover: #00c060;        /* Slightly darker green for hover */
+    --bg-color: #f4f6f8; 
+    --form-bg: #ffffff; 
+    --text-main: #333333;
+    --text-secondary: #888888; 
+    --accent-color: #00d26a;   
+    --accent-hover: #00c060;        
     --white: #ffffff;
     
-    /* Modern, soft drop shadows */
     --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
     --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
@@ -45,7 +42,6 @@
   gap: 24px;
 }
 
-/* 로고 */
 .logo {
   display: flex;
   align-items: center;
@@ -74,7 +70,6 @@
   color: var(--brand-color);
 }
 
-/* 검색 영역 */
 .search-area {
   flex: 1;
   max-width: 520px;
@@ -126,7 +121,6 @@
   color: #9ca3af;
 }
 
-/* 검색 드롭다운 */
 .search-dropdown {
   position: absolute;
   top: calc(100% + 12px);
@@ -215,7 +209,6 @@
   min-width: 16px;
 }
 
-/* 네비게이션 메뉴 */
 .header-actions {
   display: flex;
   align-items: center;
@@ -377,7 +370,6 @@
   border-color: var(--brand-color);
 }
 
-/* 반응형 */
 @media (max-width: 768px) {
   .header-container {
     padding: 0 16px;
@@ -410,17 +402,15 @@
   }
 }
 
-/* 내프로필보기 시작 */
 .user-profile-container {
   position: relative;
   display: inline-block;
 }
 
-/* 드롭다운 박스 스타일 */
 .profile-dropdown {
   position: absolute;
-  top: 100%; /* 버튼 바로 아래 */
-  right: 0;   /* 오른쪽 정렬 */
+  top: 100%;
+  right: 0;
   width: 160px;
   background-color: white;
   border-radius: 8px;
@@ -431,7 +421,6 @@
   border: 1px solid #eee;
 }
 
-/* 화살표 느낌의 꼬리 (선택 사항) */
 .profile-dropdown::before {
   content: '';
   position: absolute;
@@ -445,7 +434,6 @@
   border-top: 1px solid #eee;
 }
 
-/* 각 메뉴 아이템 */
 .dropdown-item {
   padding: 10px 16px;
   font-size: 14px;
@@ -464,7 +452,7 @@
 
 .dropdown-item:hover {
   background-color: #f8f9fa;
-  color: var(--accent-hover); /* 당근마켓 느낌의 포인트 컬러 */
+  color: var(--accent-hover);
 }
 
 .dropdown-item.logout-item {
@@ -476,8 +464,6 @@
   border: none;
   border-top: 1px solid #eee;
 }
-
-/* 내프로필보기 끝 */
 
 .admin-btn {
   display: flex;
@@ -505,11 +491,7 @@
 .admin-btn:active {
   transform: scale(0.97);
 }
-/* ========================================= */
-/* 알림(Notification) 및 드롭다운 전용 스타일 */
-/* ========================================= */
 
-/* 알림 빨간색 뱃지 (읽지 않은 알림 수) */
 .noti-badge {
   position: absolute;
   top: 2px;
@@ -527,7 +509,6 @@
   border: 2px solid white;
 }
 
-/* 알림 전용 드롭다운 크기/위치 조정 */
 .noti-dropdown {
   width: 320px;
   right: -60px;
@@ -535,7 +516,6 @@
   overflow-y: auto;
 }
 
-/* 알림 드롭다운 상단 헤더 (새로운 알림 / 모두 읽음) */
 .noti-header {
   padding: 12px 15px;
   font-weight: bold;
@@ -554,7 +534,6 @@
   text-decoration: underline;
 }
 
-/* 알림이 없을 때 */
 .noti-empty {
   padding: 30px 15px;
   text-align: center;
@@ -562,7 +541,6 @@
   font-size: 0.9em;
 }
 
-/* 개별 알림 아이템 */
 .noti-item {
   display: flex;
   flex-direction: column;
@@ -578,7 +556,6 @@
   background-color: #f8f9fa;
 }
 
-/* 🌟 안 읽은 알림일 때 배경색 변경 */
 .noti-item.unread {
   background-color: #f0f8ff;
 }
@@ -587,7 +564,6 @@
   background-color: #e6f2ff;
 }
 
-/* 알림 본문 상단 영역 (텍스트 + 삭제버튼) */
 .noti-item-top {
   display: flex;
   justify-content: space-between;
@@ -603,14 +579,12 @@
   padding-right: 10px;
 }
 
-/* 알림 아이콘 색상 및 간격 */
 .noti-icon {
   margin-right: 6px;
 }
 .noti-icon.heart { color: #ff4d4f; }
 .noti-icon.notice { color: #007bff; }
 
-/* 알림 개별 삭제 버튼 */
 .noti-delete-btn {
   background: none;
   border: none;
@@ -626,14 +600,12 @@
   color: #ff4d4f;
 }
 
-/* 알림 시간 */
 .noti-date {
   font-size: 0.75em;
   color: #999;
   width: 100%;
 }
 
-/* 하단 알림 전체보기 버튼 */
 .noti-view-all {
   justify-content: center;
   color: #666;
@@ -641,11 +613,6 @@
   border-top: 1px solid #eee;
 }
 
-/* ========================================= */
-/* 검색 드롭다운 확장 스타일                    */
-/* ========================================= */
-
-/* 라벨 행 (제목 + 전체 삭제) */
 .dropdown-label-row {
   display: flex;
   justify-content: space-between;
@@ -664,7 +631,6 @@
   color: #ef4444;
 }
 
-/* 우측 컬럼 */
 .search-dropdown-col-right {
   width: 180px;
   flex: none !important;
@@ -672,7 +638,6 @@
   padding-left: 24px;
 }
 
-/* 검색어 없을 때 */
 .search-empty {
   font-size: 13px;
   color: #bbb;
@@ -680,7 +645,6 @@
   padding: 20px 0;
 }
 
-/* 최근 검색어 목록 */
 .recent-search-list {
   display: flex;
   flex-direction: column;
@@ -739,13 +703,11 @@
   color: #ef4444;
 }
 
-/* 인기 검색어 키워드 텍스트 */
 .trending-keyword {
   font-size: 14px;
   font-weight: 500;
 }
 
-/* 검색창 clear 버튼 (x) */
 .search-clear-btn {
   color: #9ca3af;
   cursor: pointer;

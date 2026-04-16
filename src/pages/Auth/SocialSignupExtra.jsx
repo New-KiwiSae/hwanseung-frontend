@@ -3,19 +3,16 @@ import axios from 'axios';
 import './SocialSignupExtra.css';
 
 const SocialSignupExtra = () => {
-    // 기본 상태값
     const [phone, setPhone] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // SMS 인증 관련 상태값
     const [smsCode, setSmsCode] = useState('');
     const [isSmsSent, setIsSmsSent] = useState(false);
     const [isContactVerified, setIsContactVerified] = useState(false);
     const [timeLeft, setTimeLeft] = useState(0);
     const [isTimerActive, setIsTimerActive] = useState(false);
 
-    // 1. 타이머 로직
     useEffect(() => {
         let timer;
         if (isTimerActive && timeLeft > 0) {
@@ -28,7 +25,6 @@ const SocialSignupExtra = () => {
         return () => clearInterval(timer);
     }, [isTimerActive, timeLeft]);
 
-    // 시간 포맷 (03:00)
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
@@ -40,7 +36,6 @@ const SocialSignupExtra = () => {
         setPhone(value);
     };
 
-    // 2. 인증번호 발송 (개발모드/실제 통합)
     const handleSendSms = async () => {
         if (phone.length < 10) {
             alert("올바른 연락처를 입력해주세요.");
@@ -48,12 +43,10 @@ const SocialSignupExtra = () => {
         }
 
         try {
-            // [실제 운영시] 아래 주석 해제하여 사용
-            // await axios.post('/api/auth/sms/send-code', { phoneNumber: phone });
-            // alert('인증번호가 발송되었습니다.');
+            await axios.post('/api/auth/sms/send-code', { phoneNumber: phone });
+            alert('인증번호가 발송되었습니다.');
 
-            alert('[개발모드] 인증번호가 발송되었습니다. (아무 번호나 입력 후 확인 클릭)');
-            setTimeLeft(180); // 3분
+            setTimeLeft(180);
             setIsTimerActive(true);
             setIsSmsSent(true);
             setError('');
@@ -62,7 +55,6 @@ const SocialSignupExtra = () => {
         }
     };
 
-    // 3. 인증번호 검증
     const handleVerifySmsCode = async () => {
         if (smsCode.length !== 6) {
             alert("인증번호 6자리를 입력해주세요.");
@@ -70,11 +62,6 @@ const SocialSignupExtra = () => {
         }
 
         try {
-            // [실제 운영시] 아래 주석 해제하여 사용
-            // await axios.post('/api/auth/verify-code', {
-            //     key: phone,
-            //     code: smsCode
-            // });
 
             setIsContactVerified(true);
             setIsTimerActive(false);
@@ -84,14 +71,11 @@ const SocialSignupExtra = () => {
         }
     };
 
-    // 4. 최종 제출 (연락처 저장 및 회원 상태 ACTIVE 변경)
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // 1. 세션 스토리지에서 토큰 가져오기
         const token = sessionStorage.getItem('accessToken');
 
-        // 토큰이 없으면 요청조차 할 수 없으므로 체크
         if (!token) {
             alert("인증 정보가 없습니다. 다시 로그인 해주세요.");
             return;
@@ -105,16 +89,13 @@ const SocialSignupExtra = () => {
             );
 
             if (response.status === 200) {
-                // 🌟 서버가 보내준 새 토큰(newAccessToken) 꺼내기
                 const newAccessToken = response.data;
 
-                // 🌟 세션 스토리지 교체 (이게 없으면 서버 방어막에 계속 막힘)
                 sessionStorage.setItem('accessToken', newAccessToken);
                 sessionStorage.setItem('status', 'ACTIVE');
 
                 alert('정보 저장이 완료되었습니다! 이제 서비스를 이용하실 수 있습니다.');
 
-                // 메인 페이지로 이동 (전체 상태 갱신을 위해 href 권장)
                 window.location.href = '/';
             }
         } catch (error) {
@@ -136,7 +117,6 @@ const SocialSignupExtra = () => {
                 </p>
 
                 <form onSubmit={handleSubmit}>
-                    {/* 연락처 입력 및 발송 버튼 */}
                     <div className="input-group">
                         <label htmlFor="phone">연락처</label>
                         <div className="input-with-btn">
@@ -161,7 +141,6 @@ const SocialSignupExtra = () => {
                         </div>
                     </div>
 
-                    {/* 인증번호 입력란 (발송 후에만 보임) */}
                     {isSmsSent && !isContactVerified && (
                         <div className="input-group sms-verify-group">
                             <label>인증번호</label>

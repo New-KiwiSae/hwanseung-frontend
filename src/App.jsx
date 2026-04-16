@@ -68,11 +68,9 @@ function App() {
                 <main style={{ flexGrow: 1 }}>
                     <ScrollToTop />
                     <Routes>
-                        {/* [누구나 접근 가능] 로그인과 추가 정보 입력 페이지 */}
                         <Route path="/login" element={<AuthPage />} />
                         <Route path="/social-signup-extra" element={<SocialSignupExtra />} />
 
-                        {/* [PENDING 차단 구역] 이 안에 있는 모든 라우트는 StatusGuard를 거칩니다 */}
                         <Route element={<StatusGuard />}>
                             <Route path="/" element={<MainPage />} />
                             <Route path="/near-me" element={<NearMePage />} />
@@ -83,7 +81,6 @@ function App() {
                             <Route path="/reports/create/:productId" element={<ReportCreatePage />} />
                             <Route path="/info" element={<InfoPage />} />
 
-                            {/* 마이페이지 그룹 */}
                             <Route element={<Layout />}>
                                 <Route path="/mypage" element={<MyPage />} />
                                 <Route path="/sales" element={<Sales />} />
@@ -103,7 +100,6 @@ function App() {
                                 <Route path="reports" element={<AdminReports />} />
                                 <Route path="/admin/admin-manage" element={<AdminManage />} />
                                 <Route path="chat" element={<AdminChatManager />} />
-                                {/* <Route path="chat" element={<AdminChatManage />} /> */}
                                 <Route path="announcements" element={<AdminAnnouncements />} />
                                 <Route path="inquiries" element={<AdminInquiries />} />
                             </Route>
@@ -113,9 +109,7 @@ function App() {
                                 <Route path="/sales" element={<Sales />} />
                                 <Route path="/purchase" element={<Purchase />} />
                                 <Route path="/wishlist" element={<Wishlist />} />
-                                {/* 공지사항 상세 */}
                                 <Route path="/notices/:id" element={<NoticeDetailPage handler={null} value={null} />} />
-                                {/* 공지사항 목록 */}
                                 <Route path="/notices" element={<NoticeListPage />} />
                                 <Route path="inquiries" element={<Inquiries />} />
 

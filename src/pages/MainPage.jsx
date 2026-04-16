@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './MainPage.css';
 import { useNavigate } from 'react-router-dom';
-// 분리한 Public API 호출
 import { fetchPublicCategories } from '../api/PublicCategoryAPI';
 import axios from 'axios';
 
@@ -22,7 +21,6 @@ const DEFAULT_STATS = [
     { label: '안전 결제 비중', value: 98.4, suffix: '%', icon: 'fas fa-shield-alt' },
 ];
 
-/* ── 숫자 롤링 훅 ── */
 function useCountUp(target, duration = 2000, startCounting = false) {
     const [value, setValue] = useState(0);
     const rafRef = useRef(null);
@@ -296,7 +294,6 @@ const MainPage = () => {
 
     return (
         <div className="main-page">
-            {/* ═══ Hero Section ═══ */}
             <section className="hero-section">
                 <div className="hero-bg-decoration">
                     <div className="hero-circle hero-circle-1"></div>
@@ -370,7 +367,6 @@ const MainPage = () => {
                 </div>
             </section>
 
-            {/* ═══ Category Quick Menu ═══ */}
             <section className="category-section">
                 <div className="container">
                     <div className="category-grid">
@@ -435,7 +431,6 @@ const MainPage = () => {
                 </div>
             </section>
 
-            {/* ═══ 실시간 환승 피드 (마퀴) ═══ */}
             <section className="live-marquee-section">
                 <div className="marquee-track">
                     <div className="marquee-content">
@@ -455,7 +450,6 @@ const MainPage = () => {
                 </div>
             </section>
 
-            {/* ═══ 인기 매물 그리드 ═══ */}
             <section className="products-section">
                 <div className="container">
                     <div className="section-header">
@@ -665,26 +659,6 @@ const MainPage = () => {
                         </div>
                     </div>
 
-                    <div className="trust-stats-bar">
-                        <div className="trust-stat">
-                            <span className="trust-stat-value">99.8%</span>
-                            <span className="trust-stat-label">매너 지수 만족도</span>
-                        </div>
-
-                        <div className="trust-stat-divider"></div>
-
-                        <div className="trust-stat">
-                            <span className="trust-stat-value">0.01%</span>
-                            <span className="trust-stat-label">사기 발생률</span>
-                        </div>
-
-                        <div className="trust-stat-divider"></div>
-
-                        <div className="trust-stat">
-                            <span className="trust-stat-value">2.4M</span>
-                            <span className="trust-stat-label">월간 활성 사용자</span>
-                        </div>
-                    </div>
                 </div>
             </section>
         </div>

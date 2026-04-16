@@ -13,7 +13,6 @@ const AdminInquiries = () => {
     const [expandedId, setExpandedId] = useState(null);
     const limitsize = 5;
 
-    // 모달 상태 (등록/수정)
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedInquiry, setSelectedInquiry] = useState(null);
 
@@ -24,7 +23,6 @@ const AdminInquiries = () => {
     const loadData = async () => {
       const params = { category, page };
       const res = await api.fetchInquiries(params).then((res) => {
-        console.log('res: ', res);
         setInquiries(res.data.content);
         setTotalPages(res.data.totalPages);
       }).catch(() => setError(true));
@@ -32,14 +30,10 @@ const AdminInquiries = () => {
 
     const handleToggle = (id) => setExpandedId(expandedId === id ? null : id);
 
-    //페이징 그룹 계산(5개씩)
     const pageGroup = Math.floor(page / limitsize);
     const startPage = pageGroup * limitsize;
     const endPage = Math.min(startPage + limitsize, totalPages);
 
-
-
-    // 추가 페이지 이동 함수
     const handlePageChange = (p) => {
       setPage(p);
     };
@@ -50,7 +44,6 @@ const AdminInquiries = () => {
       let dataval;
       if (tag.tagName === 'I') { dataval = tag.parentElement.getAttribute('dataVal'); }
       else { dataval = tag.getAttribute('dataVal'); }
-      console.log('dataval: ', dataval);
       if (window.confirm("삭제하시겠습니까?")) {
         await api.deleteInquiry(dataval);
         loadData();
@@ -66,7 +59,6 @@ const AdminInquiries = () => {
           <button className="btn-register" onClick={() => { setSelectedInquiry(null); setIsModalOpen(true); }}>+ 질문 등록</button>
         </div>
 
-        {/* 에러 */}
         {
           error && (
             <div className="errorBox">
@@ -119,7 +111,6 @@ const AdminInquiries = () => {
             )}
         </div>
 
-        {/* [추가] 페이징 UI */}
         {inquiries.length > 0 && (
           <>
             <div className="pagination">
@@ -145,7 +136,6 @@ const AdminInquiries = () => {
 
 
 
-        {/* 모달창 (자주묻는 질문 등록/수정) */}
         {isModalOpen && (
           <InquiryModal
             data={selectedInquiry}
@@ -161,7 +151,6 @@ const AdminInquiries = () => {
 };
 
 
-// 등록/수정 모달 컴포넌트
 const InquiryModal = ({ data, onClose, refresh }) => {
   const [form, setForm] = useState(data || { category: null, question: '', answer: '' });
 
@@ -179,7 +168,6 @@ const InquiryModal = ({ data, onClose, refresh }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content faq-register-modal" onClick={(e) => e.stopPropagation()}>
-        {/* 헤더 부분 */}
         <div className="modal-header">
           <div className="modal-title">
             <span className="plus-icon">+</span> 자주묻는 질문 {data ? '수정' : '등록'}
@@ -188,7 +176,6 @@ const InquiryModal = ({ data, onClose, refresh }) => {
         </div>
 
         <div className="modal-body">
-          {/* 질문 입력 */}
           <div className="form-group">
             <label>질문 <span className="required">*</span></label>
             <input
@@ -199,7 +186,6 @@ const InquiryModal = ({ data, onClose, refresh }) => {
             />
           </div>
 
-          {/* 카테고리 선택 (체크박스 형태) */}
           <div className="category-selection">
             <label className="checkbox-label">
               <input type="checkbox" checked={form.category === 'pay'} onChange={() => setForm({ ...form, category: 'pay' })} />
@@ -215,7 +201,6 @@ const InquiryModal = ({ data, onClose, refresh }) => {
             </label>
           </div>
 
-          {/* 답변 입력 */}
           <div className="form-group">
             <label>답변 <span className="required">*</span></label>
             <textarea
@@ -226,7 +211,6 @@ const InquiryModal = ({ data, onClose, refresh }) => {
           </div>
         </div>
 
-        {/* 하단 버튼 */}
         <div className="modal-footer">
           <button className="btnall btn-modi" onClick={onClose}>취소</button>
           <button className="btnall btn-submit" onClick={handleSubmit}>

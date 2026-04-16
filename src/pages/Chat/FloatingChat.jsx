@@ -21,20 +21,15 @@ const FloatingChat = () => {
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null); 
 
-  // 🚨 1. 알림만 전담해서 듣는 두 번째 STOMP 클라이언트 (배경에서 계속 켜져 있음)
   const notiStompClient = useRef(null);
 
   const token = sessionStorage.getItem("accessToken");
-  // const currentUser = sessionStorage.getItem("username") || "알수없음";
   const currentUser = userInfo?.username || userInfo?.userId || sessionStorage.getItem("username");
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, activeRoom]);
 
-  // ========================================================
-  // 🚨 [여기에 추가!] 컴포넌트가 화면에서 완전히 사라질 때 채팅 연결을 강제 종료하는 청소부
-  // ========================================================
   useEffect(() => {
     return () => {
       if (stompClient.current) {
@@ -43,77 +38,57 @@ const FloatingChat = () => {
     };
   }, []);
 
-  // ========================================================
-  // 🚨 2. [핵심] 처음에 알림 채널에 연결해서 귀를 열어둡니다!
-  // ========================================================
   useEffect(() => {
     fetchMyChatRooms();
 
-    // 플로팅 아이콘 전용 "알림 수신기" 연결
     const client = new Client({
       webSocketFactory: () => new SockJS('/ws-chat'),
       connectHeaders: { Authorization: `Bearer ${token}` },
 
-      // 🚨 [좀비 방어막 1 추가] 🚨
-      reconnectDelay: 0, // 강제 재접속 기능 완전히 끄기!
+      reconnectDelay: 0,
       onStompError: (frame) => {
         console.error("STOMP 에러:", frame);
-        client.deactivate(); // 에러 나면 즉시 포기! (서버 폭파 방지)
+        client.deactivate();
       },
       onWebSocketClose: () => {
-        console.log("웹소켓 연결이 강제로 끊어졌습니다. (토큰 만료 등)");
-        client.deactivate(); // 끊겨도 매달리지 않고 포기!
+        client.deactivate();
       },
-      // -------------------------
 
       onConnect: () => {
-        // 내 알림 전용 주파수에 귀를 엽니다.
         client.subscribe(`/sub/user/${currentUser}/notification`, (message) => {
           const newNoti = JSON.parse(message.body);
           
-          // 오직 "채팅" 알림일 때만 빨간 점을 올립니다!
           if (newNoti.type === 'CHAT') {
-            // const incomingRoomId = newNoti.relatedItemId.toString();
-            // const incomingRoomId = newNoti.relatedStringId;
             const incomingRoomId = String(newNoti.relatedStringId);
             let isNewRoom = false;
 
             setChatRooms((prevRooms) => {
-              // 꼼수: 최신 activeRoom 상태 확인
               let currentActiveRoomId = null;
               setActiveRoom(current => {
-                //  currentActiveRoomId = current?.roomId;
                 currentActiveRoomId = current?.roomId ? String(current.roomId) : null;
-                 return current;
+                return current;
               });
 
-              // 내가 이미 그 방 안에서 채팅을 보고 있다면 알림 숫자 안 올림!
               if (currentActiveRoomId === incomingRoomId) {
                 return prevRooms; 
               }
 
-              // 안 보고 있는 방이라면 뱃지 올리기!
-              // const roomExists = prevRooms.find(r => r.roomId === incomingRoomId);
               const roomExists = prevRooms.find(r => String(r.roomId) === incomingRoomId);
 
               if (roomExists) {
                 const updatedRoom = { ...roomExists, unreadCount: roomExists.unreadCount + 1, lastMessage: newNoti.content };
-                // return [updatedRoom, ...prevRooms.filter(r => r.roomId !== incomingRoomId)]; // 맨 위로 끌어올림
                 return [updatedRoom, ...prevRooms.filter(r => String(r.roomId) !== incomingRoomId)];
               } else {
-                // fetchMyChatRooms(); // 처음 말 거는 사람이면 목록 새로 불러오기
-                // return prevRooms;
                 isNewRoom = true; 
                 const newTempRoom = {
                   roomId: incomingRoomId, 
                   buyerId: "새로운 대화",
-                  unreadCount: 1, // 첫 메시지니까 무조건 1개!
+                  unreadCount: 1,
                   lastMessage: newNoti.content
                 };
-                return [newTempRoom, ...prevRooms]; // 맨 위로 올림
+                return [newTempRoom, ...prevRooms];
               }
             });
-            // 💡 3. 리액트 화면 꼬임 방지를 위해 상태 업데이트(setChatRooms) 바깥에서 DB 호출
             if (isNewRoom) {
               fetchMyChatRooms(); 
             }
@@ -129,7 +104,6 @@ const FloatingChat = () => {
       if (notiStompClient.current) notiStompClient.current.deactivate();
     };
   }, [token, currentUser]);
-  // ========================================================
 
   const fetchMyChatRooms = async () => {
     if (!token) return;
@@ -140,17 +114,14 @@ const FloatingChat = () => {
       
       setChatRooms(currentRooms => {
         const mergedRooms = res.data.map(serverRoom => {
-          // 💡 방 번호 비교할 때 String() 통일
           const localRoom = currentRooms.find(r => String(r.roomId) === String(serverRoom.roomId));
           
-          // 💡 서버는 0개라고 우겨도, 내 화면에 이미 1개로 떠있다면 내 화면의 뱃지 개수를 지킨다!
           if (localRoom && localRoom.unreadCount > serverRoom.unreadCount) {
             return { ...serverRoom, unreadCount: localRoom.unreadCount, lastMessage: localRoom.lastMessage };
           }
           return serverRoom;
         });
 
-        // 💡 아직 서버 DB에 반영 안 된 완전 새로운 임시 방도 리스트에서 삭제되지 않게 보호
         currentRooms.forEach(localRoom => {
           if (!mergedRooms.find(r => String(r.roomId) === String(localRoom.roomId))) {
             mergedRooms.push(localRoom);
@@ -182,7 +153,6 @@ const FloatingChat = () => {
       });
 
       try {
-        // const historyRes = await axios.get(`http://localhost/api/chat/room/${roomId}/messages`, {
         const historyRes = await axios.get(`/api/chat/room/${roomId}/messages`, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -199,7 +169,6 @@ const FloatingChat = () => {
 
   const toggleChat = () => {
     if (isOpen) {
-      // if (stompClient.current) stompClient.current.deactivate();
       setActiveRoom(null); 
       setIsOpen(false);
     } else {
@@ -208,7 +177,6 @@ const FloatingChat = () => {
   };
 
   const backToList = () => {
-    // if (stompClient.current) stompClient.current.deactivate(); 
     setActiveRoom(null); 
   };
 
@@ -216,11 +184,9 @@ const FloatingChat = () => {
     setActiveRoom(room); 
     setMessages([]); 
 
-    // 🚨 3. 방에 들어갔을 때, 화면에서 안 읽은 메시지 숫자를 즉시 0으로 폭파!
     setChatRooms(prev => prev.map(r => r.roomId === room.roomId ? { ...r, unreadCount: 0 } : r));
     
     try {
-      // const historyRes = await axios.get(`http://localhost/api/chat/room/${room.roomId}/messages`, {
       const historyRes = await axios.get(`/api/chat/room/${room.roomId}/messages`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -242,7 +208,6 @@ const FloatingChat = () => {
       setActiveRoom(newAdminRoom);
       setMessages([]);
 
-      // 💡 [여기가 추가된 부분!] 방 생성 직후 내 채팅 목록 화면에 즉시 추가!
       setChatRooms((prev) => {
         const exists = prev.find(r => r.roomId === realRoomId);
         if (exists) return prev;
@@ -261,28 +226,23 @@ const FloatingChat = () => {
   };
 
   const connectStomp = (currentRoomId) => {
-    // 🚨 [핵심 방어 코드 1] 기존에 연결된 방 라디오가 있다면 반드시 먼저 전원을 끕니다!
     if (stompClient.current) {
       stompClient.current.deactivate();
       stompClient.current = null;
     }
 
     const client = new Client({
-      // webSocketFactory: () => new SockJS('http://localhost/ws-chat'),
       webSocketFactory: () => new SockJS('/ws-chat'),
       connectHeaders: { Authorization: `Bearer ${token}` },
 
-      // 🚨 [좀비 방어막 2 추가] 🚨
-      reconnectDelay: 0, // 강제 재접속 끄기
+      reconnectDelay: 0,
       onStompError: (frame) => {
         console.error("STOMP 에러:", frame);
         client.deactivate();
       },
       onWebSocketClose: () => {
-        console.log("웹소켓 연결이 강제로 끊어졌습니다.");
         client.deactivate();
       },
-      // -------------------------
       
       onConnect: () => {
         client.subscribe(`/sub/chat/room/${currentRoomId}`, (message) => {
@@ -295,24 +255,19 @@ const FloatingChat = () => {
     stompClient.current = client;
   };
 
-  // ========================================================
-  // 🚨 4. [핵심] 메시지 쏠 때, 상대방 아이디(receiverId) 묶어 보내기!
-  // ========================================================
   const sendMessage = () => {
     if (inputMessage.trim() !== '' && stompClient.current?.connected && activeRoom) {
       
-      const opponentId = getOpponentName(activeRoom); // 상대방 아이디 알아내기
+      const opponentId = getOpponentName(activeRoom);
 
       const messageData = { 
         roomId: activeRoom.roomId, 
         sender: currentUser, 
         senderId: currentUser, 
         content: inputMessage,
-        receiverId: opponentId === "환승마켓 고객센터" ? "admin" : opponentId // 🚨 백엔드 DTO에 추가한 바로 그 녀석!
+        receiverId: opponentId === "환승마켓 고객센터" ? "admin" : opponentId
       };
 
-      // 🚨 [탐지기 1번] 백엔드로 쏘기 직전에 데이터 확인! (F12 콘솔창 확인)
-      console.log("🔥 [탐지기 1번] 백엔드로 보낼 데이터:", messageData);
       
       stompClient.current.publish({ destination: '/pub/chat/message', body: JSON.stringify(messageData) });
       setInputMessage('');
@@ -327,7 +282,6 @@ const FloatingChat = () => {
     formData.append('file', file); 
 
     try {
-      // const uploadRes = await axios.post('http://localhost/api/chat/image', formData, {
       const uploadRes = await axios.post('/api/chat/image', formData, {
         headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
       });
@@ -360,7 +314,6 @@ const FloatingChat = () => {
         <div className={`admin-chat-modal ${isOpen ? 'open' : ''}`}>
           
           {!activeRoom ? (
-            /* ================= [화면 1] 채팅방 목록 ================= */
             <>
               <div className="admin-chat-header">
                 <h3>내 채팅방</h3>
@@ -396,7 +349,6 @@ const FloatingChat = () => {
             </>
           ) : (
             
-            /* ================= [화면 2] 채팅방 내부 ================= */
             <>
               <div className="admin-chat-header">
                 <button className="back-btn" onClick={backToList}><i className="fas fa-chevron-left"></i></button>
@@ -419,7 +371,6 @@ const FloatingChat = () => {
 
                   return (
                     <div key={index} className={`chat-bubble-wrap ${isMe ? 'me' : 'admin'}`}>
-                      {/* 상대방이 보낸 경우에만 위에 아이디 작게 표시 */}
                       {!isMe && (
                         <div className="sender-name">
                           {(msg.senderId || msg.sender) === "admin" ? "고객센터" : (msg.senderId || msg.sender)}
@@ -429,10 +380,8 @@ const FloatingChat = () => {
                       <div className={`chat-bubble ${isImage ? 'image-bubble' : ''}`}>
                         {isImage ? (
                           <img 
-                            // src={`http://localhost${msg.content}`} 
                             src={`${msg.content}`} 
                             alt="전송된 이미지" 
-                            // onClick={() => setSelectedImage(`http://localhost${msg.content}`)}
                             onClick={() => setSelectedImage(`${msg.content}`)}
                           />
                         ) : (
@@ -463,7 +412,6 @@ const FloatingChat = () => {
         <button className="admin-chat-fab" onClick={toggleChat}>
           {isOpen ? <i className="fas fa-times"></i> : <i className="fas fa-comment-dots"></i>}
           
-          {/* 플로팅 알림 뱃지 */}
           {!isOpen && totalUnreadCount > 0 && (
             <span className="fab-unread-badge">
               {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
@@ -472,7 +420,6 @@ const FloatingChat = () => {
         </button>
       </div>
 
-      {/* 이미지 전체화면 모달 */}
       {selectedImage && (
         <div className="image-modal-overlay" onClick={() => setSelectedImage(null)}>
           <img src={selectedImage} alt="확대된 이미지" />
