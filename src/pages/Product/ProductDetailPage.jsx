@@ -235,7 +235,7 @@ export default function ProductDetailPage() {
             );
         } catch (error) {
             console.error("채팅방 생성/입장 실패:", error);
-            alert("채팅방을 여는 데 실패했습니다. 다시 시도해주세요.");
+            alert("채팅방을 여는 데 실패했습니다. 로그인 후 이용 가능합니다.");
         }
     };
 

@@ -21,6 +21,11 @@ axios.interceptors.response.use(
         return response;
     },
     async (error) => {
+        const currentPath = window.location.pathname;
+
+        if (currentPath === '/login') {
+            return Promise.reject(error);
+        }
         if (sessionStorage.getItem("tokenType") === null || sessionStorage.getItem("tokenType") === undefined || sessionStorage.getItem("tokenType") === '') {
             window.location.href = "/login";
             return Promise.reject(error);
@@ -77,9 +82,9 @@ export const getInquiries = (params) => {
 export const fetchInquiries = (params) =>
     axios.get(API_BASE, { params, headers: getToken('auth') });
 
-export const createInquiry = (data) => axios.post(API_BASE, data, { withCredentials: true, headers : getToken('content') });
+export const createInquiry = (data) => axios.post(API_BASE, data, { withCredentials: true, headers: getToken('content') });
 
-export const updateInquiry = (id, data) => axios.put(`${API_BASE}/${id}`, data, { withCredentials: true, headers : getToken('content') });
+export const updateInquiry = (id, data) => axios.put(`${API_BASE}/${id}`, data, { withCredentials: true, headers: getToken('content') });
 
-export const deleteInquiry = (id) => axios.delete(`${API_BASE}/${id}`, { withCredentials: true, headers : getToken('content') });
+export const deleteInquiry = (id) => axios.delete(`${API_BASE}/${id}`, { withCredentials: true, headers: getToken('content') });
 
