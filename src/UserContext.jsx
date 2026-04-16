@@ -24,7 +24,6 @@ export const UserProvider = ({ children }) => {
 
         const status = sessionStorage.getItem('status');
         if (error.response?.status === 403 && status === 'PENDING') {
-            console.log("추가 정보 입력이 필요한 유저입니다. 세션을 유지합니다.");
             
             setUserInfo({ 
                 username: sessionStorage.getItem('username'), 
