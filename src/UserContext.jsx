@@ -37,6 +37,7 @@ export const UserProvider = ({ children }) => {
         } else {
             // 진짜 토큰 만료나 인증 에러일 때만 지웁니다.
             sessionStorage.clear();
+            alert("에러확인 UserCOntext.jsx")
             setUserInfo(null);
         }
         } finally {
