@@ -1,14 +1,9 @@
-/* MainPage.css */
-
 .container {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 24px;
 }
 
-/* ═══════════════════════════════
-   Hero Section
-   ═══════════════════════════════ */
 .hero-section {
   position: relative;
   background: linear-gradient(135deg, #F0FFF4 0%, #ffffff 50%, #e6fbf2 100%);
@@ -29,7 +24,6 @@
   opacity: 0.08;
 }
 
-/* 변경 후 */
 .hero-circle-1 {
   width: 600px;
   height: 600px;
@@ -48,7 +42,6 @@
   animation: circleFloat2 10s ease-in-out infinite;
 }
 
-/* 우상단 원: 천천히 떠다니며 크기 변화 */
 @keyframes circleFloat1 {
   0%   { transform: translate(0, 0) scale(1); }
   25%  { transform: translate(-30px, 20px) scale(1.05); }
@@ -57,7 +50,6 @@
   100% { transform: translate(0, 0) scale(1); }
 }
 
-/* 좌하단 원: 반대 방향으로 떠다니며 크기 변화 */
 @keyframes circleFloat2 {
   0%   { transform: translate(0, 0) scale(1); }
   25%  { transform: translate(20px, -15px) scale(1.08); }
@@ -175,7 +167,6 @@
   border-color: #e0e0e0;
 }
 
-/* Hero 비주얼 카드 */
 .hero-visual {
   flex-shrink: 0;
   width: 380px;
@@ -240,9 +231,6 @@
   gap: 4px;
 }
 
-/* ═══════════════════════════════
-   Category Quick Menu
-   ═══════════════════════════════ */
 .category-section {
   padding: 48px 0;
   background: white;
@@ -316,9 +304,6 @@
   color: var(--dark-color);
 }
 
-/* ═══════════════════════════════
-   Live Marquee
-   ═══════════════════════════════ */
 .live-marquee-section {
   padding: 14px 0;
   background: var(--light-bg);
@@ -374,7 +359,6 @@
   color: var(--dark-color);
 }
 
-/* 🔥 복제된 전체 길이의 절반만 이동 */
 @keyframes marquee {
   0% {
     transform: translate3d(0, 0, 0);
@@ -384,9 +368,6 @@
   }
 }
 
-/* ═══════════════════════════════
-   Products Grid
-   ═══════════════════════════════ */
 .products-section {
   padding: 80px 0;
   background: white;
@@ -434,7 +415,6 @@
   gap: 28px;
 }
 
-/* 상품 카드 */
 .product-card {
   border-radius: 20px;
   overflow: hidden;
@@ -487,7 +467,6 @@
   font-size: 11px;
   font-weight: 700;
   border-radius: 8px;
-  /* backdrop-filter: blur(4px); */
 }
 
 .product-like-btn {
@@ -498,7 +477,6 @@
   height: 36px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.85);
-  /* backdrop-filter: blur(8px); */
   border: none;
   display: flex;
   align-items: center;
@@ -571,9 +549,6 @@
   gap: 3px;
 }
 
-/* ═══════════════════════════════
-   Transit Insight (Dark Section)
-   ═══════════════════════════════ */
 .insight-section {
   position: relative;
   background: #111111;
@@ -640,7 +615,6 @@
   flex: 1;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  /* backdrop-filter: blur(8px); */
   border-radius: 24px;
   padding: 28px;
   opacity: 0;
@@ -684,7 +658,6 @@
   letter-spacing: -0.02em;
 }
 
-/* 실시간 피드 카드 */
 .insight-right {
   width: 400px;
   flex-shrink: 0;
@@ -789,9 +762,6 @@
   flex-shrink: 0;
 }
 
-/* ═══════════════════════════════
-   Safety Guide Banner
-   ═══════════════════════════════ */
 .safety-section {
   padding: 80px 0;
   background: white;
@@ -849,7 +819,6 @@
   gap: 6px;
   padding: 6px 16px;
   background: rgba(255, 255, 255, 0.2);
-  /* backdrop-filter: blur(8px); */
   border-radius: 999px;
   font-size: 13px;
   font-weight: 700;
@@ -877,9 +846,6 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
-/* ═══════════════════════════════
-   Trust Section
-   ═══════════════════════════════ */
 .trust-section {
   padding: 80px 0 100px;
   background: var(--light-bg);
@@ -983,7 +949,6 @@
   background: var(--border-color);
 }
 
-/* 인기목록*/
 .main-popular-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1118,9 +1083,6 @@
   }
 }
 
-/* ═══════════════════════════════
-   Responsive
-   ═══════════════════════════════ */
 @media (max-width: 1024px) {
   .hero-title {
     font-size: 2.5rem;

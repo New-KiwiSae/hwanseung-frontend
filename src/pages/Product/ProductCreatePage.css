@@ -242,7 +242,6 @@
     color: var(--text-secondary);
 }
 
-/* ✅ 버튼 영역 새 클래스 */
 .product-create-submit-buttons {
     display: flex;
     flex-direction: row;
@@ -294,7 +293,6 @@
     transform: translateY(-1px);
 }
 
-/* 이미지 미리보기 */
 .image-upload-content {
     display: flex;
     flex-direction: column;
@@ -355,7 +353,6 @@
     transform: scale(1.06);
 }
 
-/* 주소 검색 / 지도 영역 */
 .product-full-column {
     grid-column: 1 / -1;
 }
@@ -407,7 +404,6 @@
     overflow: hidden;
 }
 
-/* 다음 주소검색 모달 */
 .postcode-overlay {
     position: fixed;
     inset: 0;

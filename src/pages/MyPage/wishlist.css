@@ -1,4 +1,3 @@
-/* wishlist.css */
 
 .wish-title {
     border-bottom: 2px solid #333;
@@ -10,7 +9,7 @@
 
 .wish-title i {
     margin-right: 10px;
-    color: #ff4d4f; /* 관심 목록은 하트니까 빨간색 포인트! */
+    color: #ff4d4f;
 }
 
 .wish-empty-state {
@@ -28,7 +27,7 @@
 .wish-go-btn {
     margin-top: 20px;
     padding: 12px 24px;
-    background-color: #ff6f0f; /* 환승마켓 메인컬러 */
+    background-color: #ff6f0f;
     color: white;
     border: none;
     border-radius: 8px;

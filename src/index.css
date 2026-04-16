@@ -13,11 +13,11 @@
   --border-color: #f3f4f6;
   --text-secondary: #495057;
   --max-width: 1200px;
-  /* ====== Transition ====== */
+
   --tran-03: all 0.3s ease;
   --tran-04: all 0.3s ease;
   --tran-05: all 0.3s ease;
-  /* ===== 환승마켓 Colors ===== */
+
   --body-color: #f6f9fc;
   --sidebar-color: #ffffff;
   --primary-color: #00d68f;
@@ -89,13 +89,11 @@ ul, ol {
   list-style: none;
 }
 
-/* 스크롤바 커스텀 */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: #f1f1f1; }
 ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--brand-color); }
 
-/* 공통 애니메이션 */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -131,9 +129,6 @@ ul, ol {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ═══════════════════════════════
-   Admin Floating Chat 
-   ═══════════════════════════════ */
 .admin-chat-wrapper {
   position: fixed;
   bottom: 30px;
@@ -141,7 +136,6 @@ ul, ol {
   z-index: 9999;
 }
 
-/* 플로팅 버튼 (FAB) & 뱃지 */
 .admin-chat-fab {
   width: 60px;
   height: 60px;
@@ -156,7 +150,7 @@ ul, ol {
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative; /* 뱃지 위치 기준점 */
+  position: relative;
 }
 
 .admin-chat-fab:hover {
@@ -183,7 +177,6 @@ ul, ol {
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* 채팅 모달 창 */
 .admin-chat-modal {
   position: absolute;
   bottom: 80px;
@@ -200,7 +193,6 @@ ul, ol {
   overflow: hidden;
   border: 1px solid var(--border-color, #eee);
   
-  /* 애니메이션 설정 */
   opacity: 0;
   transform: translateY(20px) scale(0.95);
   pointer-events: none;
@@ -214,7 +206,6 @@ ul, ol {
   pointer-events: auto;
 }
 
-/* 헤더 영역 */
 .admin-chat-header {
   background: var(--dark-color, #333);
   color: white;
@@ -254,7 +245,6 @@ ul, ol {
 .back-btn { margin-right: 10px; }
 .back-btn:hover, .close-btn:hover { color: white; }
 
-/* ================= 채팅방 목록 (화면 1) ================= */
 .chat-list-body {
   flex: 1;
   background: #f0f2f5;
@@ -314,7 +304,6 @@ ul, ol {
 }
 .item-name-preview { font-size: 0.85em; color: #888; margin-bottom: 3px; }
 
-/* ================= 채팅방 내부 (화면 2) ================= */
 .admin-chat-body {
   flex: 1;
   background: #F8F9FA;
@@ -326,17 +315,14 @@ ul, ol {
 
 .empty-message { text-align: center; margin: auto; color: #adb5bd; }
 
-/* 🚨 말풍선 레이아웃 (핵심!) */
 .chat-bubble-wrap {
   display: flex;
-  flex-direction: column; /* 이름과 말풍선을 세로로 배치 */
+  flex-direction: column;
   width: 100%;
   margin-bottom: 12px;
 }
 
-/* 내 메시지는 오른쪽 정렬 */
 .chat-bubble-wrap.me { align-items: flex-end; }
-/* 상대방 메시지는 왼쪽 정렬 */
 .chat-bubble-wrap.admin { align-items: flex-start; }
 
 .sender-name {
@@ -352,7 +338,7 @@ ul, ol {
   border-radius: 16px;
   font-size: 14px;
   line-height: 1.4;
-  word-break: break-word; /* 긴 글씨 자동 줄바꿈 */
+  word-break: break-word;
 }
 
 .chat-bubble-wrap.me .chat-bubble {
@@ -368,7 +354,6 @@ ul, ol {
   border-bottom-left-radius: 4px;
 }
 
-/* 이미지 말풍선 투명화 */
 .chat-bubble.image-bubble {
   padding: 0;
   background: transparent !important;
@@ -385,7 +370,6 @@ ul, ol {
   border: 1px solid #eee;
 }
 
-/* 입력 영역 */
 .admin-chat-footer {
   padding: 12px 16px;
   background: white;
@@ -432,7 +416,7 @@ ul, ol {
 }
 .btn-send:disabled { background: #e9ecef; color: #adb5bd; cursor: not-allowed; }
 
-/* 이미지 전체화면 모달 */
+
 .image-modal-overlay {
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;

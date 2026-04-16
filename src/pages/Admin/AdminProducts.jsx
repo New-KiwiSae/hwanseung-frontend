@@ -12,10 +12,8 @@ import {
     bulkDelete,
 } from '../../api/AdminProductsAPI';
 
-// 추가할 카테고리 API
 import { fetchCategories } from '../../api/AdminCategoriesAPI';
 
-// 상태 매핑
 const STATUS_MAP = {
     SALE: { label: '판매중', style: styles.badgeSale },
     SOLD_OUT: { label: '판매완료', style: styles.badgeSoldOut },
@@ -24,7 +22,6 @@ const STATUS_MAP = {
     HIDDEN: { label: '숨김', style: styles.badgeHidden },
 };
 
-// 정렬 옵션
 const SORT_OPTIONS = [
     { value: 'latest', label: '최신순' },
     { value: 'oldest', label: '오래된순' },
@@ -33,7 +30,6 @@ const SORT_OPTIONS = [
     { value: 'reportDesc', label: '신고 많은순' },
 ];
 
-// 날짜 포맷
 const fmtDate = (dateStr) => {
     if (!dateStr) return '-';
     const d = new Date(dateStr);
@@ -41,43 +37,35 @@ const fmtDate = (dateStr) => {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
-// 가격 포맷
 const fmtPrice = (v) => (v != null ? `${v.toLocaleString()}원` : '-');
 
 function AdminProducts() {
-    // 목록 상태
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
-    // 필터/검색/정렬
     const [searchInput, setSearchInput] = useState('');
     const [searchKeyword, setSearchKeyword] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
     const [filterCategory, setFilterCategory] = useState('');
     const [sortBy, setSortBy] = useState('latest');
 
-    // 👉 [추가] 동적 카테고리 관리를 위한 상태
-    const [activeCategories, setActiveCategories] = useState([]); // 드롭다운용 (활성)
-    const [categoryMap, setCategoryMap] = useState({}); // 테이블 및 상세 표시용 (전체)
+    const [activeCategories, setActiveCategories] = useState([]);
+    const [categoryMap, setCategoryMap] = useState({});
 
-    // 요약
     const [summary, setSummary] = useState({ total: 0, sale: 0, soldOut: 0, reserved: 0, hidden: 0 });
 
-    // 체크박스 (일괄 처리)
     const [selectedIds, setSelectedIds] = useState(new Set());
 
-    // 상세 모달
     const [detail, setDetail] = useState(null);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
     const [detailError, setDetailError] = useState(null);
     const [actionReason, setActionReason] = useState('');
     const [isActioning, setIsActioning] = useState(false);
-    const [showReasonFor, setShowReasonFor] = useState(null); // 'reject' | 'hide'
+    const [showReasonFor, setShowReasonFor] = useState(null);
 
-    // 목록 조회
     const loadProducts = useCallback(async () => {
         setIsLoading(true);
         setError(null);
@@ -102,17 +90,14 @@ function AdminProducts() {
         }
     }, [page, searchKeyword, filterStatus, filterCategory, sortBy]);
 
-    // 👉 [추가] 컴포넌트 마운트 시 카테고리 데이터 로드
     useEffect(() => {
         const loadCategories = async () => {
             try {
                 const categoryList = await fetchCategories();
 
-                // 1. 드롭다운에 표시할 '활성화된' 카테고리만 필터링 (정렬은 백엔드에서 sortOrder 기준으로 이미 됨)
                 const activeOnly = categoryList.filter(c => c.active === true);
                 setActiveCategories(activeOnly);
 
-                // 2. 테이블/모달에서 key값을 한글명(displayName)으로 변환할 매핑 객체 생성
                 const mapObj = {};
                 categoryList.forEach(c => {
                     mapObj[c.key] = c.displayName;
@@ -129,25 +114,21 @@ function AdminProducts() {
         loadProducts();
     }, [loadProducts]);
 
-    // 필터 변경 시 선택 초기화
     useEffect(() => {
         setSelectedIds(new Set());
     }, [page, searchKeyword, filterStatus, filterCategory, sortBy]);
 
-    // 검색
     const handleSearch = (e) => {
         e.preventDefault();
         setPage(1);
         setSearchKeyword(searchInput);
     };
 
-    // 상태 필터 (요약 카드 클릭)
     const handleStatusFilter = (status) => {
         setPage(1);
         setFilterStatus(prev => prev === status ? '' : status);
     };
 
-    // 체크박스
     const toggleSelect = (id) => {
         setSelectedIds(prev => {
             const next = new Set(prev);
@@ -165,7 +146,6 @@ function AdminProducts() {
         }
     };
 
-    // 일괄 승인
     const handleBulkApprove = async () => {
         if (!window.confirm(`선택한 ${selectedIds.size}개 상품을 승인하시겠습니까?`)) return;
         try {
@@ -178,7 +158,6 @@ function AdminProducts() {
         }
     };
 
-    // 일괄 삭제
     const handleBulkDelete = async () => {
         if (!window.confirm(`선택한 ${selectedIds.size}개 상품을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) return;
         try {
@@ -191,7 +170,6 @@ function AdminProducts() {
         }
     };
 
-    // 상세 조회
     const openDetail = async (productId) => {
         setDetail(null);
         setDetailError(null);
@@ -217,7 +195,6 @@ function AdminProducts() {
         setShowReasonFor(null);
     };
 
-    // 개별 액션 (모달 내)
     const handleApprove = async () => {
         if (!detail) return;
         setIsActioning(true);
@@ -297,7 +274,6 @@ function AdminProducts() {
         }
     };
 
-    // ESC 키
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') closeDetail();
@@ -308,7 +284,6 @@ function AdminProducts() {
         }
     }, [detail, isDetailLoading]);
 
-    // 로딩
     if (isLoading && products.length === 0) {
         return (
             <div className={styles.container}>
@@ -324,12 +299,10 @@ function AdminProducts() {
 
     return (
         <div className={styles.container}>
-            {/* 헤더 */}
             <div className={styles.pageHeader}>
                 <h2 className={styles.pageTitle}>상품 관리</h2>
             </div>
 
-            {/* 요약 카드 */}
             <div className={styles.summaryGrid}>
                 <SummaryCard
                     icon="bx bx-package" iconBg="rgba(59,130,246,0.12)" iconColor="#3b82f6"
@@ -358,7 +331,6 @@ function AdminProducts() {
                 />
             </div>
 
-            {/* 툴바 */}
             <div className={styles.toolbar}>
                 <form className={styles.searchForm} onSubmit={handleSearch}>
                     <div className={styles.searchInputWrap}>
@@ -380,7 +352,6 @@ function AdminProducts() {
                         onChange={(e) => { setFilterCategory(e.target.value); setPage(1); }}
                     >
                         <option value="">전체 카테고리</option>
-                        {/* 👉 동적으로 불러온 활성 카테고리 배열로 렌더링 */}
                         {activeCategories.map((cat) => (
                             <option key={cat.key} value={cat.key}>
                                 {cat.displayName}
@@ -401,7 +372,6 @@ function AdminProducts() {
                 </div>
             </div>
 
-            {/* 일괄 처리 바 */}
             {selectedIds.size > 0 && (
                 <div className={styles.bulkBar}>
                     <span className={styles.bulkBarText}>
@@ -419,7 +389,6 @@ function AdminProducts() {
                 </div>
             )}
 
-            {/* 에러 배너 */}
             {error && (
                 <div className={styles.errorBanner}>
                     <i className="bx bx-error-circle"></i>
@@ -427,7 +396,6 @@ function AdminProducts() {
                 </div>
             )}
 
-            {/* 테이블 */}
             <div className={styles.tableWrap}>
                 <table className={styles.table}>
                     <thead>
@@ -558,7 +526,6 @@ function AdminProducts() {
                 </table>
             </div>
 
-            {/* 페이지네이션 */}
             {!isLoading && products.length > 0 && (
                 <div className={styles.pagination}>
                     <button className={styles.pageBtn} disabled={page <= 1} onClick={() => setPage(1)}>
@@ -577,7 +544,6 @@ function AdminProducts() {
                 </div>
             )}
 
-            {/* ====== 상세 모달 ====== */}
             {(detail || isDetailLoading || detailError) && (
                 <div className={styles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) closeDetail(); }}>
                     <div className={styles.modal}>
@@ -598,7 +564,7 @@ function AdminProducts() {
                         ) : detail && (
                             <DetailContent
                                 detail={detail}
-                                categoryMap={categoryMap} // 👉 프롭스 추가
+                                categoryMap={categoryMap}
                                 closeDetail={closeDetail}
                                 showReasonFor={showReasonFor}
                                 setShowReasonFor={setShowReasonFor}
@@ -619,7 +585,6 @@ function AdminProducts() {
     );
 }
 
-/* === 서브 컴포넌트 === */
 
 function SummaryCard({ icon, iconBg, iconColor, label, value, active, onClick }) {
     return (
@@ -647,7 +612,6 @@ function DetailContent({
 
     return (
         <>
-            {/* 헤더 */}
             <div className={styles.modalHeader}>
                 <div className={styles.modalTitleWrap}>
                     <h3 className={styles.modalTitle}>{detail.title}</h3>
@@ -664,7 +628,6 @@ function DetailContent({
             </div>
 
             <div className={styles.modalBody}>
-                {/* 이미지 갤러리 */}
                 <div className={styles.imageGallery}>
                     {images.length > 0 ? images.map((img, i) => (
                         <img
@@ -683,7 +646,6 @@ function DetailContent({
                     )}
                 </div>
 
-                {/* 상세 정보 */}
                 <div className={styles.detailGrid}>
                     <div className={styles.detailItem}>
                         <div className={styles.detailItemLabel}>카테고리</div>
@@ -707,10 +669,8 @@ function DetailContent({
                     </div>
                 </div>
 
-                {/* 상품 설명 */}
                 <div className={styles.descriptionBox}>{detail.content || '설명 없음'}</div>
 
-                {/* 반려/숨김 사유 (기존) */}
                 {detail.rejectReason && (
                     <div className={styles.reportHistory}>
                         <div className={styles.reportHistoryTitle}>
@@ -735,7 +695,6 @@ function DetailContent({
                     </div>
                 )}
 
-                {/* 신고 이력 */}
                 {reports.length > 0 && (
                     <div className={styles.reportHistory}>
                         <div className={styles.reportHistoryTitle}>
@@ -751,7 +710,6 @@ function DetailContent({
                     </div>
                 )}
 
-                {/* 사유 입력 (반려/숨김) */}
                 {showReasonFor && (
                     <div className={styles.reasonSection}>
                         <label className={styles.reasonLabel}>
@@ -766,16 +724,13 @@ function DetailContent({
                     </div>
                 )}
 
-                {/* 액션 버튼 */}
                 <div className={styles.modalActions}>
-                    {/* 삭제 (항상) */}
                     <button className={styles.btnDanger} onClick={onDelete} disabled={isActioning}>
                         <i className="bx bx-trash"></i> 삭제
                     </button>
 
                     <div style={{ flex: 1 }}></div>
 
-                    {/* 승인대기 상태: 승인 + 반려 */}
                     {currentStatus === 'RESERVED' && !showReasonFor && (
                         <>
                             <button
@@ -791,7 +746,6 @@ function DetailContent({
                         </>
                     )}
 
-                    {/* 판매중/판매완료: 숨김 처리 */}
                     {(currentStatus === 'SALE' || currentStatus === 'SOLD_OUT') && !showReasonFor && (
                         <button
                             className={styles.btnOutlinePurple}
@@ -802,21 +756,18 @@ function DetailContent({
                         </button>
                     )}
 
-                    {/* 숨김 상태: 숨김 해제 */}
                     {currentStatus === 'HIDDEN' && !showReasonFor && (
                         <button className={styles.btnPrimary} onClick={onUnhide} disabled={isActioning}>
                             {isActioning ? <><i className="bx bx-loader-alt bx-spin"></i> 처리 중</> : <><i className="bx bx-show"></i> 숨김 해제</>}
                         </button>
                     )}
 
-                    {/* 반려 상태: 재승인 */}
                     {currentStatus === 'REJECTED' && !showReasonFor && (
                         <button className={styles.btnPrimary} onClick={onApprove} disabled={isActioning}>
                             {isActioning ? <><i className="bx bx-loader-alt bx-spin"></i> 처리 중</> : <><i className="bx bx-check"></i> 재승인</>}
                         </button>
                     )}
 
-                    {/* 사유 입력 모드 버튼 */}
                     {showReasonFor === 'reject' && (
                         <>
                             <button className={styles.btnSecondary} onClick={() => setShowReasonFor(null)}>취소</button>

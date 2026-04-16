@@ -11,7 +11,6 @@ import {
     unsuspendUser,
 } from '../../api/ReportsAPI';
 
-// 신고 처리 상태 매핑
 const STATUS_MAP = {
     PENDING: { label: '미처리', style: styles.badgePending },
     WARNED: { label: '경고', style: styles.badgeWarned },
@@ -20,14 +19,12 @@ const STATUS_MAP = {
     RESOLVED: { label: '처리완료', style: styles.badgeResolved },
 };
 
-// 신고 유형 매핑
 const TYPE_MAP = {
     USER: { label: '사용자', icon: 'bx bx-user', style: styles.typeUser },
     PRODUCT: { label: '상품', icon: 'bx bx-package', style: styles.typeProduct },
     CHAT: { label: '채팅', icon: 'bx bx-message-dots', style: styles.typeChat },
 };
 
-// 신고 사유 카테고리
 const REASON_CATEGORIES = {
     FRAUD: '사기 의심',
     INAPPROPRIATE: '부적절한 콘텐츠',
@@ -37,7 +34,6 @@ const REASON_CATEGORIES = {
     OTHER: '기타',
 };
 
-// 정지 기간 옵션
 const SUSPEND_DAYS_OPTIONS = [
     { value: 3, label: '3일' },
     { value: 7, label: '7일' },
@@ -47,7 +43,6 @@ const SUSPEND_DAYS_OPTIONS = [
     { value: 0, label: '영구 정지' },
 ];
 
-// 날짜 포맷
 const fmtDate = (dateStr) => {
     if (!dateStr) return '-';
     const d = new Date(dateStr);
@@ -56,10 +51,8 @@ const fmtDate = (dateStr) => {
 };
 
 function AdminReports() {
-    // 탭 ('reports' | 'suspended')
     const [activeTab, setActiveTab] = useState('reports');
 
-    // ========== 신고 목록 ==========
     const [reports, setReports] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -73,18 +66,15 @@ function AdminReports() {
 
     const [summary, setSummary] = useState({ total: 0, pending: 0, warned: 0, suspended: 0, dismissed: 0 });
 
-    // 상세 모달
     const [detail, setDetail] = useState(null);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
     const [detailError, setDetailError] = useState(null);
 
-    // 처리 액션
-    const [actionMode, setActionMode] = useState(null); // 'warn' | 'suspend' | 'dismiss'
+    const [actionMode, setActionMode] = useState(null);
     const [actionMemo, setActionMemo] = useState('');
     const [suspendDays, setSuspendDays] = useState(7);
     const [isActioning, setIsActioning] = useState(false);
 
-    // ========== 정지 사용자 ==========
     const [suspendedUsers, setSuspendedUsers] = useState([]);
     const [suIsLoading, setSuIsLoading] = useState(false);
     const [suError, setSuError] = useState(null);
@@ -94,7 +84,6 @@ function AdminReports() {
     const [suSearchKeyword, setSuSearchKeyword] = useState('');
     const [suspendedCount, setSuspendedCount] = useState(0);
 
-    // 신고 목록 조회
     const loadReports = useCallback(async () => {
         setIsLoading(true);
         setError(null);
@@ -117,7 +106,6 @@ function AdminReports() {
         }
     }, [page, searchKeyword, filterStatus, filterType]);
 
-    // 정지 사용자 목록 조회
     const loadSuspendedUsers = useCallback(async () => {
         setSuIsLoading(true);
         setSuError(null);
@@ -143,7 +131,6 @@ function AdminReports() {
         else loadSuspendedUsers();
     }, [activeTab, loadReports, loadSuspendedUsers]);
 
-    // 검색
     const handleSearch = (e) => {
         e.preventDefault();
         setPage(1);
@@ -156,13 +143,11 @@ function AdminReports() {
         setSuSearchKeyword(suSearchInput);
     };
 
-    // 상태 필터 클릭
     const handleStatusFilter = (status) => {
         setPage(1);
         setFilterStatus((prev) => (prev === status ? '' : status));
     };
 
-    // 상세 조회
     const openDetail = async (reportId) => {
         setDetail(null);
         setDetailError(null);
@@ -189,7 +174,6 @@ function AdminReports() {
         setActionMode(null);
     };
 
-    // 처리 액션 실행
     const executeAction = async () => {
         if (!detail) return;
         setIsActioning(true);
@@ -215,7 +199,6 @@ function AdminReports() {
         }
     };
 
-    // 콘텐츠 삭제
     const handleDeleteContent = async () => {
         if (!detail) return;
         if (!window.confirm('신고된 콘텐츠를 삭제하시겠습니까?')) return;
@@ -229,7 +212,6 @@ function AdminReports() {
         }
     };
 
-    // 정지 해제
     const handleUnsuspend = async (userId, nickname) => {
         if (!window.confirm(`"${nickname}" 사용자의 정지를 해제하시겠습니까?`)) return;
         try {
@@ -240,7 +222,6 @@ function AdminReports() {
         }
     };
 
-    // ESC 키
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') closeDetail();
@@ -253,12 +234,10 @@ function AdminReports() {
 
     return (
         <div className={styles.container}>
-            {/* 헤더 */}
             <div className={styles.pageHeader}>
                 <h2 className={styles.pageTitle}>신고/정지</h2>
             </div>
 
-            {/* 탭 */}
             <div className={styles.tabBar}>
                 <button
                     className={`${styles.tab} ${activeTab === 'reports' ? styles.tabActive : ''}`}
@@ -282,10 +261,8 @@ function AdminReports() {
                 </button>
             </div>
 
-            {/* ====== 신고 관리 탭 ====== */}
             {activeTab === 'reports' && (
                 <>
-                    {/* 요약 카드 */}
                     <div className={styles.summaryGrid}>
                         <SummaryCard
                             icon="bx bx-flag" iconBg="rgba(59,130,246,0.12)" iconColor="#3b82f6"
@@ -309,7 +286,6 @@ function AdminReports() {
                         />
                     </div>
 
-                    {/* 툴바 */}
                     <div className={styles.toolbar}>
                         <form className={styles.searchForm} onSubmit={handleSearch}>
                             <div className={styles.searchInputWrap}>
@@ -338,7 +314,6 @@ function AdminReports() {
                         </div>
                     </div>
 
-                    {/* 에러 */}
                     {error && (
                         <div className={styles.errorBanner}>
                             <i className="bx bx-error-circle"></i>
@@ -346,7 +321,6 @@ function AdminReports() {
                         </div>
                     )}
 
-                    {/* 신고 테이블 */}
                     <div className={styles.tableWrap}>
                         <table className={styles.table}>
                             <thead>
@@ -425,17 +399,14 @@ function AdminReports() {
                         </table>
                     </div>
 
-                    {/* 페이지네이션 */}
                     {!isLoading && reports.length > 0 && (
                         <Pagination page={page} totalPages={totalPages} setPage={setPage} />
                     )}
                 </>
             )}
 
-            {/* ====== 정지 사용자 탭 ====== */}
             {activeTab === 'suspended' && (
                 <>
-                    {/* 검색 */}
                     <div className={styles.toolbar}>
                         <form className={styles.searchForm} onSubmit={handleSuSearch}>
                             <div className={styles.searchInputWrap}>
@@ -544,7 +515,6 @@ function AdminReports() {
                 </>
             )}
 
-            {/* ====== 신고 상세 모달 ====== */}
             {(detail || isDetailLoading || detailError) && (
                 <div className={styles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) closeDetail(); }}>
                     <div className={styles.modal}>
@@ -565,7 +535,6 @@ function AdminReports() {
                             </div>
                         ) : detail && (
                             <>
-                                {/* 모달 헤더 */}
                                 <div className={styles.modalHeader}>
                                     <div className={styles.modalTitleWrap}>
                                         <h3 className={styles.modalTitle}>
@@ -591,7 +560,6 @@ function AdminReports() {
                                 </div>
 
                                 <div className={styles.modalBody}>
-                                    {/* 신고자 / 피신고자 정보 */}
                                     <div className={styles.infoCardRow}>
                                         <div className={styles.infoCard}>
                                             <div className={styles.infoCardLabel}>
@@ -622,7 +590,6 @@ function AdminReports() {
                                         </div>
                                     </div>
 
-                                    {/* 신고 대상 (상품인 경우) */}
                                     {detail.type === 'PRODUCT' && detail.targetProduct && (
                                         <div className={styles.infoCardRow}>
                                             <div className={styles.infoCard} style={{ gridColumn: '1 / -1' }}>
@@ -642,7 +609,6 @@ function AdminReports() {
                                         </div>
                                     )}
 
-                                    {/* 신고 내용 */}
                                     <div className={styles.reportContentBox}>
                                         <div className={styles.reportContentLabel}>
                                             <i className="bx bx-flag"></i>
@@ -653,7 +619,6 @@ function AdminReports() {
                                         </div>
                                     </div>
 
-                                    {/* 처리 이력 */}
                                     {detail.history && detail.history.length > 0 && (
                                         <div className={styles.historySection}>
                                             <div className={styles.historyTitle}>
@@ -665,14 +630,14 @@ function AdminReports() {
                                                     <div key={i} className={styles.historyItem}>
                                                         <i className={
                                                             h.action === 'WARNED' ? 'bx bx-error' :
-                                                            h.action === 'SUSPENDED' ? 'bx bx-user-x' :
-                                                            h.action === 'DISMISSED' ? 'bx bx-x-circle' :
-                                                            'bx bx-check-circle'
+                                                                h.action === 'SUSPENDED' ? 'bx bx-user-x' :
+                                                                    h.action === 'DISMISSED' ? 'bx bx-x-circle' :
+                                                                        'bx bx-check-circle'
                                                         } style={{
                                                             color: h.action === 'WARNED' ? '#f97316' :
-                                                                   h.action === 'SUSPENDED' ? '#ef4444' :
-                                                                   h.action === 'DISMISSED' ? '#6b7280' :
-                                                                   'var(--primary-color)'
+                                                                h.action === 'SUSPENDED' ? '#ef4444' :
+                                                                    h.action === 'DISMISSED' ? '#6b7280' :
+                                                                        'var(--primary-color)'
                                                         }}></i>
                                                         <div className={styles.historyItemContent}>
                                                             <strong>{(STATUS_MAP[h.action] || {}).label || h.action}</strong>
@@ -688,7 +653,6 @@ function AdminReports() {
                                         </div>
                                     )}
 
-                                    {/* 처리 폼 */}
                                     {actionMode && (
                                         <div className={styles.actionForm}>
                                             <div className={styles.actionFormTitle}>
@@ -754,7 +718,6 @@ function AdminReports() {
                                         </div>
                                     )}
 
-                                    {/* 하단 액션 (미처리 상태일 때만) */}
                                     {!actionMode && (
                                         <div className={styles.modalActions}>
                                             {detail.type === 'PRODUCT' && detail.targetProduct && (
@@ -792,7 +755,6 @@ function AdminReports() {
     );
 }
 
-/* === 서브 컴포넌트 === */
 
 function SummaryCard({ icon, iconBg, iconColor, label, value, active, onClick }) {
     return (

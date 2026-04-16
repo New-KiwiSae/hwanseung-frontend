@@ -13,11 +13,9 @@ import {
     fetchTopCategories,
 } from '../../api/AdminTransactionsAPI';
 
-// 숫자/통화 포맷
 const fmt = (v) => (v != null ? Number(v).toLocaleString() : '0');
 const fmtWon = (v) => `${fmt(v)}원`;
 
-// 기본 기간: 오늘 기준 최근 30일
 const toYmd = (d) => d.toISOString().slice(0, 10);
 const getDefaultRange = () => {
     const end = new Date();
@@ -33,7 +31,6 @@ const STATUS_LABEL = {
     RESERVED: '예약중',
 };
 
-/** CSV(UTF-8 BOM) 다운로드 — Excel에서 바로 열림. 별도 라이브러리 불필요 */
 const downloadCsv = (filename, rows) => {
     if (!rows || rows.length === 0) return;
     const headers = Object.keys(rows[0]);
@@ -58,15 +55,15 @@ const downloadCsv = (filename, rows) => {
 
 function AdminTransactions() {
     const defaults = useMemo(getDefaultRange, []);
-    const [period, setPeriod] = useState('daily'); // daily | weekly | monthly
+    const [period, setPeriod] = useState('daily');
     const [startDate, setStartDate] = useState(defaults.startDate);
     const [endDate, setEndDate] = useState(defaults.endDate);
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const [series, setSeries] = useState([]);       // [{bucket,count,amount}]
-    const [summary, setSummary] = useState(null);   // {totalCount,totalAmount,avgAmount}
+    const [series, setSeries] = useState([]);
+    const [summary, setSummary] = useState(null);
     const [statusData, setStatusData] = useState([]);
     const [topCategories, setTopCategories] = useState([]);
 
@@ -100,7 +97,6 @@ function AdminTransactions() {
         loadAll();
     }, [loadAll]);
 
-    // ---- 엑셀(CSV) 다운로드 ----
     const exportSeriesCsv = () => {
         const rows = series.map((r) => ({
             기간구분: period,
@@ -112,7 +108,6 @@ function AdminTransactions() {
     };
 
     const exportAllCsv = () => {
-        // 시트 대용으로 섹션을 한 파일에 모음
         const rows = [];
         rows.push({ 섹션: '요약', 항목: '총 거래건수', 값: summary?.totalCount ?? 0 });
         rows.push({ 섹션: '요약', 항목: '총 거래금액', 값: summary?.totalAmount ?? 0 });
@@ -143,7 +138,6 @@ function AdminTransactions() {
                 </div>
             </div>
 
-            {/* 툴바 */}
             <div className={styles.toolbar}>
                 <div className={styles.periodTabs}>
                     {[
@@ -184,7 +178,6 @@ function AdminTransactions() {
                 </div>
             ) : (
                 <>
-                    {/* 요약 카드 */}
                     <div className={styles.summaryGrid}>
                         <div className={styles.summaryCard}>
                             <div className={styles.summaryLabel}>총 거래 건수</div>
@@ -206,7 +199,6 @@ function AdminTransactions() {
                         </div>
                     </div>
 
-                    {/* 시계열 차트 (거래금액 라인 + 거래건수 바) */}
                     <div className={styles.chartCard} style={{ marginBottom: 20 }}>
                         <h3 className={styles.chartTitle}>
                             거래 추이 ({period === 'daily' ? '일별' : period === 'weekly' ? '주간별' : '월별'})
@@ -248,7 +240,6 @@ function AdminTransactions() {
                         </ResponsiveContainer>
                     </div>
 
-                    {/* 상태 분포 + 카테고리 TOP */}
                     <div className={`${styles.chartGrid} ${styles.two}`}>
                         <div className={styles.chartCard}>
                             <h3 className={styles.chartTitle}>카테고리별 거래 TOP</h3>

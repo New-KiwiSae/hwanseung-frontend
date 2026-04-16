@@ -1,7 +1,4 @@
-/* /src/Notice/NoticeListPage.css */
-/* 상단 타이틀 영역 */
 .notice-title {
-    /* border-bottom: 2px solid #333; */
     padding-bottom: 15px;
     margin-bottom: 25px;
     font-size: 22px;
@@ -13,7 +10,6 @@
     color: var(--accent-color, #00d26a);
 }
 
-/* 상품이 없을 때 (빈 화면) */
 .notice-empty-state {
     text-align: center;
     padding: 80px 20px;
@@ -42,7 +38,6 @@
     background-color: var(--accent-hover, #00b35a);
 }
 
-/* 상품 목록 영역 */
 .notice-list-container {
     display: flex;
     flex-direction: column;
@@ -60,7 +55,6 @@
     transition: all 0.2s ease;
 }
 
-/* 마우스 올렸을 때 액션 */
 .notice-list-item:hover {
     box-shadow: var(--shadow-soft, 0 10px 25px rgba(0,0,0,0.05));
     border-color: var(--accent-color, #00d26a);
@@ -115,7 +109,6 @@
     font-weight: 700;
 }
 
-/* 판매 상태 뱃지 */
 .notice-status-badge {
     padding: 6px 14px;
     border-radius: 20px;
@@ -133,7 +126,6 @@
     color: #a0a0a0;
 }
 
-/* 더보기 버튼 컨테이너 */
 .more-btn-container {
     display: flex;
     justify-content: center;

@@ -9,7 +9,7 @@ function NoticeModiPage({ handler, value }) {
     const navigate = useNavigate();
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
-    const [pinned, setPinned] = useState(false); // pinned 상태 추가
+    const [pinned, setPinned] = useState(false);
     const [error, setError] = useState("");
     const [isAuthPage, setisAuthPage] = useState(false);
 
@@ -41,8 +41,6 @@ function NoticeModiPage({ handler, value }) {
       }
 
       try {
-        // API 호출 시 pinned 값도 함께 전송 (0 또는 1)
-        console.log('pinned: ', pinned ? 1 : 0);
         updateNotice(value, { title, content, pinned: pinned ? 1 : 0 });
 
         alert("공지사항이 수정되었습니다.");
@@ -75,7 +73,6 @@ function NoticeModiPage({ handler, value }) {
             />
           </div>
 
-          {/* 고정 여부 체크박스 추가 */}
           <div className="form-group checkbox-group">
             <input
               type="checkbox"

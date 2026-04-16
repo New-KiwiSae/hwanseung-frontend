@@ -9,7 +9,6 @@ import {
     toggleCategoryActive,
 } from '../../api/AdminCategoriesAPI';
 
-// 이모지 프리셋 (카테고리용)
 const EMOJI_PRESETS = [
     '📱', '💻', '👕', '👗', '🛋️', '🪑', '🍳', '🏠',
     '📚', '🎨', '⚽', '🏃', '🎫', '🎟️', '🎮', '🎵',
@@ -22,16 +21,13 @@ function AdminCategories() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // 모달 상태
-    const [modalMode, setModalMode] = useState(null); // 'add' | 'edit' | 'delete'
+    const [modalMode, setModalMode] = useState(null);
     const [editTarget, setEditTarget] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // 폼
     const [form, setForm] = useState({ key: '', displayName: '', emoji: '📱', description: '' });
     const [formError, setFormError] = useState('');
 
-    // 데이터 로드
     const loadCategories = useCallback(async () => {
         setIsLoading(true);
         setError(null);
@@ -50,7 +46,6 @@ function AdminCategories() {
         loadCategories();
     }, [loadCategories]);
 
-    // 모달 열기
     const openAddModal = () => {
         setModalMode('add');
         setEditTarget(null);
@@ -81,25 +76,21 @@ function AdminCategories() {
         setFormError('');
     };
 
-    // 폼 입력 핸들러
     const handleFormChange = (field, value) => {
         setForm(prev => ({ ...prev, [field]: value }));
         setFormError('');
     };
 
-    // 카테고리 키 자동 생성 (영문소문자만)
     const handleKeyInput = (value) => {
         const sanitized = value.toLowerCase().replace(/[^a-z0-9_]/g, '');
         handleFormChange('key', sanitized);
     };
 
-    // 폼 검증
     const validateForm = () => {
         if (!form.key.trim()) return '카테고리 키를 입력하세요.';
         if (form.key.length < 2) return '카테고리 키는 2자 이상이어야 합니다.';
         if (!form.displayName.trim()) return '표시 이름을 입력하세요.';
 
-        // 추가 모드에서 키 중복 검사
         if (modalMode === 'add') {
             const exists = categories.some(c => (c.key || c.categoryKey) === form.key);
             if (exists) return '이미 존재하는 카테고리 키입니다.';
@@ -107,7 +98,6 @@ function AdminCategories() {
         return '';
     };
 
-    // 저장 (추가/수정)
     const handleSave = async () => {
         const validationError = validateForm();
         if (validationError) {
@@ -141,7 +131,6 @@ function AdminCategories() {
         }
     };
 
-    // 삭제
     const handleDelete = async () => {
         if (!editTarget) return;
         setIsSubmitting(true);
@@ -157,11 +146,9 @@ function AdminCategories() {
         }
     };
 
-    // 활성/비활성 토글
     const handleToggle = async (cat) => {
         try {
             await toggleCategoryActive(cat.id);
-            // 로컬 상태 즉시 업데이트
             setCategories(prev =>
                 prev.map(c => c.id === cat.id ? { ...c, active: !c.active } : c)
             );
@@ -171,7 +158,6 @@ function AdminCategories() {
         }
     };
 
-    // 순서 이동
     const moveCategory = async (index, direction) => {
         const newList = [...categories];
         const targetIndex = index + direction;
@@ -184,11 +170,10 @@ function AdminCategories() {
             await updateCategoryOrder(newList.map(c => c.id));
         } catch (err) {
             console.error('순서 변경 실패:', err);
-            loadCategories(); // 실패 시 원래 순서 복원
+            loadCategories();
         }
     };
 
-    // ESC 키로 모달 닫기
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') closeModal();
@@ -199,12 +184,10 @@ function AdminCategories() {
         }
     }, [modalMode]);
 
-    // 요약 통계
     const activeCount = categories.filter(c => c.active !== false).length;
     const inactiveCount = categories.filter(c => c.active === false).length;
     const totalProducts = categories.reduce((sum, c) => sum + (c.productCount || 0), 0);
 
-    // 로딩
     if (isLoading) {
         return (
             <div className={styles.container}>
@@ -218,7 +201,6 @@ function AdminCategories() {
 
     return (
         <div className={styles.container}>
-            {/* 헤더 */}
             <div className={styles.pageHeader}>
                 <h2 className={styles.pageTitle}>카테고리 관리</h2>
                 <button className={styles.addBtn} onClick={openAddModal}>
@@ -227,7 +209,6 @@ function AdminCategories() {
                 </button>
             </div>
 
-            {/* 에러 배너 */}
             {error && (
                 <div className={styles.errorBanner}>
                     <i className="bx bx-error-circle"></i>
@@ -235,7 +216,6 @@ function AdminCategories() {
                 </div>
             )}
 
-            {/* 요약 바 */}
             <div className={styles.summaryBar}>
                 <div className={styles.summaryItem}>
                     <i className="bx bx-category"></i>
@@ -257,7 +237,6 @@ function AdminCategories() {
                 </div>
             </div>
 
-            {/* 테이블 */}
             <div className={styles.tableWrap}>
                 <table className={styles.table}>
                     <thead>
@@ -281,7 +260,6 @@ function AdminCategories() {
                         ) : (
                             categories.map((cat, index) => (
                                 <tr key={cat.id} style={{ opacity: cat.active === false ? 0.5 : 1 }}>
-                                    {/* 순서 */}
                                     <td>
                                         <div className={styles.orderHandle}>
                                             <div className={styles.orderBtns}>
@@ -306,7 +284,6 @@ function AdminCategories() {
                                         </div>
                                     </td>
 
-                                    {/* 카테고리 이름 */}
                                     <td>
                                         <div className={styles.categoryNameCell}>
                                             <div className={styles.categoryEmoji}>
@@ -323,12 +300,10 @@ function AdminCategories() {
                                         </div>
                                     </td>
 
-                                    {/* 설명 */}
                                     <td style={{ fontSize: 13, opacity: 0.65 }}>
                                         {cat.description || '-'}
                                     </td>
 
-                                    {/* 상품 수 */}
                                     <td>
                                         <span className={styles.countBadge}>
                                             <i className="bx bx-package"></i>
@@ -336,7 +311,6 @@ function AdminCategories() {
                                         </span>
                                     </td>
 
-                                    {/* 활성 상태 */}
                                     <td>
                                         <div className={styles.toggleWrap}>
                                             <button
@@ -352,7 +326,6 @@ function AdminCategories() {
                                         </div>
                                     </td>
 
-                                    {/* 관리 */}
                                     <td>
                                         <div className={styles.actionBtns}>
                                             <button
@@ -378,7 +351,6 @@ function AdminCategories() {
                 </table>
             </div>
 
-            {/* ====== 추가/수정 모달 ====== */}
             {(modalMode === 'add' || modalMode === 'edit') && (
                 <div className={styles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}>
                     <div className={styles.modal}>
@@ -393,7 +365,6 @@ function AdminCategories() {
                         </div>
 
                         <div className={styles.modalBody}>
-                            {/* 에러 메시지 */}
                             {formError && (
                                 <div className={styles.errorBanner} style={{ marginBottom: 18 }}>
                                     <i className="bx bx-error-circle"></i>
@@ -401,7 +372,6 @@ function AdminCategories() {
                                 </div>
                             )}
 
-                            {/* 카테고리 키 */}
                             <div className={styles.formGroup}>
                                 <label className={styles.formLabel}>
                                     카테고리 키 <span className={styles.required}>*</span>
@@ -420,7 +390,6 @@ function AdminCategories() {
                                 </div>
                             </div>
 
-                            {/* 표시 이름 */}
                             <div className={styles.formGroup}>
                                 <label className={styles.formLabel}>
                                     표시 이름 <span className={styles.required}>*</span>
@@ -434,7 +403,6 @@ function AdminCategories() {
                                 />
                             </div>
 
-                            {/* 아이콘(이모지) 선택 */}
                             <div className={styles.formGroup}>
                                 <label className={styles.formLabel}>아이콘</label>
                                 <div className={styles.emojiPickerGrid}>
@@ -451,7 +419,6 @@ function AdminCategories() {
                                 </div>
                             </div>
 
-                            {/* 설명 */}
                             <div className={styles.formGroup}>
                                 <label className={styles.formLabel}>설명</label>
                                 <input
@@ -463,7 +430,6 @@ function AdminCategories() {
                                 />
                             </div>
 
-                            {/* 미리보기 */}
                             <div style={{
                                 background: 'var(--body-color)',
                                 borderRadius: 10,
@@ -484,7 +450,6 @@ function AdminCategories() {
                                 </div>
                             </div>
 
-                            {/* 액션 */}
                             <div className={styles.modalActions}>
                                 <button className={styles.btnSecondary} onClick={closeModal}>취소</button>
                                 <button
@@ -504,7 +469,6 @@ function AdminCategories() {
                 </div>
             )}
 
-            {/* ====== 삭제 확인 모달 ====== */}
             {modalMode === 'delete' && editTarget && (
                 <div className={styles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}>
                     <div className={styles.modal}>

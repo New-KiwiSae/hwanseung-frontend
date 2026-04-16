@@ -47,7 +47,6 @@ function NoticeDetailPage({ handler, value, setNo }) {
         <h2 className="page-title"><i className="fas fa-heart"></i> 공지사항</h2>
 
         <div className="notice-card">
-          {/* 제목 영역 */}
           <div className="notice-header">
             <div className="notice-title">
               {notice.title}
@@ -57,7 +56,6 @@ function NoticeDetailPage({ handler, value, setNo }) {
             </div>
           </div>
 
-          {/* 본문 */}
           <div className="notice-body">{notice.content}</div>
         </div>
 

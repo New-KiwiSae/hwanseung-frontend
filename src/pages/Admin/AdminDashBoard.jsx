@@ -2,15 +2,12 @@ import styles from './AdminContent.module.css';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
-// Recharts 라이브러리 추가
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 function AdminDashBoard() {
     const navigate = useNavigate();
     const [counts, setCounts] = useState({ users: 0, products: 0, sellproducts: 0, activeTransactions: 0, completedTransactions: 0, pendingReports: 0 });
-    // 주간 트렌드 데이터를 저장할 상태 추가
     const [trendData, setTrendData] = useState([]);
-    // 권고사항 2: 로딩 및 에러 상태 관리 추가
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -29,15 +26,12 @@ function AdminDashBoard() {
         };
     };
     useEffect(() => {
-        // 데이터 페칭 함수 분리 (재사용성 및 Polling 목적)
         const fetchDashboardData = async () => {
             try {
-                setError(null); // 재호출 시 이전 에러 초기화
+                setError(null);
 
-                // HTTP 응답 상태(res.ok)를 1차적으로 검증하는 로직 추가
                 const [userData, productData, sellData, summaryData, trendRes,
                     pendingReportsRes, txLogsRes, recentProductsRes] = await Promise.all([
-                        // ── 기존 5개 유지 (변경 없음) ──
                         axios.get('/api/user/count', getHeader()).then(res => {
                             if (!res.status) throw new Error('사용자 통계 API 응답 오류');
                             return res.data;
@@ -58,7 +52,6 @@ function AdminDashBoard() {
                             if (res.status !== 200) throw new Error('주간 트렌드 API 응답 오류');
                             return res.data;
                         }),
-                        // ── 추가 3개 (개별 catch로 하나 실패해도 나머지 정상 동작) ──
                         axios.get('/api/admin/dashboard/pending-reports', getHeader())
                             .then(res => res.data).catch(() => []),
                         axios.get('/api/admin/dashboard/transaction-logs', getHeader())
@@ -78,7 +71,6 @@ function AdminDashBoard() {
                 setTransactionLogs(Array.isArray(txLogsRes) ? txLogsRes : []);
                 setRecentProducts(Array.isArray(recentProductsRes) ? recentProductsRes : []);
 
-                // 백엔드 데이터(3개의 배열)를 Recharts용 객체 배열로 변환
                 if (trendRes && trendRes.labels) {
                     const formattedTrendData = trendRes.labels.map((label, index) => ({
                         name: label,
@@ -95,13 +87,10 @@ function AdminDashBoard() {
             }
         };
 
-        // 1. 마운트 시 최초 데이터 페칭
         fetchDashboardData();
 
-        // 권고사항 3: Polling 적용 (30초마다 데이터 자동 갱신)
         const intervalId = setInterval(fetchDashboardData, 30000);
 
-        // 언마운트 시 메모리 누수 방지를 위한 클린업 처리
         return () => clearInterval(intervalId);
     }, []);
 
@@ -109,7 +98,6 @@ function AdminDashBoard() {
         <div className={styles.container}>
             <h2 className={styles.title}>대시보드</h2>
 
-            {/* 에러 발생 시 UI 노출 처리 */}
             {error && (
                 <div className={styles.errorAlert} style={{ color: '#d9534f', padding: '10px 0', fontWeight: 'bold' }}>
                     <i className="bx bx-error-circle" style={{ marginRight: '8px' }}></i>
@@ -118,7 +106,6 @@ function AdminDashBoard() {
             )}
 
             <div className={styles.cardGrid}>
-                {/* 권고사항 1: 모든 아이콘을 boxicons(bx)로 통일 */}
                 <div className={styles.card}>
                     <div className={styles.cardIcon}>
                         <i className="bx bx-user"></i>
@@ -163,7 +150,6 @@ function AdminDashBoard() {
                 </div>
                 <div className={styles.card}>
                     <div className={styles.cardIcon}>
-                        {/* FontAwesome 제거 및 Boxicons로 대체 */}
                         <i className="bx bx-check-circle"></i>
                     </div>
                     <div className={styles.cardInfo}>
@@ -187,13 +173,10 @@ function AdminDashBoard() {
                 데이터는 30초 주기로 자동 갱신됩니다.
             </p>
 
-            {/* --- 하단 시각화 레이아웃 영역 (이전 제안 기반) --- */}
             <div className={styles.dashboardBody} style={{ marginTop: '40px', display: 'flex', gap: '20px' }}>
-                {/* 1. 통계 그래프 섹션 (Recharts 연동) */}
                 <div className={styles.chartSection} style={{ flex: 2, minWidth: 0, background: 'var(--sidebar-color)', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                     <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: 'var(--text-color)' }}>주간 거래 및 가입 추이</h3>
 
-                    {/* 그래프 무한 확장 버그 방지를 위해 height 300px 고정 및 width 100% 명시 */}
                     <div style={{ width: '100%', height: '300px', backgroundColor: 'var(--sidebar-color)' }}>
                         {isLoading ? (
                             <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: 'var(--text-color)' }}>
@@ -227,7 +210,6 @@ function AdminDashBoard() {
                     </div>
                 </div>
 
-                {/* 2. 빠른 처리 요망 섹션 */}
                 <div className={styles.listSection} style={{ flex: 1, background: 'var(--sidebar-color)', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                         <h3 style={{ fontSize: '1.1rem', color: 'var(--text-color)' }}>🚨미처리 신고 내역</h3>
@@ -261,10 +243,8 @@ function AdminDashBoard() {
                 </div>
             </div>
 
-            {/* --- 3. 하단 실시간 시스템 및 상품 모니터링 영역 --- */}
             <div className={styles.dashboardFooter} style={{ marginTop: '20px', display: 'flex', gap: '20px' }}>
 
-                {/* 3-1. 실시간 거래완료 로그 */}
                 <div className={styles.logSection} style={{ flex: 1, background: 'var(--sidebar-color)', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                         <h3 style={{ fontSize: '1.1rem', color: 'var(--text-color)' }}>실시간 거래완료 로그</h3>
@@ -297,7 +277,6 @@ function AdminDashBoard() {
                     </div>
                 </div>
 
-                {/* 3-2. 최근 등록 상품 */}
                 <div className={styles.recentProductSection} style={{ flex: 1, background: 'var(--sidebar-color)', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                         <h3 style={{ fontSize: '1.1rem', color: 'var(--text-color)' }}>최근 등록 상품 모니터링</h3>

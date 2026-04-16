@@ -7,12 +7,10 @@ import '../../chargePay.css'
 import '../../pages/MyPage.css';
 import { useUser } from '../../UserContext';
 
-// axios.defaults.baseURL = "http://localhost:8080";
 axios.defaults.baseURL = "";
 const MyPage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  // const IMG_BASE_URL = "http://localhost:8080";
   const IMG_BASE_URL = "";
 
   const { userInfo, isLoading, fetchUser } = useUser();
@@ -26,19 +24,16 @@ const MyPage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
 
-  // 닉네임 관련 상태
   const [isNicknameChecked, setIsNicknameChecked] = useState(true);
   const [nicknameMessage, setNicknameMessage] = useState('');
   const [nicknameError, setNicknameError] = useState('');
 
-  // 🌟 SMS 인증 관련 상태 관리
   const [isSmsSent, setIsSmsSent] = useState(false);
   const [smsCode, setSmsCode] = useState("");
   const [isContactVerified, setIsContactVerified] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isTimerActive, setIsTimerActive] = useState(false);
 
-  // 🌟 비밀번호 재확인 팝업 상태 관리
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [verifyPassword, setVerifyPassword] = useState('');
   const [verifyError, setVerifyError] = useState('');
@@ -57,12 +52,11 @@ const MyPage = () => {
 
   useEffect(() => {
     const token = sessionStorage.getItem('accessToken');
-    if (!isLoading && !userInfo && !token) { // 토큰조차 없을 때만 튕기기
+    if (!isLoading && !userInfo && !token) { 
       navigate('/login');
     }
   }, [isLoading, userInfo, navigate]);
 
-  // 🌟 SMS 타이머 로직
   useEffect(() => {
     let timer;
     if (isTimerActive && timeLeft > 0) {
@@ -75,7 +69,7 @@ const MyPage = () => {
   }, [isTimerActive, timeLeft]);
 
   useEffect(() => {
-  }, [editData]); // editData가 바뀔 때마다 실행됨
+  }, [editData]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -125,7 +119,6 @@ const MyPage = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // ✅ 핵심: 기존 userInfo를 복사하되, 비밀번호 관련 필드만 확실히 빈 문자열로 초기화
       const initialEditData = {
         ...userInfo,
         password: '',
@@ -133,10 +126,9 @@ const MyPage = () => {
       };
 
       setEditData(initialEditData);
-      setIsEditing(true);           // 수정 모드 활성화
-      setIsPasswordModalOpen(false); // 모달 닫기
+      setIsEditing(true);           
+      setIsPasswordModalOpen(false);
 
-      // 나머지 상태 초기화
       setIsNicknameChecked(true);
       setNicknameMessage('');
       setVerifyPassword('');
@@ -173,43 +165,12 @@ const MyPage = () => {
     validateUpdate();
   }, [editData, validateUpdate]);
 
-  // 🌟 비밀번호 검증 함수 (수정 모드 진입 전)
-  // const handleVerifyPassword = async () => {
-  //   if (!verifyPassword) {
-  //     setVerifyError('비밀번호를 입력해주세요.');
-  //     return;
-  //   }
-
-  //   try {
-  //     const token = sessionStorage.getItem('accessToken');
-
-  //     // 백엔드 API (주소는 실제 백엔드 설정에 맞게 변경하세요)
-  //     await axios.post('/api/user/verify-password', 
-  //       { password: verifyPassword }, 
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-
-  //     // 비밀번호가 맞다면 수정 모드 진입
-  //     setIsPasswordModalOpen(false);
-  //     setIsEditing(true);
-  //     setIsNicknameChecked(true);
-  //     setNicknameMessage('');
-  //     setVerifyPassword('');
-  //     setVerifyError('');
-
-  //   } catch (error) {
-  //     // 비밀번호가 틀렸다면 에러 메시지
-  //     setVerifyError('비밀번호가 일치하지 않습니다.');
-  //   }
-  // };
-
   const handleSendSms = async () => {
     if (!editData.contact || !/^[0-9]{11}$/.test(editData.contact)) {
       alert("올바른 연락처 11자리를 입력해주세요.");
       return;
     }
     try {
-      // 중복 체크 (선택 사항: 본인 번호 그대로면 통과시키려면 추가 로직 필요)
       const checkRes = await axios.get('/api/auth/check-contact', {
         params: { contact: editData.contact }
       });
@@ -219,12 +180,10 @@ const MyPage = () => {
         return;
       }
 
-      // 실제 발송 요청
       await axios.post('/api/auth/sms/send-code', {
         phoneNumber: editData.contact
       });
 
-      // 상태 업데이트
       setIsSmsSent(true);
       setTimeLeft(180);
       setIsTimerActive(true);
@@ -367,17 +326,14 @@ const MyPage = () => {
 
     const token = sessionStorage.getItem('accessToken');
 
-    // ✅ 보낼 데이터를 복사합니다.
     const dataToSend = { ...editData };
 
-    // ✅ 비밀번호 입력창이 비어있다면 객체에서 제거 (기존 비밀번호 유지 목적)
     if (!dataToSend.password || dataToSend.password.trim() === "") {
       delete dataToSend.password;
       delete dataToSend.confirmPassword;
     }
 
     const formData = new FormData();
-    // 수정된 dataToSend를 Blob으로 넣습니다.
     formData.append('userData', new Blob([JSON.stringify(dataToSend)], { type: 'application/json' }));
 
     if (selectedFile) {
@@ -416,13 +372,11 @@ const MyPage = () => {
   if (isLoading) return <div className="mypage-container" style={{ padding: '50px', textAlign: 'center' }}>정보를 불러오는 중입니다...</div>;
   if (!userInfo) return null;
 
-  // 회원탈퇴
   const clearAuthSession = () => {
     sessionStorage.removeItem('tokenType');
     sessionStorage.removeItem('accessToken');
     sessionStorage.removeItem('refreshToken');
-    // 필요한 경우 다른 상태값들도 초기화
-    window.location.href = '/login'; // 로그인 페이지로 강제 이동
+    window.location.href = '/login';
   };
 
   const WithdrawalSection = () => {
@@ -431,18 +385,16 @@ const MyPage = () => {
 
     const handleWithdrawal = async () => {
       try {
-        // 백엔드 withdraw API 호출
         const response = await axios.post('/api/auth/withdraw',
-          { password }, // JSON Body
+          { password },
           { headers: { Authorization: `Bearer ${sessionStorage.getItem('accessToken')}` } }
         );
 
         if (response.status === 200) {
           alert("그동안 이용해주셔서 감사합니다. 회원 탈퇴가 완료되었습니다.");
-          clearAuthSession(); // 세션 정리 및 이동
+          clearAuthSession();
         }
       } catch (error) {
-        // 백엔드에서 던진 "비밀번호가 일치하지 않습니다" 등의 메시지 처리
         alert(error.response?.data || "탈퇴 처리 중 오류가 발생했습니다.");
       }
     };
@@ -484,7 +436,6 @@ const MyPage = () => {
 
         alert("탈퇴 처리가 완료되었습니다. 그동안 이용해주셔서 감사합니다.");
 
-        // 모든 세션 정보 삭제 및 이동
         sessionStorage.clear();
         window.location.href = "/";
       } catch (error) {
@@ -569,7 +520,6 @@ const MyPage = () => {
                 userInfo.provider === 'LOCAL' ? (
                   <span className="info-value">********</span>
                 ) : (
-                  /* ⭐ 소셜 계정일 때만 이 메시지가 표시됩니다 */
                   <span className="info-value" style={{ color: '#999' }}>
                     소셜 계정은 비밀번호를 사용하지 않습니다.
                   </span>
@@ -812,7 +762,6 @@ const MyPage = () => {
             </>
           ) : (
             <button className="btn-edit" onClick={() => {
-              // 🌟 소셜 로그인 유저는 비밀번호 확인 없이 바로 수정 모드 진입
               if (userInfo.provider !== 'LOCAL') {
                 const initialEditData = {
                   ...userInfo,
@@ -821,9 +770,7 @@ const MyPage = () => {
                 };
                 setEditData(initialEditData);
                 setIsEditing(true);
-                // setIsNicknameChecked(true);
               } else {
-                // 일반 유저는 기존처럼 비밀번호 모달 오픈
                 setIsPasswordModalOpen(true);
               }
             }}
@@ -836,7 +783,6 @@ const MyPage = () => {
 
 
 
-      {/* 🌟 [추가] 비밀번호 확인 팝업창 (CSS 클래스만 사용) */}
       {isPasswordModalOpen && (
         <>
           <div className="pw-modal-overlay" onClick={() => setIsPasswordModalOpen(false)} />
@@ -877,7 +823,6 @@ const MyPage = () => {
 
       {isPayModalOpen && <ChargePay onClose={() => setIsPayModalOpen(false)} userInfo={userInfo} />}
 
-      {/* 회원 탈퇴 구역  */}
       <div className="withdrawal-footer" style={{ marginTop: '40px', textAlign: 'right', borderTop: '1px solid #eee', paddingTop: '20px' }}>
         <span style={{ color: '#999', fontSize: '13px', marginRight: '15px' }}>더 이상 서비스를 이용하지 않으시나요?</span>
         <button onClick={handleWithdraw} style={{ background: 'none', border: 'none', color: '#999', textDecoration: 'underline', cursor: 'pointer', fontSize: '13px' }}>회원 탈퇴</button>

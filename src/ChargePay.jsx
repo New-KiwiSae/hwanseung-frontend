@@ -123,7 +123,7 @@ const ChargePay = ({ onClose, userInfo }) => {
                         <button className="quick-btn" onClick={() => handleQuickSelect(30000)}>+ 3만</button>
                         <button className="quick-btn" onClick={() => handleQuickSelect(50000)}>+ 5만</button>
                         <button className="quick-btn reset-btn" onClick={() => { setAmount(''); setDisplayAmount(''); }}>초기화</button>
-                    </div>
+                    </div><br/>
                     <button className="final-charge-btn" onClick={requestPay}>
                         충전하기
                     </button>

@@ -10,7 +10,6 @@ const Inquiries = () => {
     const [category, setCategory] = useState('all');
     const [expandedId, setExpandedId] = useState(null);
 
-    // 더보기 구현
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
@@ -26,13 +25,11 @@ const Inquiries = () => {
           allList = res.data;
 
           if (allList.length === 0) {
-            setHasMore(false); // 데이터가 없으면 버튼 숨김
+            setHasMore(false);
           } else {
             const newData = allList.filter((item, index) => index < page * limitno);
-            // 기존 리스트에 새 데이터를 이어 붙임
             setInquiries([...newData]);
 
-            // 만약 가져온 데이터가 모두 다 보여졌으면 실행
             if (newData.length === allList.length) {
               setHasMore(false);
             }
@@ -48,7 +45,6 @@ const Inquiries = () => {
 
     };
 
-    // 컴포넌트 마운트 시 첫 페이지 로드
     useEffect(() => {
       setHasMore(true);
       allList = [];
@@ -57,7 +53,6 @@ const Inquiries = () => {
 
     const handleToggle = (id) => setExpandedId(expandedId === id ? null : id);
 
-    // [더보기] 버튼 클릭 핸들러
     const handleLoadMore = () => {
       loadData();
     };
@@ -71,7 +66,6 @@ const Inquiries = () => {
           </h2>
         </div>
 
-        {/* 에러 */}
         {
           error && (
             <div className="errorBox">
@@ -116,7 +110,6 @@ const Inquiries = () => {
             )}
         </div>
 
-        {/* 더보기 버튼 */}
         {!loading && hasMore && inquiries.length > 0 && (
           <div className="more-btn-container">
             <button className="notice-more-btn" onClick={handleLoadMore}>

@@ -15,12 +15,10 @@ const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // ★ 검색 관련 state 추가
   const [searchKeyword, setSearchKeyword] = useState('');
   const [popularKeywords, setPopularKeywords] = useState([]);
   const [recentSearches, setRecentSearches] = useState([]);
 
-  // 알림 관련 상태값들
   const [isNotiOpen, setIsNotiOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const stompClient = useRef(null);
@@ -31,7 +29,6 @@ const Header = () => {
   const token = sessionStorage.getItem("accessToken");
   const currentUser = userInfo?.username || userInfo?.userId || sessionStorage.getItem("username");
 
-  // ★ 인기 검색어 로드
   const fetchPopularKeywords = async () => {
     try {
       const res = await axios.get('/api/search/popular');
@@ -41,7 +38,6 @@ const Header = () => {
     }
   };
 
-  // ★ localStorage에서 최근 검색어 로드
   const loadRecentSearches = () => {
     try {
       const saved = localStorage.getItem('recentSearches');
@@ -51,22 +47,18 @@ const Header = () => {
     }
   };
 
-  // ★ 검색 실행
   const handleSearch = async (keyword) => {
     const trimmed = (keyword || searchKeyword).trim();
     if (!trimmed) return;
 
-    // 최근 검색어 저장 (중복 제거, 최대 10개)
     try {
       const prev = JSON.parse(localStorage.getItem('recentSearches') || '[]');
       const updated = [trimmed, ...prev.filter(k => k !== trimmed)].slice(0, 10);
       localStorage.setItem('recentSearches', JSON.stringify(updated));
       setRecentSearches(updated);
     } catch (e) {
-      // localStorage 접근 실패 시 무시
     }
 
-    // 키워드 카운트 증가 (실패해도 검색은 진행)
     axios.post('/api/search/log', { keyword: trimmed }).catch(() => {});
 
     setIsSearchOpen(false);
@@ -74,7 +66,6 @@ const Header = () => {
     navigate(`/products?keyword=${encodeURIComponent(trimmed)}`);
   };
 
-  // ★ 최근 검색어 개별 삭제
   const removeRecentSearch = (e, keyword) => {
     e.stopPropagation();
     try {
@@ -82,11 +73,9 @@ const Header = () => {
       localStorage.setItem('recentSearches', JSON.stringify(updated));
       setRecentSearches(updated);
     } catch (err) {
-      // localStorage 접근 실패 시 무시
     }
   };
 
-  // ★ 최근 검색어 전체 삭제
   const clearAllRecentSearches = () => {
     try {
       localStorage.removeItem('recentSearches');
@@ -94,22 +83,18 @@ const Header = () => {
     setRecentSearches([]);
   };
 
-  // ★ Enter 키 검색
   const handleSearchKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
   };
 
-  // ★ 검색창 열릴 때 데이터 로드
   useEffect(() => {
     if (isSearchOpen) {
       fetchPopularKeywords();
       loadRecentSearches();
     }
   }, [isSearchOpen]);
-
-  // --- 아래부터 기존 코드 그대로 유지 ---
 
   const handleNearMeClick = () => {
     if (userInfo && userInfo.address) {
@@ -289,7 +274,6 @@ const Header = () => {
           <span><span className="logo-brand">환승</span>마켓</span>
         </a>
 
-        {/* ★ 검색 영역 전체 교체 */}
         <div className="search-area" ref={searchRef}>
           <div className={`search-input-wrapper ${isSearchOpen ? 'active' : ''}`}>
             <i className="fas fa-search search-icon" onClick={() => handleSearch()} style={{ cursor: 'pointer' }}></i>
@@ -309,12 +293,10 @@ const Header = () => {
             )}
           </div>
 
-          {/* ★ 검색 드롭다운 */}
           {isSearchOpen && (
             <div className="search-dropdown">
               <div className="search-dropdown-grid">
 
-                {/* 좌측: 최근 검색어 */}
                 <div className="search-dropdown-col">
                   <div className="dropdown-label-row">
                     <span className="dropdown-label">최근 검색어</span>
@@ -351,7 +333,6 @@ const Header = () => {
                   )}
                 </div>
 
-                {/* 우측: 실시간 인기 검색어 */}
                 <div className="search-dropdown-col search-dropdown-col-right">
                   <div className="dropdown-label">실시간 인기 검색어</div>
                   {popularKeywords.length === 0 ? (
@@ -375,7 +356,6 @@ const Header = () => {
             </div>
           )}
         </div>
-        {/* ★ 검색 영역 끝 */}
 
         <div className="header-actions">
           <div className="nav-links">
@@ -397,18 +377,9 @@ const Header = () => {
 
                 {isNotiOpen && (
                   <div className="profile-dropdown noti-dropdown">
-                    {/* <div className="noti-header">
-                      <span>새로운 알림</span>
-                      {unreadNotiCount > 0 && (
-                        <span className="noti-read-all" onClick={(e) => { e.stopPropagation(); handleReadAll(); }}>
-                          모두 읽음
-                        </span>
-                      )}
-                    </div> */}
                     <div className="noti-header">
                       <span>새로운 알림</span>
                       <div>
-                        {/* 전체보기 버튼 */}
                         <span 
                           className="noti-read-all" 
                           onClick={(e) => { 
@@ -416,13 +387,11 @@ const Header = () => {
                             setIsNotiOpen(false); 
                             navigate('/notifications'); 
                           }}
-                          // 기존 주황색 글씨(noti-read-all) 스타일을 유지하되, 전체보기는 살짝 회색조로 빼줍니다.
                           style={{ color: '#888', marginRight: unreadNotiCount > 0 ? '12px' : '0' }}
                         >
                           전체보기
                         </span>
                         
-                        {/* 모두 읽음 버튼 (기존 클래스/스타일 100% 유지) */}
                         {unreadNotiCount > 0 && (
                           <span 
                             className="noti-read-all" 

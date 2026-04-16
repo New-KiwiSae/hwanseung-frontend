@@ -15,7 +15,6 @@ export default function AuthPage() {
     const [isSignUpActive, setIsSignUpActive] = useState(false);
     const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
 
-    // 중복 확인 및 인증 관련 상태들
     const [isIdChecked, setIsIdChecked] = useState(false);
     const [isNicknameChecked, setIsNicknameChecked] = useState(false);
     const [isEmailVerified, setIsEmailVerified] = useState(false);
@@ -24,7 +23,7 @@ export default function AuthPage() {
     const [isContactVerified, setIsContactVerified] = useState(false);
     const [smsCode, setSmsCode] = useState("");
     const [isSmsSent, setIsSmsSent] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(0); // 남은 시간 (초)
+    const [timeLeft, setTimeLeft] = useState(0);
     const [isTimerActive, setIsTimerActive] = useState(false);
     const [isEmailSent, setIsEmailSent] = useState(false);
     const [isSocialSignup, setIsSocialSignup] = useState(false);
@@ -51,7 +50,6 @@ export default function AuthPage() {
         password: "",
     });
 
-    // --- 유효성 검사 (useCallback으로 최적화) ---
     const validateSignUp = useCallback(() => {
         const newErrors = {};
 
@@ -71,7 +69,6 @@ export default function AuthPage() {
         }
 
         if (signUpValues.name) {
-            // 한글(가-힣) 또는 영문(a-zA-Z)만 2자 이상 허용하는 정규식
             const nameRegex = /^[가-힣a-zA-Z]{2,20}$/;
             if (!nameRegex.test(signUpValues.name)) {
                 newErrors.name = "이름은 한글 또는 영문 2자~20자 이내여야 합니다.";
@@ -107,7 +104,6 @@ export default function AuthPage() {
         return Object.keys(newErrors).length === 0;
     }, [signUpValues]);
 
-    // 실시간 유효성 감시
     useEffect(() => {
         const hasValues = Object.values(signUpValues).some(val => val !== "");
         if (!hasValues) {
@@ -117,36 +113,30 @@ export default function AuthPage() {
         validateSignUp();
     }, [signUpValues, validateSignUp]);
 
-    // --- 핸들러 함수들 ---
 
-    // 중복 확인 버튼 클릭 이벤트
     const handleDuplicateCheck = async (type, value) => {
         if (!value || errors[type]) {
             alert("입력 형식이 올바르지 않습니다.");
             return;
         }
 
-        // 1. 표시할 이름 매핑 객체 생성
         const typeNames = {
             username: "아이디",
             nickname: "닉네임",
             email: "이메일"
         };
-        const displayName = typeNames[type] || type; // 매핑된 이름이 없으면 기본 type 출력
+        const displayName = typeNames[type] || type;
 
         try {
             const response = await axios.get(`/api/auth/check-${type}`, { params: { [type]: value } });
 
             if (response.data.isDuplicate) {
-                // 2. 매핑된 이름 사용
                 alert(`이미 사용 중인 ${displayName}입니다.`);
             } else {
-                // 3. 매핑된 이름 사용
                 alert(`사용 가능한 ${displayName}입니다!`);
 
                 if (type === 'username') setIsIdChecked(true);
                 if (type === 'nickname') setIsNicknameChecked(true);
-                // if (type === 'email') setIsEmailChecked(true);
             }
         } catch (error) {
             alert(`${displayName} 중복 체크 연결에 실패했습니다.`);
@@ -164,25 +154,21 @@ export default function AuthPage() {
 
         setSignUpValues(prev => ({ ...prev, [targetId]: finalValue }));
 
-        // 값이 변경되면 중복 확인 상태 초기화
         if (targetId === 'username') setIsIdChecked(false);
         if (targetId === 'nickname') setIsNicknameChecked(false);
-        // if (targetId === 'email') setIsEmailChecked(false); // ✨ 추가
     };
 
-    /*이메일인증 */
     const handleSendVerification = async () => {
         if (!signUpValues.email || errors.email) {
             alert("올바른 이메일 형식을 입력해주세요.");
             return;
         }
         try {
-            // 서버 API 호출 (중복 확인 후 메일 발송)
             const response = await axios.post('/api/auth/email/send-code', {
                 email: signUpValues.email
             });
             alert("인증번호가 발송되었습니다. 메일함을 확인해주세요.");
-            setIsEmailSent(true); //
+            setIsEmailSent(true); 
         } catch (error) {
             if (error.response?.status === 409) {
                 setErrors({ ...errors, email: "이미 사용 중인 이메일입니다." });
@@ -191,47 +177,19 @@ export default function AuthPage() {
             }
         }
 
-        // 개발용 우회 로직
-        // try {
-        //     // 1. 서버에 이메일 중복 체크 API 호출
-        //     const response = await axios.get(`/api/auth/check-email`, {
-        //         params: { email: signUpValues.email }
-        //     });
-
-        //     if (response.data.isDuplicate) {
-        //         alert("이미 사용 중인 이메일입니다.");
-        //         setErrors({ ...errors, email: "이미 사용 중인 이메일입니다." });
-        //         return; // 중복이면 여기서 중단
-        //     }
-
-        //     // 2. 중복이 아닐 경우 -> 개발 모드 우회 (실제 발송 API 호출 대신)
-        //     alert('[개발 모드] 인증번호 입력창에 아무 번호나 입력해주세요.');
-        //     setIsEmailSent(true); // // 인증번호 입력창을 보여주는 상태값 활성화
-
-        // } catch (error) {
-        //     console.error("중복 체크 에러:", error);
-        //     alert("서버 연결에 실패했습니다.");
-        // }
-
     };
 
     const handleVerifyCode = async () => {
         try {
-            // 서버에 입력한 번호 확인 요청
             await axios.post('/api/auth/verify-code', {
                 key: signUpValues.email,
                 code: verificationCode
             });
-            setIsEmailVerified(true); // 인증 완료 상태값 변경
+            setIsEmailVerified(true);
             alert("이메일 인증이 성공했습니다.");
         } catch (error) {
             setErrors({ ...errors, verificationCode: "인증번호가 일치하지 않습니다." });
         }
-
-        // 개발용 우회로직
-        // console.log('[개발모드] 인증 성공');
-        // setIsEmailVerified(true);
-        // alert('[개발모드] 인증되었습니다.');
     };
 
     const formatTime = (seconds) => {
@@ -240,7 +198,6 @@ export default function AuthPage() {
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     };
 
-    // 타이머 작동 useEffect
     useEffect(() => {
         let timer;
         if (isTimerActive && timeLeft > 0) {
@@ -254,7 +211,6 @@ export default function AuthPage() {
         return () => clearInterval(timer);
     }, [isTimerActive, timeLeft]);
 
-    // 1. SMS 인증번호 발송 요청
     const handleSendSms = async (e) => {
         if (e) {
             e.preventDefault();
@@ -269,7 +225,6 @@ export default function AuthPage() {
                 phoneNumber: signUpValues.contact
             });
 
-            // 타이머 초기화 (3분 = 180초)
             setTimeLeft(180);
             setIsTimerActive(true);
             setIsSmsSent(true);
@@ -280,36 +235,12 @@ export default function AuthPage() {
             return;
         }
 
-        // 개발용 우회 로직
-        // try {
-        //     // 1. 서버에 연락처 중복 체크 API 호출
-        //     const response = await axios.get(`/api/auth/check-contact`, {
-        //         params: { contact: signUpValues.contact }
-        //     });
-
-        //     if (response.data.isDuplicate) {
-        //         alert("이미 등록된 연락처입니다.");
-        //         setErrors({ ...errors, contact: "이미 사용 중인 연락처입니다." });
-        //         return;
-        //     }
-
-        //     // 2. 중복이 아닐 경우 -> 개발 모드 타이머 활성화 및 발송 처리
-        //     alert('[개발모드] 인증번호 입력창에 아무 번호나 입력해주세요.');
-        //     setTimeLeft(180);
-        //     setIsTimerActive(true);
-        //     setIsSmsSent(true);
-
-        // } catch (error) {
-        //     alert("서버 연결에 실패했습니다.");
-        // }
-
     };
 
-    // 2. SMS 인증번호 검증
     const handleVerifySmsCode = async () => {
         try {
             await axios.post('/api/auth/verify-code', {
-                key: signUpValues.contact, // 휴대폰 번호를 키로 사용
+                key: signUpValues.contact,
                 code: smsCode
             });
             setIsContactVerified(true);
@@ -317,11 +248,6 @@ export default function AuthPage() {
         } catch (error) {
             alert("인증번호가 일치하지 않습니다.");
         }
-
-        // 개발용 우회로직
-        // console.log('[개발모드] 인증 성공');
-        // setIsContactVerified(true);
-        // alert('[개발모드] 인증되었습니다.');
     };
 
     const handleSignInChange = (e) => {
@@ -336,11 +262,10 @@ export default function AuthPage() {
             sessionStorage.setItem('refreshToken', response.data.refreshToken);
             sessionStorage.setItem('username', signInValues.username);
 
-            await fetchUser(); // 🌟 추가
+            await fetchUser(); 
 
             window.location.href = "/";
         }).catch((error) => {
-            // 🌟 서버가 보낸 JSON 객체에서 message 필드를 꺼냅니다.
             const errorMessage = error.response?.data?.message || "로그인 정보가 올바르지 않습니다.";
 
             alert(errorMessage);
@@ -361,7 +286,6 @@ export default function AuthPage() {
             return;
         }
 
-        // 아이디, 닉네임은 필수이므로 체크
         if (!isIdChecked || !isNicknameChecked) {
             alert("아이디와 닉네임 중복 확인을 완료해주세요.");
             return;
@@ -397,7 +321,6 @@ export default function AuthPage() {
 
             setIsIdChecked(false);
             setIsNicknameChecked(false);
-            // setIsEmailChecked(false);
             setIsEmailVerified(false);
             setIsContactVerified(false);
             setVerificationCode("");
@@ -434,11 +357,8 @@ export default function AuthPage() {
 
     const handleGoogleSuccess = async (credentialResponse) => {
         try {
-            // 1. 로그인 시도 전 세션 찌꺼기 제거
             sessionStorage.clear();
 
-            // 2. 구글 ID Token(JWT)을 백엔드로 전송
-            // axios 인터셉터가 REFRESH_TOKEN 헤더를 강제하지 않도록 설정을 추가합니다.
             const response = await axios.post("/api/auth/google", {
                 token: credentialResponse.credential
             }, {
@@ -450,7 +370,6 @@ export default function AuthPage() {
 
             const { accessToken, refreshToken, status, tokenType } = response.data;
 
-            // 3. 토큰 정보 저장
             const decoded = jwtDecode(accessToken);
             const usernameFromToken = decoded.sub || decoded.username;
 
@@ -460,10 +379,8 @@ export default function AuthPage() {
             sessionStorage.setItem('status', status);
             sessionStorage.setItem('tokenType', tokenType || 'Bearer');
 
-            // 전역 유저 상태 업데이트
             await fetchUser();
 
-            // 4. 상태에 따른 페이지 이동
             if (status === "PENDING") {
                 alert("추가 정보 입력이 필요합니다.");
                 navigate("/social-signup-extra");
@@ -480,7 +397,6 @@ export default function AuthPage() {
 
     return (
         <div className="auth-page-wrapper">
-            {/* 주소 검색 모달 */}
             {isPostcodeOpen && (
                 <>
                     <div className="postcode-overlay" onClick={() => setIsPostcodeOpen(false)} />
@@ -496,11 +412,9 @@ export default function AuthPage() {
 
             <div className={`container ${isSignUpActive ? "right-panel-active" : ""}`} id="container">
 
-                {/* 회원가입 영역 */}
                 <div className={`form-container sign-up-container ${isSignUpActive ? "active" : ""}`}>
                     <form onSubmit={(e) => e.preventDefault()}>
 
-                        {/* [추가] 모바일 전용 헤더: 여기에 전환 버튼이 있습니다 */}
                         <div className="mobile-overlay-header">
                             <h1>처음이신가요?</h1>
                             <p>환승마켓에 가입해보세요.</p>
@@ -513,7 +427,6 @@ export default function AuthPage() {
                                     <GoogleLogin
                                         onSuccess={handleGoogleSuccess}
                                         onError={() => console.log('Login Failed')}
-                                        // 🌟 디자인을 동그란 아이콘으로 만드는 설정
                                         type="icon"
                                         shape="circle"
                                         theme="outline"
@@ -523,7 +436,6 @@ export default function AuthPage() {
                             </div>
                             <span className="sub-text">기본 정보 입력</span>
 
-                            {/* 아이디 + 중복확인 */}
                             <div className="input-group with-btn">
                                 <div className="input-wrapper">
                                     <input type="text" id="username" placeholder="아이디" onChange={handleSignUpChange} value={signUpValues.username} required />
@@ -536,11 +448,9 @@ export default function AuthPage() {
                                 >
                                     {isIdChecked ? "확인됨" : "중복확인"}
                                 </button>
-                                {/* 에러메시지는 wrapper와 button 아래에 배치 */}
                                 {errors.username && <span className="error-msg">{errors.username}</span>}
                             </div>
 
-                            {/* 비밀번호 (wrapper 추가 및 에러 위치 수정) */}
                             <div className="input-group">
                                 <div className="input-wrapper">
                                     <input type="password" id="password" placeholder="비밀번호" onChange={handleSignUpChange} value={signUpValues.password} required />
@@ -549,7 +459,6 @@ export default function AuthPage() {
                                 {errors.password && <span className="error-msg">{errors.password}</span>}
                             </div>
 
-                            {/* 비밀번호 재확인 (에러 위치 수정) */}
                             <div className="input-group">
                                 <div className="input-wrapper">
                                     <input type="password" id="confirmPassword" placeholder="비밀번호 재확인"
@@ -559,7 +468,6 @@ export default function AuthPage() {
                                 {errors.confirmPassword && <span className="error-msg">{errors.confirmPassword}</span>}
                             </div>
 
-                            {/* 이름 (에러 위치 수정) */}
                             <div className="input-group">
                                 <div className="input-wrapper">
                                     <input
@@ -568,7 +476,7 @@ export default function AuthPage() {
                                         placeholder="이름(실명)"
                                         onChange={handleSignUpChange}
                                         value={signUpValues.name}
-                                        maxLength={20} // 추천드린 최대글자수 추가
+                                        maxLength={20}
                                         required
                                     />
                                     <i className="fas fa-user"></i>
@@ -576,7 +484,6 @@ export default function AuthPage() {
                                 {errors.name && <span className="error-msg">{errors.name}</span>}
                             </div>
 
-                            {/* 닉네임 (에러 위치 수정) */}
                             <div className="input-group with-btn">
                                 <div className="input-wrapper">
                                     <input type="text" id="nickname" placeholder="닉네임" onChange={handleSignUpChange} value={signUpValues.nickname} maxLength={8} required />
@@ -592,7 +499,6 @@ export default function AuthPage() {
                                 {errors.nickname && <span className="error-msg">{errors.nickname}</span>}
                             </div>
 
-                            {/* 연락처 */}
                             <div className="input-group with-btn">
                                 <div className="input-wrapper">
                                     <input type="tel" id="contact" placeholder="연락처 (숫자만)" onChange={handleSignUpChange} value={signUpValues.contact} disabled={isContactVerified} required />
@@ -603,7 +509,7 @@ export default function AuthPage() {
                                     className={`btn small-btn ${isContactVerified ? 'success-btn' : 'outline-btn'}`}
                                     onClick={(e) => {
                                         handleSendSms(e);
-                                        return false; // 브라우저에게 아무것도 하지 말라고 한 번 더 지시
+                                        return false;
                                     }}
                                     disabled={isContactVerified}
                                 >
@@ -612,7 +518,6 @@ export default function AuthPage() {
                                 {errors.contact && <span className="error-msg">{errors.contact}</span>}
                             </div>
 
-                            {/* SMS 인증번호 입력란 */}
                             {isSmsSent && !isContactVerified && (
                                 <div className="input-group-container">
                                     <div className="input-group with-btn">
@@ -624,7 +529,6 @@ export default function AuthPage() {
                                                 value={smsCode}
                                             />
                                             <i className="fas fa-key"></i>
-                                            {/* 타이머 표시 */}
                                             <span className={`timer-text ${timeLeft < 30 ? 'warning' : ''}`}>
                                                 {formatTime(timeLeft)}
                                             </span>
@@ -639,7 +543,6 @@ export default function AuthPage() {
                                         </button>
                                     </div>
 
-                                    {/* 재전송 링크 */}
                                     <div className="resend-wrapper">
                                         <span>번호를 받지 못하셨나요?</span>
                                         <button type="button" className="resend-btn" onClick={handleSendSms}>
@@ -650,7 +553,6 @@ export default function AuthPage() {
                             )}
 
 
-                            {/* 이메일 입력 + 인증번호 발송 */}
                             <div className="input-group with-btn">
                                 <div className="input-wrapper">
                                     <input
@@ -659,7 +561,7 @@ export default function AuthPage() {
                                         placeholder="이메일 주소"
                                         onChange={handleSignUpChange}
                                         value={signUpValues.email}
-                                        disabled={isEmailVerified} // 인증 완료 시 수정 불가
+                                        disabled={isEmailVerified}
                                         required
                                     />
                                     <i className="fas fa-envelope"></i>
@@ -672,11 +574,9 @@ export default function AuthPage() {
                                 >
                                     {isEmailVerified ? "인증완료" : "인증번호발송"}
                                 </button>
-                                {/* 에러 메시지는 항상 wrapper와 버튼 아래에 배치 */}
                                 {errors.email && <span className="error-msg">{errors.email}</span>}
                             </div>
 
-                            {/* 인증번호 확인란 (메일 발송 성공 시에만 보여주는 것이 좋습니다) */}
                             {isEmailSent && !isEmailVerified && (
                                 <div className="input-group with-btn">
                                     <div className="input-wrapper">
@@ -700,7 +600,6 @@ export default function AuthPage() {
                             <hr className="gray-line" />
                             <span className="sub-text">선택 정보 입력</span>
 
-                            {/* 주소 그룹 (아이콘 고정을 위해 wrapper 구조 적용) */}
                             <div className="address-group">
                                 <div className="input-group with-btn">
                                     <div className="input-wrapper">
@@ -743,11 +642,9 @@ export default function AuthPage() {
                     </form>
                 </div>
 
-                {/* 로그인 영역 */}
                 <div className={`form-container sign-in-container ${isSignUpActive ? "" : "active"}`}>
                     <form onSubmit={onSignInSubmit}>
 
-                        {/* [추가] 모바일 전용 헤더 */}
                         <div className="mobile-overlay-header">
                             <h1>다시 오셨군요!</h1>
                             <p>가치 있는 환승을 시작하세요.</p>
@@ -760,7 +657,6 @@ export default function AuthPage() {
                             <GoogleLogin
                                 onSuccess={handleGoogleSuccess}
                                 onError={() => console.log('Login Failed')}
-                                // 🌟 디자인을 동그란 아이콘으로 만드는 설정
                                 type="icon"
                                 shape="circle"
                                 theme="outline"
@@ -781,7 +677,6 @@ export default function AuthPage() {
                     </form>
                 </div>
 
-                {/* 오버레이 영역 */}
                 <div className="overlay-container">
                     <div className="overlay">
                         <div className="overlay-panel overlay-left">

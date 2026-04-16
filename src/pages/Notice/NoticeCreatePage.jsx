@@ -9,7 +9,7 @@ function NoticeCreatePage({ handler, setNo }) {
     const navigate = useNavigate();
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
-    const [pinned, setPinned] = useState(false); // pinned 상태 추가
+    const [pinned, setPinned] = useState(false);
     const [error, setError] = useState("");
 
     const handleSubmit = async (e) => {
@@ -21,7 +21,6 @@ function NoticeCreatePage({ handler, setNo }) {
       }
 
       try {
-        // API 호출 시 pinned 값도 함께 전송 (0 또는 1)
         await createNotice({ title, content, pinned: pinned ? 1 : 0 });
 
         alert("공지사항이 등록되었습니다.");
@@ -55,7 +54,6 @@ function NoticeCreatePage({ handler, setNo }) {
             />
           </div>
 
-          {/* 고정 여부 체크박스 추가 */}
           <div className="form-group checkbox-group">
             <input
               type="checkbox"

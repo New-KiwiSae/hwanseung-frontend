@@ -12,7 +12,6 @@ function formatPrice(price) {
     return Number(price || 0).toLocaleString();
 }
 
-// ✅ 추가: 작성일 표시용 함수
 function formatDate(dateString) {
     if (!dateString) return "-";
 
@@ -167,21 +166,14 @@ export default function ProductDetailPage() {
         fetchProductDetail();
     }, [productId, navigate]);
 
-    // const currentUser = sessionStorage.getItem("username");
 
     const startChat = async () => {
-        // if (currentUser === product.sellerId) {
-        //     alert("본인이 등록한 상품에는 채팅을 걸 수 없습니다.");
-        //     return;
-        // }
         if (isSeller) {
             alert("본인이 등록한 상품에는 채팅을 걸 수 없습니다.");
             return;
         }
 
         const currentToken = sessionStorage.getItem("accessToken");
-
-        console.log("🔥 채팅할 때 쏘는 토큰:", currentToken);
 
         try {
             const res = await axios.post(
@@ -203,9 +195,6 @@ export default function ProductDetailPage() {
                 onConnect: () => {
                     const messageData = {
                         roomId: realRoomId,
-                        // sender: currentUser,
-                        // senderId: currentUser,
-                        // content: `${currentUser}님이 [${product.title}] 상품에 대해 채팅을 시작했습니다!`,
                         sender: loginUserId, 
                         senderId: loginUserId, 
                         content: `${loginUserId}님이 [${product.title}] 상품에 대해 채팅을 시작했습니다!`,
@@ -226,7 +215,6 @@ export default function ProductDetailPage() {
                 new CustomEvent("openTradeChat", {
                     detail: {
                         roomId: realRoomId,
-                        // buyerId: currentUser,
                         buyerId: loginUserId,
                         sellerId: product.sellerId,
                         itemName: product.title,
@@ -285,7 +273,6 @@ export default function ProductDetailPage() {
         }
     };
 
-    // ✏️수정: 신고 버튼 클릭 시 서버에 먼저 중복 신고 여부 확인
     const handleReport = async () => {
         const token = sessionStorage.getItem("accessToken");
 
@@ -626,7 +613,6 @@ export default function ProductDetailPage() {
                                 <span className="value">{product.location}</span>
                             </div>
 
-                            {/* ✅ 추가: 거래지역 아래 작성일 */}
                             <div className="detail-info-item">
                                 <span className="label">작성일</span>
                                 <span className="value">{formatDate(product.createdAt)}</span>

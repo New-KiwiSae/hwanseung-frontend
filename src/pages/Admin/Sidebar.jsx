@@ -46,7 +46,6 @@ const Sidebar = () => {
   };
 
   const handleLogout = (e) => {
-    console.log('로그아웃 클릭');
     e.preventDefault();
     sessionStorage.removeItem("accessToken");
     sessionStorage.removeItem("refreshToken");

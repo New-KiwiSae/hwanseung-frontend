@@ -527,13 +527,11 @@
     box-shadow: 0 10px 20px rgba(0, 210, 122, 0.18);
 }
 
-/* 예약중 글자색상 */
 .product-sale-status-text.reserved {
     color: #ea580c !important;
     font-weight: 800;
 }
 
-/* 무한스크롤 감지용 */
 .product-list-observer {
     width: 100%;
     height: 1px;
@@ -637,7 +635,6 @@
     transform: translateY(-1px);
 }
 
-/* 카테고리 모바일 */
 @media (max-width: 768px) {
     .product-category-tabs {
         display: flex;

@@ -26,13 +26,9 @@ export default function ProductEditPage() {
     const [loading, setLoading] = useState(true);
     const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
 
-    // ✅ 기존 이미지
     const [existingImages, setExistingImages] = useState([]);
-    // ✅ 삭제 체크된 기존 이미지 id
     const [deleteImageIds, setDeleteImageIds] = useState([]);
-    // ✅ 새로 추가할 파일
     const [newImageFiles, setNewImageFiles] = useState([]);
-    // ✅ 새 이미지 미리보기
     const [newPreviewUrls, setNewPreviewUrls] = useState([]);
     const [categories, setCategories] = useState([]);
 
@@ -132,7 +128,6 @@ export default function ProductEditPage() {
         }
     };
 
-    // ✅ 수정: 새 이미지 누적 추가
     const handleNewImageChange = (e) => {
         const files = Array.from(e.target.files || []);
 
@@ -165,7 +160,6 @@ export default function ProductEditPage() {
         e.target.value = "";
     };
 
-    // ✅ 기존 이미지 삭제 체크
     const handleToggleDeleteImage = (imageId) => {
         setDeleteImageIds((prev) =>
             prev.includes(imageId)
@@ -174,7 +168,6 @@ export default function ProductEditPage() {
         );
     };
 
-    // ✅ 추가: 새 이미지 개별 삭제
     const handleRemoveNewImage = (index) => {
         setNewImageFiles((prev) => prev.filter((_, i) => i !== index));
 
@@ -281,7 +274,6 @@ export default function ProductEditPage() {
         });
     }, [loading, userInfo, form.location]);
 
-    // ✅ 추가: 새 미리보기 URL 정리
     useEffect(() => {
         return () => {
             newPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
