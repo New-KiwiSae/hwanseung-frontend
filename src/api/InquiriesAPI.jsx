@@ -21,13 +21,20 @@ axios.interceptors.response.use(
         return response;
     },
     async (error) => {
+        const currentPath = window.location.pathname;
+
+        if (currentPath === '/login') {
+            return Promise.reject(error);
+        }
         if (sessionStorage.getItem("tokenType") === null || sessionStorage.getItem("tokenType") === undefined || sessionStorage.getItem("tokenType") === '') {
             window.location.href = "/login";
             return Promise.reject(error);
         }
         // 방금 실패한 원래의 API 요청 정보를 가져옵니다.
         const originalRequest = error.config;
-
+        if (originalRequest?.url === '/api/user/verify-password') {
+            return Promise.reject(error);
+        }
         // 2. 만약 에러가 401(토큰 만료)이고, 아직 재시도를 안 한 요청이라면?
         // if (error.response && error.response.status === 401 && !originalRequest._retry) {
         // 만약 에러가 난 곳이 '/api/auth/refresh' 라면 무한 갱신 시도를 하지 않고 멈춥니다!
@@ -77,9 +84,9 @@ export const getInquiries = (params) => {
 export const fetchInquiries = (params) =>
     axios.get(API_BASE, { params, headers: getToken('auth') });
 
-export const createInquiry = (data) => axios.post(API_BASE, data, { withCredentials: true, headers : getToken('content') });
+export const createInquiry = (data) => axios.post(API_BASE, data, { withCredentials: true, headers: getToken('content') });
 
-export const updateInquiry = (id, data) => axios.put(`${API_BASE}/${id}`, data, { withCredentials: true, headers : getToken('content') });
+export const updateInquiry = (id, data) => axios.put(`${API_BASE}/${id}`, data, { withCredentials: true, headers: getToken('content') });
 
-export const deleteInquiry = (id) => axios.delete(`${API_BASE}/${id}`, { withCredentials: true, headers : getToken('content') });
+export const deleteInquiry = (id) => axios.delete(`${API_BASE}/${id}`, { withCredentials: true, headers: getToken('content') });
 

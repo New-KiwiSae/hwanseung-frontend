@@ -176,64 +176,62 @@ export default function AuthPage() {
             alert("올바른 이메일 형식을 입력해주세요.");
             return;
         }
-        // try {
-        //     // 서버 API 호출 (중복 확인 후 메일 발송)
-        //     const response = await axios.post('/api/auth/email/send-code', {
-        //         email: signUpValues.email
-        //     });
-        //     alert("인증번호가 발송되었습니다. 메일함을 확인해주세요.");
-        //     setIsEmailSent(true); //
-        // } catch (error) {
-        //     if (error.response?.status === 409) {
-        //         setErrors({ ...errors, email: "이미 사용 중인 이메일입니다." });
-        //     } else {
-        //         alert("메일 발송에 실패했습니다.");
-        //     }
-        // }
-
-        // 개발용 우회 로직
         try {
-            // 1. 서버에 이메일 중복 체크 API 호출
-            const response = await axios.get(`/api/auth/check-email`, {
-                params: { email: signUpValues.email }
+            // 서버 API 호출 (중복 확인 후 메일 발송)
+            const response = await axios.post('/api/auth/email/send-code', {
+                email: signUpValues.email
             });
-
-            if (response.data.isDuplicate) {
-                alert("이미 사용 중인 이메일입니다.");
-                setErrors({ ...errors, email: "이미 사용 중인 이메일입니다." });
-                return; // 중복이면 여기서 중단
-            }
-
-            // 2. 중복이 아닐 경우 -> 개발 모드 우회 (실제 발송 API 호출 대신)
-            alert('[개발 모드] 인증번호 입력창에 아무 번호나 입력해주세요.');
-            setIsEmailSent(true); // // 인증번호 입력창을 보여주는 상태값 활성화
-
+            alert("인증번호가 발송되었습니다. 메일함을 확인해주세요.");
+            setIsEmailSent(true); //
         } catch (error) {
-            console.error("중복 체크 에러:", error);
-            alert("서버 연결에 실패했습니다.");
+            if (error.response?.status === 409) {
+                setErrors({ ...errors, email: "이미 사용 중인 이메일입니다." });
+            } else {
+                alert("메일 발송에 실패했습니다.");
+            }
         }
 
+        // 개발용 우회 로직
+        // try {
+        //     // 1. 서버에 이메일 중복 체크 API 호출
+        //     const response = await axios.get(`/api/auth/check-email`, {
+        //         params: { email: signUpValues.email }
+        //     });
+
+        //     if (response.data.isDuplicate) {
+        //         alert("이미 사용 중인 이메일입니다.");
+        //         setErrors({ ...errors, email: "이미 사용 중인 이메일입니다." });
+        //         return; // 중복이면 여기서 중단
+        //     }
+
+        //     // 2. 중복이 아닐 경우 -> 개발 모드 우회 (실제 발송 API 호출 대신)
+        //     alert('[개발 모드] 인증번호 입력창에 아무 번호나 입력해주세요.');
+        //     setIsEmailSent(true); // // 인증번호 입력창을 보여주는 상태값 활성화
+
+        // } catch (error) {
+        //     console.error("중복 체크 에러:", error);
+        //     alert("서버 연결에 실패했습니다.");
+        // }
 
     };
 
     const handleVerifyCode = async () => {
-        // try {
-        //     // 서버에 입력한 번호 확인 요청
-        //     await axios.post('/api/auth/verify-code', {
-        //         key: signUpValues.email,
-        //         code: verificationCode
-        //     });
-        //     setIsEmailVerified(true); // 인증 완료 상태값 변경
-        //     alert("이메일 인증이 성공했습니다.");
-        // } catch (error) {
-        //     setErrors({ ...errors, verificationCode: "인증번호가 일치하지 않습니다." });
-        // }
+        try {
+            // 서버에 입력한 번호 확인 요청
+            await axios.post('/api/auth/verify-code', {
+                key: signUpValues.email,
+                code: verificationCode
+            });
+            setIsEmailVerified(true); // 인증 완료 상태값 변경
+            alert("이메일 인증이 성공했습니다.");
+        } catch (error) {
+            setErrors({ ...errors, verificationCode: "인증번호가 일치하지 않습니다." });
+        }
 
-        console.log('[개발모드] 인증 성공');
-        setIsEmailVerified(true);
-        alert('[개발모드] 인증되었습니다.');
-
-
+        // 개발용 우회로직
+        // console.log('[개발모드] 인증 성공');
+        // setIsEmailVerified(true);
+        // alert('[개발모드] 인증되었습니다.');
     };
 
     const formatTime = (seconds) => {
@@ -257,66 +255,73 @@ export default function AuthPage() {
     }, [isTimerActive, timeLeft]);
 
     // 1. SMS 인증번호 발송 요청
-    const handleSendSms = async () => {
+    const handleSendSms = async (e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
         if (!signUpValues.contact || errors.contact) {
             alert("올바른 연락처를 입력해주세요.");
             return;
         }
-        // try {
-        //     await axios.post('/api/auth/sms/send-code', {
-        //         phoneNumber: signUpValues.contact
-        //     });
-
-        //     // 타이머 초기화 (3분 = 180초)
-        //     setTimeLeft(180);
-        //     setIsTimerActive(true);
-        //     setIsSmsSent(true);
-        //     alert("인증번호가 발송되었습니다.");
-        // } catch (error) {
-        //     alert("발송 실패. 잠시 후 다시 시도해주세요.");
-        // }
-
-        // 개발용 우회 로직
         try {
-            // 1. 서버에 연락처 중복 체크 API 호출
-            const response = await axios.get(`/api/auth/check-contact`, {
-                params: { contact: signUpValues.contact }
+            await axios.post('/api/auth/sms/send-code', {
+                phoneNumber: signUpValues.contact
             });
 
-            if (response.data.isDuplicate) {
-                alert("이미 등록된 연락처입니다.");
-                setErrors({ ...errors, contact: "이미 사용 중인 연락처입니다." });
-                return;
-            }
-
-            // 2. 중복이 아닐 경우 -> 개발 모드 타이머 활성화 및 발송 처리
-            alert('[개발모드] 인증번호 입력창에 아무 번호나 입력해주세요.');
+            // 타이머 초기화 (3분 = 180초)
             setTimeLeft(180);
             setIsTimerActive(true);
             setIsSmsSent(true);
-
+            alert("인증번호가 발송되었습니다.");
         } catch (error) {
-            alert("서버 연결에 실패했습니다.");
+            const errorMsg = error.response?.data || "발송 실패. 잠시 후 다시 시도해주세요.";
+            alert(errorMsg);
+            return;
         }
+
+        // 개발용 우회 로직
+        // try {
+        //     // 1. 서버에 연락처 중복 체크 API 호출
+        //     const response = await axios.get(`/api/auth/check-contact`, {
+        //         params: { contact: signUpValues.contact }
+        //     });
+
+        //     if (response.data.isDuplicate) {
+        //         alert("이미 등록된 연락처입니다.");
+        //         setErrors({ ...errors, contact: "이미 사용 중인 연락처입니다." });
+        //         return;
+        //     }
+
+        //     // 2. 중복이 아닐 경우 -> 개발 모드 타이머 활성화 및 발송 처리
+        //     alert('[개발모드] 인증번호 입력창에 아무 번호나 입력해주세요.');
+        //     setTimeLeft(180);
+        //     setIsTimerActive(true);
+        //     setIsSmsSent(true);
+
+        // } catch (error) {
+        //     alert("서버 연결에 실패했습니다.");
+        // }
 
     };
 
     // 2. SMS 인증번호 검증
     const handleVerifySmsCode = async () => {
-        // try {
-        //     await axios.post('/api/auth/verify-code', {
-        //         key: signUpValues.contact, // 휴대폰 번호를 키로 사용
-        //         code: smsCode
-        //     });
-        //     setIsContactVerified(true);
-        //     alert("휴대폰 인증이 완료되었습니다.");
-        // } catch (error) {
-        //     alert("인증번호가 일치하지 않습니다.");
-        // }
+        try {
+            await axios.post('/api/auth/verify-code', {
+                key: signUpValues.contact, // 휴대폰 번호를 키로 사용
+                code: smsCode
+            });
+            setIsContactVerified(true);
+            alert("휴대폰 인증이 완료되었습니다.");
+        } catch (error) {
+            alert("인증번호가 일치하지 않습니다.");
+        }
 
-        console.log('[개발모드] 인증 성공');
-        setIsContactVerified(true);
-        alert('[개발모드] 인증되었습니다.');
+        // 개발용 우회로직
+        // console.log('[개발모드] 인증 성공');
+        // setIsContactVerified(true);
+        // alert('[개발모드] 인증되었습니다.');
     };
 
     const handleSignInChange = (e) => {
@@ -493,7 +498,7 @@ export default function AuthPage() {
 
                 {/* 회원가입 영역 */}
                 <div className={`form-container sign-up-container ${isSignUpActive ? "active" : ""}`}>
-                    <form onSubmit={onSignUpSubmit}>
+                    <form onSubmit={(e) => e.preventDefault()}>
 
                         {/* [추가] 모바일 전용 헤더: 여기에 전환 버튼이 있습니다 */}
                         <div className="mobile-overlay-header">
@@ -501,233 +506,240 @@ export default function AuthPage() {
                             <p>환승마켓에 가입해보세요.</p>
                             <button type="button" className="btn ghost-green" onClick={() => setIsSignUpActive(false)}>로그인으로 이동</button>
                         </div>
-            <div className="scrollable-form">
-                        <h2>회원가입</h2>
-                        <div className="social-login">
-                            <div className="social-login" style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-                                <GoogleLogin
-                                    onSuccess={handleGoogleSuccess}
-                                    onError={() => console.log('Login Failed')}
-                                    // 🌟 디자인을 동그란 아이콘으로 만드는 설정
-                                    type="icon"
-                                    shape="circle"
-                                    theme="outline"
-                                    size="large"
-                                />
+                        <div className="scrollable-form">
+                            <h2>회원가입</h2>
+                            <div className="social-login">
+                                <div className="social-login" style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                                    <GoogleLogin
+                                        onSuccess={handleGoogleSuccess}
+                                        onError={() => console.log('Login Failed')}
+                                        // 🌟 디자인을 동그란 아이콘으로 만드는 설정
+                                        type="icon"
+                                        shape="circle"
+                                        theme="outline"
+                                        size="large"
+                                    />
+                                </div>
                             </div>
-                        </div>
-                        <span className="sub-text">기본 정보 입력</span>
+                            <span className="sub-text">기본 정보 입력</span>
 
-                        {/* 아이디 + 중복확인 */}
-                        <div className="input-group with-btn">
-                            <div className="input-wrapper">
-                                <input type="text" id="username" placeholder="아이디" onChange={handleSignUpChange} value={signUpValues.username} required />
-                                <i className="fas fa-id-badge"></i>
+                            {/* 아이디 + 중복확인 */}
+                            <div className="input-group with-btn">
+                                <div className="input-wrapper">
+                                    <input type="text" id="username" placeholder="아이디" onChange={handleSignUpChange} value={signUpValues.username} required />
+                                    <i className="fas fa-id-badge"></i>
+                                </div>
+                                <button
+                                    type="button"
+                                    className={`btn small-btn ${isIdChecked ? 'success-btn' : 'outline-btn'}`}
+                                    onClick={() => handleDuplicateCheck('username', signUpValues.username)}
+                                >
+                                    {isIdChecked ? "확인됨" : "중복확인"}
+                                </button>
+                                {/* 에러메시지는 wrapper와 button 아래에 배치 */}
+                                {errors.username && <span className="error-msg">{errors.username}</span>}
                             </div>
-                            <button
-                                type="button"
-                                className={`btn small-btn ${isIdChecked ? 'success-btn' : 'outline-btn'}`}
-                                onClick={() => handleDuplicateCheck('username', signUpValues.username)}
-                            >
-                                {isIdChecked ? "확인됨" : "중복확인"}
-                            </button>
-                            {/* 에러메시지는 wrapper와 button 아래에 배치 */}
-                            {errors.username && <span className="error-msg">{errors.username}</span>}
-                        </div>
 
-                        {/* 비밀번호 (wrapper 추가 및 에러 위치 수정) */}
-                        <div className="input-group">
-                            <div className="input-wrapper">
-                                <input type="password" id="password" placeholder="비밀번호" onChange={handleSignUpChange} value={signUpValues.password} required />
-                                <i className="fas fa-lock"></i>
+                            {/* 비밀번호 (wrapper 추가 및 에러 위치 수정) */}
+                            <div className="input-group">
+                                <div className="input-wrapper">
+                                    <input type="password" id="password" placeholder="비밀번호" onChange={handleSignUpChange} value={signUpValues.password} required />
+                                    <i className="fas fa-lock"></i>
+                                </div>
+                                {errors.password && <span className="error-msg">{errors.password}</span>}
                             </div>
-                            {errors.password && <span className="error-msg">{errors.password}</span>}
-                        </div>
 
-                        {/* 비밀번호 재확인 (에러 위치 수정) */}
-                        <div className="input-group">
-                            <div className="input-wrapper">
-                                <input type="password" id="confirmPassword" placeholder="비밀번호 재확인"
-                                    onChange={handleSignUpChange} value={signUpValues.confirmPassword} required />
-                                <i className="fas fa-check-circle"></i>
+                            {/* 비밀번호 재확인 (에러 위치 수정) */}
+                            <div className="input-group">
+                                <div className="input-wrapper">
+                                    <input type="password" id="confirmPassword" placeholder="비밀번호 재확인"
+                                        onChange={handleSignUpChange} value={signUpValues.confirmPassword} required />
+                                    <i className="fas fa-check-circle"></i>
+                                </div>
+                                {errors.confirmPassword && <span className="error-msg">{errors.confirmPassword}</span>}
                             </div>
-                            {errors.confirmPassword && <span className="error-msg">{errors.confirmPassword}</span>}
-                        </div>
 
-                        {/* 이름 (에러 위치 수정) */}
-                        <div className="input-group">
-                            <div className="input-wrapper">
-                                <input
-                                    type="text"
-                                    id="name"
-                                    placeholder="이름(실명)"
-                                    onChange={handleSignUpChange}
-                                    value={signUpValues.name}
-                                    maxLength={20} // 추천드린 최대글자수 추가
-                                    required
-                                />
-                                <i className="fas fa-user"></i>
+                            {/* 이름 (에러 위치 수정) */}
+                            <div className="input-group">
+                                <div className="input-wrapper">
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        placeholder="이름(실명)"
+                                        onChange={handleSignUpChange}
+                                        value={signUpValues.name}
+                                        maxLength={20} // 추천드린 최대글자수 추가
+                                        required
+                                    />
+                                    <i className="fas fa-user"></i>
+                                </div>
+                                {errors.name && <span className="error-msg">{errors.name}</span>}
                             </div>
-                            {errors.name && <span className="error-msg">{errors.name}</span>}
-                        </div>
 
-                        {/* 닉네임 (에러 위치 수정) */}
-                        <div className="input-group with-btn">
-                            <div className="input-wrapper">
-                                <input type="text" id="nickname" placeholder="닉네임" onChange={handleSignUpChange} value={signUpValues.nickname} maxLength={8} required />
-                                <i className="fas fa-smile"></i>
+                            {/* 닉네임 (에러 위치 수정) */}
+                            <div className="input-group with-btn">
+                                <div className="input-wrapper">
+                                    <input type="text" id="nickname" placeholder="닉네임" onChange={handleSignUpChange} value={signUpValues.nickname} maxLength={8} required />
+                                    <i className="fas fa-smile"></i>
+                                </div>
+                                <button
+                                    type="button"
+                                    className={`btn small-btn ${isNicknameChecked ? 'success-btn' : 'outline-btn'}`}
+                                    onClick={() => handleDuplicateCheck('nickname', signUpValues.nickname)}
+                                >
+                                    {isNicknameChecked ? "확인됨" : "중복확인"}
+                                </button>
+                                {errors.nickname && <span className="error-msg">{errors.nickname}</span>}
                             </div>
-                            <button
-                                type="button"
-                                className={`btn small-btn ${isNicknameChecked ? 'success-btn' : 'outline-btn'}`}
-                                onClick={() => handleDuplicateCheck('nickname', signUpValues.nickname)}
-                            >
-                                {isNicknameChecked ? "확인됨" : "중복확인"}
-                            </button>
-                            {errors.nickname && <span className="error-msg">{errors.nickname}</span>}
-                        </div>
 
-                        {/* 연락처 */}
-                        <div className="input-group with-btn">
-                            <div className="input-wrapper">
-                                <input type="tel" id="contact" placeholder="연락처 (숫자만)" onChange={handleSignUpChange} value={signUpValues.contact} disabled={isContactVerified} required />
-                                <i className="fas fa-phone"></i>
+                            {/* 연락처 */}
+                            <div className="input-group with-btn">
+                                <div className="input-wrapper">
+                                    <input type="tel" id="contact" placeholder="연락처 (숫자만)" onChange={handleSignUpChange} value={signUpValues.contact} disabled={isContactVerified} required />
+                                    <i className="fas fa-phone"></i>
+                                </div>
+                                <button
+                                    type="button"
+                                    className={`btn small-btn ${isContactVerified ? 'success-btn' : 'outline-btn'}`}
+                                    onClick={(e) => {
+                                        handleSendSms(e);
+                                        return false; // 브라우저에게 아무것도 하지 말라고 한 번 더 지시
+                                    }}
+                                    disabled={isContactVerified}
+                                >
+                                    {isContactVerified ? "인증완료" : "인증번호발송"}
+                                </button>
+                                {errors.contact && <span className="error-msg">{errors.contact}</span>}
                             </div>
-                            <button
-                                type="button" className={`btn small-btn ${isContactVerified ? 'success-btn' : 'outline-btn'}`} onClick={handleSendSms} disabled={isContactVerified} >
-                                {isContactVerified ? "인증완료" : "인증번호발송"}
-                            </button>
-                            {errors.contact && <span className="error-msg">{errors.contact}</span>}
-                        </div>
 
-                        {/* SMS 인증번호 입력란 */}
-                        {isSmsSent && !isContactVerified && (
-                            <div className="input-group-container">
+                            {/* SMS 인증번호 입력란 */}
+                            {isSmsSent && !isContactVerified && (
+                                <div className="input-group-container">
+                                    <div className="input-group with-btn">
+                                        <div className="input-wrapper">
+                                            <input
+                                                type="text"
+                                                placeholder="인증번호 6자리"
+                                                onChange={(e) => setSmsCode(e.target.value)}
+                                                value={smsCode}
+                                            />
+                                            <i className="fas fa-key"></i>
+                                            {/* 타이머 표시 */}
+                                            <span className={`timer-text ${timeLeft < 30 ? 'warning' : ''}`}>
+                                                {formatTime(timeLeft)}
+                                            </span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="btn small-btn primary-btn"
+                                            onClick={handleVerifySmsCode}
+                                            disabled={timeLeft === 0}
+                                        >
+                                            확인
+                                        </button>
+                                    </div>
+
+                                    {/* 재전송 링크 */}
+                                    <div className="resend-wrapper">
+                                        <span>번호를 받지 못하셨나요?</span>
+                                        <button type="button" className="resend-btn" onClick={handleSendSms}>
+                                            재전송하기
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+
+                            {/* 이메일 입력 + 인증번호 발송 */}
+                            <div className="input-group with-btn">
+                                <div className="input-wrapper">
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        placeholder="이메일 주소"
+                                        onChange={handleSignUpChange}
+                                        value={signUpValues.email}
+                                        disabled={isEmailVerified} // 인증 완료 시 수정 불가
+                                        required
+                                    />
+                                    <i className="fas fa-envelope"></i>
+                                </div>
+                                <button
+                                    type="button"
+                                    className={`btn small-btn ${isEmailVerified ? 'success-btn' : 'outline-btn'}`}
+                                    onClick={handleSendVerification}
+                                    disabled={isEmailVerified}
+                                >
+                                    {isEmailVerified ? "인증완료" : "인증번호발송"}
+                                </button>
+                                {/* 에러 메시지는 항상 wrapper와 버튼 아래에 배치 */}
+                                {errors.email && <span className="error-msg">{errors.email}</span>}
+                            </div>
+
+                            {/* 인증번호 확인란 (메일 발송 성공 시에만 보여주는 것이 좋습니다) */}
+                            {isEmailSent && !isEmailVerified && (
                                 <div className="input-group with-btn">
                                     <div className="input-wrapper">
                                         <input
                                             type="text"
+                                            id="verificationCode"
                                             placeholder="인증번호 6자리"
-                                            onChange={(e) => setSmsCode(e.target.value)}
-                                            value={smsCode}
-                                        />
+                                            onChange={(e) => setVerificationCode(e.target.value)}
+                                            value={verificationCode} />
                                         <i className="fas fa-key"></i>
-                                        {/* 타이머 표시 */}
-                                        <span className={`timer-text ${timeLeft < 30 ? 'warning' : ''}`}>
-                                            {formatTime(timeLeft)}
-                                        </span>
                                     </div>
                                     <button
                                         type="button"
                                         className="btn small-btn primary-btn"
-                                        onClick={handleVerifySmsCode}
-                                        disabled={timeLeft === 0}
-                                    >
-                                        확인
+                                        onClick={handleVerifyCode} > 확인
                                     </button>
+                                    {errors.verificationCode && <span className="error-msg">{errors.verificationCode}</span>}
                                 </div>
+                            )}
 
-                                {/* 재전송 링크 */}
-                                <div className="resend-wrapper">
-                                    <span>번호를 받지 못하셨나요?</span>
-                                    <button type="button" className="resend-btn" onClick={handleSendSms}>
-                                        재전송하기
-                                    </button>
+                            <hr className="gray-line" />
+                            <span className="sub-text">선택 정보 입력</span>
+
+                            {/* 주소 그룹 (아이콘 고정을 위해 wrapper 구조 적용) */}
+                            <div className="address-group">
+                                <div className="input-group with-btn">
+                                    <div className="input-wrapper">
+                                        <input type="text" id="zipCode" placeholder="우편번호" value={signUpValues.zipCode} readOnly />
+                                        <i className="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <button type="button" className="btn small-btn" onClick={() => setIsPostcodeOpen(true)}>주소검색</button>
+                                </div>
+                                <div className="input-group">
+                                    <div className="input-wrapper">
+                                        <input type="text" id="address" placeholder="주소" value={signUpValues.address} readOnly />
+                                        <i className="fas fa-home"></i>
+                                    </div>
+                                </div>
+                                <div className="input-group">
+                                    <div className="input-wrapper">
+                                        <input type="text" id="detailAddress" placeholder="상세주소" onChange={handleSignUpChange} value={signUpValues.detailAddress} disabled={!signUpValues.address} className={!signUpValues.address ? "disabled-input" : ""} />
+                                        <i className="fas fa-building"></i>
+                                    </div>
                                 </div>
                             </div>
-                        )}
 
-
-                        {/* 이메일 입력 + 인증번호 발송 */}
-                        <div className="input-group with-btn">
-                            <div className="input-wrapper">
-                                <input
-                                    type="email"
-                                    id="email"
-                                    placeholder="이메일 주소"
-                                    onChange={handleSignUpChange}
-                                    value={signUpValues.email}
-                                    disabled={isEmailVerified} // 인증 완료 시 수정 불가
-                                    required
-                                />
-                                <i className="fas fa-envelope"></i>
-                            </div>
-                            <button
-                                type="button"
-                                className={`btn small-btn ${isEmailVerified ? 'success-btn' : 'outline-btn'}`}
-                                onClick={handleSendVerification}
-                                disabled={isEmailVerified}
-                            >
-                                {isEmailVerified ? "인증완료" : "인증번호발송"}
-                            </button>
-                            {/* 에러 메시지는 항상 wrapper와 버튼 아래에 배치 */}
-                            {errors.email && <span className="error-msg">{errors.email}</span>}
-                        </div>
-
-                        {/* 인증번호 확인란 (메일 발송 성공 시에만 보여주는 것이 좋습니다) */}
-                        {isEmailSent && !isEmailVerified && (
-                            <div className="input-group with-btn">
-                                <div className="input-wrapper">
-                                    <input
-                                        type="text"
-                                        id="verificationCode"
-                                        placeholder="인증번호 6자리"
-                                        onChange={(e) => setVerificationCode(e.target.value)}
-                                        value={verificationCode} />
-                                    <i className="fas fa-key"></i>
-                                </div>
-                                <button
-                                    type="button"
-                                    className="btn small-btn primary-btn"
-                                    onClick={handleVerifyCode} > 확인
-                                </button>
-                                {errors.verificationCode && <span className="error-msg">{errors.verificationCode}</span>}
-                            </div>
-                        )}
-
-                        <hr className="gray-line" />
-                        <span className="sub-text">선택 정보 입력</span>
-
-                        {/* 주소 그룹 (아이콘 고정을 위해 wrapper 구조 적용) */}
-                        <div className="address-group">
-                            <div className="input-group with-btn">
-                                <div className="input-wrapper">
-                                    <input type="text" id="zipCode" placeholder="우편번호" value={signUpValues.zipCode} readOnly />
-                                    <i className="fas fa-map-marker-alt"></i>
-                                </div>
-                                <button type="button" className="btn small-btn" onClick={() => setIsPostcodeOpen(true)}>주소검색</button>
-                            </div>
                             <div className="input-group">
-                                <div className="input-wrapper">
-                                    <input type="text" id="address" placeholder="주소" value={signUpValues.address} readOnly />
-                                    <i className="fas fa-home"></i>
-                                </div>
+                                <input type="date" id="birthday" onChange={handleSignUpChange} value={signUpValues.birthday} max={new Date().toISOString().split("T")[0]} />
                             </div>
-                            <div className="input-group">
-                                <div className="input-wrapper">
-                                    <input type="text" id="detailAddress" placeholder="상세주소" onChange={handleSignUpChange} value={signUpValues.detailAddress} disabled={!signUpValues.address} className={!signUpValues.address ? "disabled-input" : ""} />
-                                    <i className="fas fa-building"></i>
-                                </div>
+
+                            <div className="gender-group">
+                                <label className="gender-radio">
+                                    <input type="radio" name="gender" value="" checked={signUpValues.gender === "" || signUpValues.gender === null} onChange={handleSignUpChange} /> 선택안함
+                                </label>
+                                <label className="gender-radio">
+                                    <input type="radio" name="gender" value="MALE" checked={signUpValues.gender === "MALE"} onChange={handleSignUpChange} /> 남성
+                                </label>
+                                <label className="gender-radio">
+                                    <input type="radio" name="gender" value="FEMALE" checked={signUpValues.gender === "FEMALE"} onChange={handleSignUpChange} /> 여성
+                                </label>
                             </div>
                         </div>
-
-                        <div className="input-group">
-                            <input type="date" id="birthday" onChange={handleSignUpChange} value={signUpValues.birthday} max={new Date().toISOString().split("T")[0]} />
-                        </div>
-
-                        <div className="gender-group">
-                            <label className="gender-radio">
-                                <input type="radio" name="gender" value="" checked={signUpValues.gender === "" || signUpValues.gender === null} onChange={handleSignUpChange} /> 선택안함
-                            </label>
-                            <label className="gender-radio">
-                                <input type="radio" name="gender" value="MALE" checked={signUpValues.gender === "MALE"} onChange={handleSignUpChange} /> 남성
-                            </label>
-                            <label className="gender-radio">
-                                <input type="radio" name="gender" value="FEMALE" checked={signUpValues.gender === "FEMALE"} onChange={handleSignUpChange} /> 여성
-                            </label>
-                        </div>
-            </div>
-                        <button type="submit" className="btn primary-btn">가입하기</button>
+                        <button type="button" className="btn primary-btn" onClick={onSignUpSubmit}>가입하기</button>
                     </form>
                 </div>
 
@@ -746,14 +758,14 @@ export default function AuthPage() {
                         <h2>로그인</h2>
                         <div className="social-login">
                             <GoogleLogin
-                                    onSuccess={handleGoogleSuccess}
-                                    onError={() => console.log('Login Failed')}
-                                    // 🌟 디자인을 동그란 아이콘으로 만드는 설정
-                                    type="icon"
-                                    shape="circle"
-                                    theme="outline"
-                                    size="large"
-                                />
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => console.log('Login Failed')}
+                                // 🌟 디자인을 동그란 아이콘으로 만드는 설정
+                                type="icon"
+                                shape="circle"
+                                theme="outline"
+                                size="large"
+                            />
                         </div>
                         <span className="sub-text">또는 이메일 계정으로 로그인하세요</span>
 
@@ -765,7 +777,6 @@ export default function AuthPage() {
                             <input type="password" id="password" placeholder="비밀번호" onChange={handleSignInChange} value={signInValues.password} required />
                             <i className="fas fa-lock"></i>
                         </div>
-                        <a href="#" className="footer-link">비밀번호를 잊으셨나요?</a>
                         <button type="submit" className="btn primary-btn" style={{ marginTop: "20px" }}>로그인</button>
                     </form>
                 </div>

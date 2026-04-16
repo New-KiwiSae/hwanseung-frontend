@@ -56,12 +56,11 @@ const MyPage = () => {
   }, [userInfo]);
 
   useEffect(() => {
-  const token = sessionStorage.getItem('accessToken');
-  if (!isLoading && !userInfo && !token) { // 토큰조차 없을 때만 튕기기
-    alert("로그인이 필요한 서비스입니다.");
-    navigate('/login');
-  }
-}, [isLoading, userInfo, navigate]);
+    const token = sessionStorage.getItem('accessToken');
+    if (!isLoading && !userInfo && !token) { // 토큰조차 없을 때만 튕기기
+      navigate('/login');
+    }
+  }, [isLoading, userInfo, navigate]);
 
   // 🌟 SMS 타이머 로직
   useEffect(() => {
