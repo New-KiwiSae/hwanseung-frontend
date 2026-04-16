@@ -68,7 +68,7 @@ axios.interceptors.response.use(
             originalRequest._retry = true; // 무한 루프 방지용 꼬리표 붙이기
 
             try {
-                console.log("토큰이 만료되었습니다. 자동 갱신을 시도합니다...");
+                console.log("토큰이 만료되었습니다. 자동 갱신을 시도합니다... ");
 
                 // 3. 서랍(SessionStorage)에서 Refresh Token을 꺼내서 새 토큰을 받아옵니다.
                 const newAccessToken = await refreshAccessToken();

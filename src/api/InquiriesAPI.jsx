@@ -32,7 +32,9 @@ axios.interceptors.response.use(
         }
         // 방금 실패한 원래의 API 요청 정보를 가져옵니다.
         const originalRequest = error.config;
-
+        if (originalRequest?.url === '/api/user/verify-password') {
+            return Promise.reject(error);
+        }
         // 2. 만약 에러가 401(토큰 만료)이고, 아직 재시도를 안 한 요청이라면?
         // if (error.response && error.response.status === 401 && !originalRequest._retry) {
         // 만약 에러가 난 곳이 '/api/auth/refresh' 라면 무한 갱신 시도를 하지 않고 멈춥니다!
