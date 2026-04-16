@@ -101,6 +101,12 @@ export default function MyPageSidebar({ userInfo }) {
                     </button>
                 </NavLink>
 
+                <NavLink to="/notifications" className={({ isActive }) => (isActive ? 'active' : '')}>
+                    <button>
+                        <i className="far fa-bell"></i> 알림 보기
+                    </button>
+                </NavLink>
+
                 <p className="nav-label" style={{ marginTop: '20px' }}>고객지원</p>
 
                 <button onClick={() => window.location.href = '/inquiries'}>

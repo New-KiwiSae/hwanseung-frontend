@@ -42,6 +42,8 @@ import NoticeDetailPage from "./pages/Notice/NoticeDetailPage";
 import NoticeListPage from "./pages/Notice/NoticeListPage";
 import Inquiries from "./pages/Inquiry/Inquiries";
 
+import NotificationListPage from "./pages/Notification/NotificationListPage";
+
 
 function App() {
     const location = useLocation();
@@ -116,6 +118,8 @@ function App() {
                                 {/* 공지사항 목록 */}
                                 <Route path="/notices" element={<NoticeListPage />} />
                                 <Route path="inquiries" element={<Inquiries />} />
+
+                                <Route path="/notifications" element={<NotificationListPage />} />
                             </Route>
 
                         </Route>

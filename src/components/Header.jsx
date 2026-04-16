@@ -399,13 +399,41 @@ const Header = () => {
 
                 {isNotiOpen && (
                   <div className="profile-dropdown noti-dropdown">
-                    <div className="noti-header">
+                    {/* <div className="noti-header">
                       <span>새로운 알림</span>
                       {unreadNotiCount > 0 && (
                         <span className="noti-read-all" onClick={(e) => { e.stopPropagation(); handleReadAll(); }}>
                           모두 읽음
                         </span>
                       )}
+                    </div> */}
+                    <div className="noti-header">
+                      <span>새로운 알림</span>
+                      <div>
+                        {/* 전체보기 버튼 */}
+                        <span 
+                          className="noti-read-all" 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            setIsNotiOpen(false); 
+                            navigate('/notifications'); 
+                          }}
+                          // 기존 주황색 글씨(noti-read-all) 스타일을 유지하되, 전체보기는 살짝 회색조로 빼줍니다.
+                          style={{ color: '#888', marginRight: unreadNotiCount > 0 ? '12px' : '0' }}
+                        >
+                          전체보기
+                        </span>
+                        
+                        {/* 모두 읽음 버튼 (기존 클래스/스타일 100% 유지) */}
+                        {unreadNotiCount > 0 && (
+                          <span 
+                            className="noti-read-all" 
+                            onClick={(e) => { e.stopPropagation(); handleReadAll(); }}
+                          >
+                            모두 읽음
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {!(notifications && notifications.length > 0) ? (
