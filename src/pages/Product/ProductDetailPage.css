@@ -75,7 +75,7 @@
 .product-detail-image-empty {
     width: 100%;
     aspect-ratio: 1 / 1;
-    background: linear-gradient(135deg, #e8fff2 0%, #f7fffb 100%);
+    background: linear-gradient(135deg, #f7f8fa 0%, #eef2f6 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -565,6 +565,60 @@
     cursor: not-allowed;
 }
 
+.reserve-inline-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.reserve-buyer-select {
+    height: 38px;
+    width: 110px;
+    min-width: 110px;
+    max-width: 110px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 13px;
+    font-weight: 600;
+    outline: none;
+    box-shadow: 0 4px 10px rgba(17, 24, 39, 0.05);
+}
+
+.reserve-buyer-select:focus {
+    border-color: var(--brand-color);
+}
+
+.reserved-confirmed-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.reserved-buyer-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 38px;
+    width: 110px;
+    min-width: 110px;
+    max-width: 110px;
+    padding: 0 12px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 @media (max-width: 992px) {
     .product-detail-main {
         grid-template-columns: 1fr;
@@ -679,4 +733,35 @@
     .like-text {
         font-size: 14px;
     }
+
+    .reserve-inline-wrap {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .reserve-buyer-select {
+        width: 100%;
+        min-width: 100%;
+        height: 34px;
+        font-size: 12px;
+        border-radius: 10px;
+    }
+
+    .reserved-confirmed-wrap {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .reserved-buyer-badge {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        height: 34px;
+        font-size: 12px;
+        border-radius: 10px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
 }
