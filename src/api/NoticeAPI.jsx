@@ -13,38 +13,6 @@ function getToken(auth) {
     return auth === 'auth' ? headersAuth : headers;
 }
 
-
-// axios.interceptors.response.use(
-//     (response) => {
-//         return response;
-//     },
-//     async (error) => {
-//         const originalRequest = error.config;
-//         if (originalRequest?.url === '/api/user/verify-password') {
-//             return Promise.reject(error);
-//         }
-//         if (error.response && error.response.status === 401 && !originalRequest._retry && originalRequest.url !== '/api/auth/refresh') {
-//             originalRequest._retry = true;
-
-//             try {
-//                 const newAccessToken = await refreshAccessToken();
-
-//                 originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-
-//                 return axios(originalRequest);
-
-//             } catch (refreshError) {
-//                 sessionStorage.clear();
-//                 window.location.href = "/";
-//                 return Promise.reject(refreshError);
-//             }
-//         }
-
-//         return Promise.reject(error);
-//     }
-// );
-
-
 export const getNoticesList = () => {
     let res = null;
     try {

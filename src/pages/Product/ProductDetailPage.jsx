@@ -105,8 +105,8 @@ export default function ProductDetailPage() {
                 method: "GET",
                 headers: token
                     ? {
-                          Authorization: `Bearer ${token}`,
-                      }
+                        Authorization: `Bearer ${token}`,
+                    }
                     : {},
             });
 
@@ -723,7 +723,7 @@ export default function ProductDetailPage() {
                                 <span className="label">조회수</span>
                                 <span className="value">{product.viewCount}</span>
                             </div>
-                            
+
                         </div>
 
                         <div className="detail-action-buttons">
