@@ -17,6 +17,17 @@ export default function MyPageSidebar({ userInfo }) {
     // 1. 내 잔액을 저장할 상태(State) 창고 만들기 (기본값은 0원)
     const [balance, setBalance] = useState(0);
 
+    // [신규 추가] 점수에 따른 레벨 계산 함수 (요구 점수가 점진적으로 증가)
+    const getTrustLevel = (score) => {
+        if (!score || score < 0) return 0; // 점수가 없거나 음수면 레벨 0
+        if (score >= 1500) return 6; // +600
+        if (score >= 900) return 5;  // +500
+        if (score >= 400) return 4;  // +300
+        if (score >= 100) return 3;  // +100
+        if (score >= 20) return 2;   // +20
+        return 1;                    // 0~19
+    };
+
     // 2. 사이드바 화면이 처음 켜질 때 딱 한 번 실행 (잔액 물어보기)
     // 🌟 무전기 수신기 설치 완료!
     useEffect(() => {
@@ -63,6 +74,21 @@ export default function MyPageSidebar({ userInfo }) {
                 <div className="info">
                     <div className="name-wrapper">
                         <p className="name">{userInfo?.nickname}</p>
+                        {/* 레벨 표시부 수정 */}
+                        <div className="level-badge">
+                            <span className="level-text" style={{ color: 'var(--accent-color)' }}>
+                                {userInfo?.level ? `Lv.${userInfo.level}` : 'Lv.0'}
+                            </span>
+                        </div>
+
+                        {/* 👇 새로 추가하는 문구 */}
+                        {userInfo?.level < 5 ? (
+                            <p className="next-level-info">
+                                다음 레벨까지 <strong>{userInfo?.nextLevelRemaining ?? 0}</strong> 남았습니다.
+                            </p>
+                        ) : (
+                            <p className="next-level-info max-level">최고 레벨에 도달했습니다!</p>
+                        )}<br/>
                         <NavLink to="/mypage" className="edit-profile-btn-link">
                             <button className="edit-profile-btn">
                                 내정보 보기
@@ -89,11 +115,12 @@ export default function MyPageSidebar({ userInfo }) {
                     </button>
                 </NavLink>
 
-                {/* <NavLink to="/purchase" className={({ isActive }) => (isActive ? 'active' : '')}>
+                {/* [신규 추가] 신뢰도 레벨 내역 메뉴 */}
+                <NavLink to="/trust-score" className={({ isActive }) => (isActive ? 'active' : '')}>
                     <button>
-                        <i className="fas fa-shopping-bag"></i> 구매 내역
+                        <i className="fas fa-shield-alt"></i> 신뢰도 레벨 내역
                     </button>
-                </NavLink> */}
+                </NavLink>
 
                 <NavLink to="/wishlist" className={({ isActive }) => (isActive ? 'active' : '')}>
                     <button>
@@ -112,7 +139,7 @@ export default function MyPageSidebar({ userInfo }) {
                 <button onClick={() => window.location.href = '/inquiries'}>
                     <i className="fas fa-question-circle"></i> 자주 묻는 질문
                 </button>
-                
+
                 <NavLink to="/notices" className={({ isActive }) => (isActive ? 'active' : '')}>
                     <button>
                         <i className="fas fa-heart"></i> 공지사항

@@ -21,7 +21,7 @@
 
 /* 사이드바 스타일 - 로그인 컨테이너의 느낌을 살림 */
 .sidebar {
-    width: 280px;
+    width: 300px;
     background: var(--white);
     border-radius: 24px;
     /* AuthPage와 통일 */
@@ -284,6 +284,22 @@
     font-size: 24px;
     color: var(--accent-color);
     margin-top: 5px;
+}
+
+.next-level-info {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.next-level-info strong {
+    color: var(--accent-color); /* 환승마켓 포인트 컬러 */
+    font-weight: 600;
+}
+
+.next-level-info.max-level {
+    color: #ffd700; /* 황금색 등 특별한 컬러 */
+    font-weight: bold;
 }
 
 /* 나의 페이지 반응형 (시작) */

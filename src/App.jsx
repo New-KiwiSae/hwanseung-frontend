@@ -14,6 +14,7 @@ import AuthPage from './pages/Auth/AuthPage.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
 import Purchase from './pages/MyPage/Purchase';
 import Wishlist from './pages/MyPage/Wishlist';
+import TrustScoreHistory from './pages/MyPage/TrustScoreHistory.jsx'; // 신규 임포트
 import './index.css';
 import SplashScreen from './components/SplashScreen';
 import FloatingChat from './pages/Chat/FloatingChat.jsx';
@@ -87,6 +88,7 @@ function App() {
                             <Route element={<Layout />}>
                                 <Route path="/mypage" element={<MyPage />} />
                                 <Route path="/sales" element={<Sales />} />
+                                <Route path="trust-score" element={<TrustScoreHistory />} />
                                 <Route path="/purchase" element={<Purchase />} />
                                 <Route path="/wishlist" element={<Wishlist />} />
                             </Route>
