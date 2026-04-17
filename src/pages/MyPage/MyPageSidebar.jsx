@@ -76,6 +76,13 @@ export default function MyPageSidebar({ userInfo }) {
                     </button>
                 </NavLink>
 
+                <NavLink to="/payments" className={({ isActive }) => (isActive ? 'active' : '')}>
+                    <button>
+                        <i className="fas fa-box-open"></i>  구매 내역
+                    </button>
+                </NavLink>
+
+
                 <NavLink to="/wishlist" className={({ isActive }) => (isActive ? 'active' : '')}>
                     <button>
                         <i className="fas fa-heart"></i> 관심 목록

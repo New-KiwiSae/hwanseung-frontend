@@ -12,8 +12,8 @@ import ReportCreatePage from './pages/Report/ReportCreatePage.jsx';
 import ScrollToTop from "./components/ScrollToTop";
 import AuthPage from './pages/Auth/AuthPage.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
-import Purchase from './pages/MyPage/Purchase';
 import Wishlist from './pages/MyPage/Wishlist';
+import Payments from './pages/MyPage/Payments';
 import './index.css';
 import SplashScreen from './components/SplashScreen';
 import FloatingChat from './pages/Chat/FloatingChat.jsx';
@@ -81,14 +81,6 @@ function App() {
                             <Route path="/reports/create/:productId" element={<ReportCreatePage />} />
                             <Route path="/info" element={<InfoPage />} />
 
-                            <Route element={<Layout />}>
-                                <Route path="/mypage" element={<MyPage />} />
-                                <Route path="/sales" element={<Sales />} />
-                                <Route path="/purchase" element={<Purchase />} />
-                                <Route path="/wishlist" element={<Wishlist />} />
-                            </Route>
-
-
                             <Route path="/admin" element={<AdminLayout />}>
                                 <Route index element={<AdminDashBoard />} />
                                 <Route path="dashboard" element={<AdminDashBoard />} />
@@ -107,12 +99,11 @@ function App() {
                             <Route element={<Layout />}>
                                 <Route path="/mypage" element={<MyPage />} />
                                 <Route path="/sales" element={<Sales />} />
-                                <Route path="/purchase" element={<Purchase />} />
+                                <Route path="/payments" element={<Payments />} />
                                 <Route path="/wishlist" element={<Wishlist />} />
                                 <Route path="/notices/:id" element={<NoticeDetailPage handler={null} value={null} />} />
                                 <Route path="/notices" element={<NoticeListPage />} />
                                 <Route path="inquiries" element={<Inquiries />} />
-
                                 <Route path="/notifications" element={<NotificationListPage />} />
                             </Route>
 
