@@ -1189,7 +1189,11 @@
   }
 
   .stats-grid {
-    flex-direction: column;
+    flex-direction: row;
+  }
+
+  .stat-icon {
+    display: inline-flex;
   }
 
   .stat-card {
