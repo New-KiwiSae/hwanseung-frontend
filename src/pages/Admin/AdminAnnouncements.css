@@ -1,11 +1,9 @@
-/* 전체 컨테이너 */
 .container.adminNotice {
     padding: 20px 60px;
     margin : 0;
     max-width :none;
 }
 
-/* 상단 헤더 */
 .adminNotice .header {
   display: flex;
   justify-content: space-between;
@@ -20,7 +18,6 @@
     margin-bottom: 24px;
 }
 
-/* 우측 버튼 */
 .adminNotice .addButton {
   background-color: #10b981;
   color: #fff;
@@ -35,7 +32,6 @@
   background-color: #059669;
 }
 
-/* 에러 박스 */
 .adminNotice .errorBox {
   background-color: #fdecec;
   border: 1px solid #f5c2c2;
@@ -46,7 +42,6 @@
   font-size: 14px;
 }
 
-/* 통계 영역 */
 .adminNotice .stats {
   display: flex;
   gap: 20px;
@@ -66,7 +61,6 @@
   font-weight: 600;
 }
 
-/* 테이블 카드 */
 .adminNotice .tableCard {
   background: #f9f9f9;
   border-radius: 12px;
@@ -74,7 +68,6 @@
   border: 1px solid #eee;
 }
 
-/* 테이블 헤더 */
 .adminNotice .tableHeader {
   display: grid;
   grid-template-columns: 80px 1fr 2fr 140px;
@@ -84,7 +77,6 @@
   border-bottom: 1px solid #eee;
 }
 
-/* 테이블 row */
 .adminNotice .tableRow {
   display: grid;
   grid-template-columns: 80px 1fr 2fr 140px;
@@ -105,26 +97,22 @@
   color: var(--text-color);
 }
 
-/* 제목 */
 .adminNotice .titleText {
   font-weight: 600;
   font-size: 14.5px;
   color: var(--text-color);
 }
 
-/* 내용 */
 .adminNotice .contentText {
   color: #666;
   font-size: 14px;
 }
 
-/* 날짜 */
 .adminNotice .dateText {
   font-size: 13px;
   color: #999;
 }
 
-/* 빈 상태 */
 .adminNotice .empty {
   text-align: center;
   padding: 60px 20px;
@@ -141,9 +129,6 @@
   padding: 3px 8px;
 }
 
-/* =========================
-    반응형
-========================= */
 @media (max-width: 768px) {
   .adminNotice .tableHeader {
     display: none;
@@ -178,7 +163,6 @@
   }
 }
 
-/* 공지사항 상세보기 */
 .adminNotice .notice-detail-page-wrap {
   position: absolute;
   top: 50%;
@@ -191,7 +175,6 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
 }
 
-/* [추가] 페이징 */
 .adminNotice .pagination {
   display: flex;
   justify-content: center;
@@ -220,7 +203,6 @@
   border-color: #10b981;
 }
 
-/* [추가] 반응형 페이징 */
 @media (max-width: 768px) {
   .adminNotice .pagination button {
     padding: 6px 8px;

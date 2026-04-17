@@ -1,26 +1,16 @@
-/* root 변수는 그대로 유지 */
 :root {
-    /* 환승마켓 Signature Theme */
     --bg-color: #f4f6f8;
-    /* Very light gray background */
     --form-bg: #ffffff;
-    /* Clean white for forms */
     --text-main: #333333;
-    /* Dark gray for primary text */
     --text-secondary: #888888;
-    /* Lighter text */
     --accent-color: #00d26a;
-    /* Vibrant Green from mockups */
     --accent-hover: #00c060;
-    /* Slightly darker green for hover */
     --white: #ffffff;
 
-    /* Modern, soft drop shadows */
     --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
     --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-/* body 태그에 직접 적용되던 스타일을 wrapper로 이동 */
 .auth-page-wrapper {
     background-color: var(--bg-color);
     display: flex;
@@ -37,7 +27,6 @@
     font-family: 'Noto Sans KR', sans-serif;
 }
 
-/* 모든 선택자 앞에 .auth-page-wrapper 추가 */
 .auth-page-wrapper .container {
     background-color: var(--form-bg);
     border-radius: 24px;
@@ -45,7 +34,6 @@
     position: relative;
     overflow: hidden;
     width: 860px;
-    /* 넓이 증가 */
     max-width: 100%;
     min-height: 580px;
     margin: 20px;
@@ -245,9 +233,7 @@
 .auth-page-wrapper .input-group.with-btn {
     display: flex;
     flex-wrap: wrap;
-    /* ✨ 중요: 요소가 넘치면 다음 줄로 보냄 */
     align-items: center;
-    /* 입력창과 버튼의 높이 정렬 */
     row-gap: 0px;
     column-gap: 10px;
     width: 100%;
@@ -275,7 +261,6 @@
 
 .timer-text.warning {
     color: #ff4d4f;
-    /* 30초 미만일 때 빨간색 */
 }
 
 .resend-wrapper {
@@ -512,25 +497,21 @@
     transform: translate(-50%, 0);
 }
 
-/* 기본적으로 모바일 헤더는 숨김 */
 .mobile-overlay-header {
     display: none;
 }
 
 @media (max-width: 768px) {
-    /* 1. 데스크톱 오버레이 제거 */
     .auth-page-wrapper .overlay-container {
         display: none !important;
     }
 
-    /* 2. wrapper */
     .auth-page-wrapper {
         align-items: flex-start;
         min-height: 100vh;
         padding: 20px 0;
     }
 
-    /* 3. 컨테이너 */
     .auth-page-wrapper .container {
         width: 95% !important;
         height: auto !important;
@@ -539,19 +520,14 @@
         margin: 0 auto;
     }
 
-    /* 4. 폼 컨테이너: relative + 애니메이션 */
     .auth-page-wrapper .form-container {
         position: relative !important;
         width: 100% !important;
         height: auto !important;
         background: #fff;
-        /* 애니메이션용 */
         transition: opacity 0.4s ease, transform 0.4s ease;
     }
 
-    /* ── 로그인/회원가입 전환 (애니메이션) ── */
-
-    /* 기본: 로그인 표시 */
     .auth-page-wrapper .sign-in-container {
         display: block;
         opacity: 1;
@@ -563,7 +539,6 @@
         transform: translateY(20px);
     }
 
-    /* 회원가입 활성화 시 */
     .auth-page-wrapper .container.right-panel-active .sign-in-container {
         display: none;
         opacity: 0;
@@ -577,12 +552,10 @@
         animation: mobileFadeUp 0.45s ease-out;
     }
 
-    /* 로그인으로 돌아올 때 */
     .auth-page-wrapper .container:not(.right-panel-active) .sign-in-container {
         animation: mobileFadeUp 0.45s ease-out;
     }
 
-    /* 5. form */
     .auth-page-wrapper form {
         display: flex !important;
         flex-direction: column !important;
@@ -591,7 +564,6 @@
         box-sizing: border-box;
     }
 
-    /* 6. 모바일 오버레이 헤더 */
     .auth-page-wrapper .mobile-overlay-header {
         display: block;
         flex-shrink: 0;
@@ -614,7 +586,6 @@
         margin: 0 0 14px;
     }
 
-    /* ★ 전환 버튼 스타일 */
     .auth-page-wrapper .mobile-overlay-header .btn.ghost-green {
         background-color: transparent;
         border: 2px solid #fff;
@@ -632,7 +603,6 @@
         background-color: rgba(255, 255, 255, 0.2);
     }
 
-    /* 7. scrollable-form: 내부 스크롤 제거 */
     .auth-page-wrapper .scrollable-form {
         max-height: none !important;
         overflow-y: visible !important;
@@ -640,7 +610,6 @@
         padding-right: 0;
     }
 
-    /* 8. 하단 버튼 */
     .auth-page-wrapper .primary-btn {
         flex-shrink: 0;
         margin-top: 10px;
@@ -648,7 +617,6 @@
     }
 }
 
-/* ── 모바일 전환 애니메이션 ── */
 @keyframes mobileFadeUp {
     0% {
         opacity: 0;
@@ -666,19 +634,14 @@
 
 .auth-page-wrapper .error-msg {
     width: 100%;
-    /* ✨ 중요: 가로를 다 채워서 버튼 옆에 못 오게 함 */
     display: block;
-    /* 확실하게 블록 요소로 지정 */
     color: #ff4d4f;
     font-size: 11px;
     margin-top: 5px;
-    /* 버튼/입력창과의 간격 */
     padding-left: 5px;
     order: 10;
-    /* flex 순서를 맨 뒤로 밀어 항상 아래에 위치 */
 }
 
-/* 주소 검색 모달 배경 (어둡게) */
 .postcode-overlay {
     position: fixed;
     top: 0;
@@ -687,10 +650,8 @@
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 9998;
-    /* 컨테이너 오버레이보다 높게 */
 }
 
-/* 주소 검색 모달 창 */
 .postcode-modal {
     position: fixed;
     top: 50%;
@@ -707,7 +668,6 @@
     flex-direction: column;
 }
 
-/* 모달 헤더 */
 .postcode-header {
     padding: 15px;
     display: flex;
@@ -742,17 +702,12 @@
     margin: 15px 0;
 }
 
-/* 상세주소 입력창이 비활성화 되었을 때의 스타일 */
 .input-wrapper input:disabled {
     background-color: #f5f5f5;
-    /* 회색 배경 */
     cursor: not-allowed;
-    /* 금지 표시 커서 */
     color: #999;
-    /* 흐린 글자색 */
 }
 
-/* 플레이스홀더 색상 조정 */
 .input-wrapper input:disabled::placeholder {
     color: #ccc;
 }

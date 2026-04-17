@@ -3,25 +3,15 @@ import axios from 'axios';
 import { fetchPublicCategories } from '../api/PublicCategoryAPI';
 import './SplashScreen.css';
 
-/**
- * 스플래시 스크린
- * - 실제 API 3개(카테고리, 인기매물, 상품목록)를 호출하며 진행률 반영
- * - 각 API 완료 시 ~33%씩 상승, 전부 완료 후 100% → 페이드아웃
- * - 첫 방문 시 한 번만 표시 (App.jsx의 sessionStorage 로직)
- */
 function SplashScreen({ onFinish }) {
-  // 실제 데이터 로딩 완료 비율 (0 ~ 100, API 완료 기준)
   const [dataProgress, setDataProgress] = useState(0);
-  // 화면에 표시되는 부드러운 진행률
   const [displayProgress, setDisplayProgress] = useState(0);
-  // 모든 데이터 로딩 완료 여부
   const [allLoaded, setAllLoaded] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
 
   const loadedCount = useRef(0);
-  const totalApis = 3; // 호출할 API 총 개수
+  const totalApis = 3;
 
-  // ── 개별 API 완료 시 진행률 갱신 ──
   const onApiLoaded = useCallback(() => {
     loadedCount.current += 1;
     const percent = Math.round((loadedCount.current / totalApis) * 100);
@@ -32,14 +22,11 @@ function SplashScreen({ onFinish }) {
     }
   }, []);
 
-  // ── 실제 API 호출 (마운트 시 1회) ──
   useEffect(() => {
-    // 1) 카테고리 목록
     fetchPublicCategories()
       .then(() => onApiLoaded())
-      .catch(() => onApiLoaded()); // 실패해도 진행
+      .catch(() => onApiLoaded());
 
-    // 2) 인기 매물
     const token = sessionStorage.getItem('accessToken');
     fetch('/api/products/popular', {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -47,26 +34,22 @@ function SplashScreen({ onFinish }) {
       .then(() => onApiLoaded())
       .catch(() => onApiLoaded());
 
-    // 3) 상품 전체 목록
     axios.get('/api/products')
       .then(() => onApiLoaded())
       .catch(() => onApiLoaded());
   }, [onApiLoaded]);
 
-  // ── 부드러운 진행률 애니메이션 ──
   useEffect(() => {
     const interval = setInterval(() => {
       setDisplayProgress(prev => {
-        // 데이터 로딩이 아직 안 끝났으면 dataProgress 근처까지만 서서히 올림
         if (!allLoaded) {
-          const target = Math.max(dataProgress - 5, 0); // 실제보다 살짝 뒤처지게
+          const target = Math.max(dataProgress - 5, 0);
           if (prev < target) {
             return Math.min(prev + 1.2, target);
           }
           return prev;
         }
 
-        // 모든 데이터 로딩 완료 → 100%까지 빠르게 채움
         if (prev >= 100) {
           clearInterval(interval);
           return 100;
@@ -78,7 +61,6 @@ function SplashScreen({ onFinish }) {
     return () => clearInterval(interval);
   }, [dataProgress, allLoaded]);
 
-  // ── 100% 도달 시 페이드아웃 → 종료 ──
   const handleFinish = useCallback(() => {
     setFadeOut(true);
     setTimeout(() => onFinish(), 500);
@@ -98,17 +80,13 @@ function SplashScreen({ onFinish }) {
       <div className="splash-logo-box">
         <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
           <g transform="translate(0, -35)">
-            {/* 자물쇠 손잡이 */}
             <path d="M 160 140 V 100 A 40 40 0 0 1 240 100 V 140"
               fill="none" stroke="#2B2D36" strokeWidth="18" strokeLinecap="round" />
-            {/* 자물쇠 몸통 */}
             <rect x="100" y="140" width="200" height="180" rx="45"
               fill="#FFFFFF" stroke="#2B2D36" strokeWidth="18" />
-            {/* 눈 */}
             <circle cx="150" cy="200" r="14" fill="#2B2D36" />
             <circle cx="250" cy="200" r="14" fill="#2B2D36" />
 
-            {/* 노선도 배경 (회색) */}
             <path d="M 150 240 L 175 265 L 225 265 L 250 240"
               fill="none" stroke="#E5E7EB" strokeWidth="17"
               strokeLinejoin="round" strokeLinecap="round" />
@@ -116,7 +94,6 @@ function SplashScreen({ onFinish }) {
             <circle cx="200" cy="265" r="9" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="6" />
             <circle cx="250" cy="240" r="9" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="6" />
 
-            {/* 노선도 채움 (초록색 - progress 연동) */}
             <path className="smile-anim"
               d="M 150 240 L 175 265 L 225 265 L 250 240"
               fill="none" stroke="#00D27A" strokeWidth="17"
@@ -125,7 +102,6 @@ function SplashScreen({ onFinish }) {
               strokeDasharray="100"
               strokeDashoffset={100 - progress} />
 
-            {/* 노선도 역(노드) - 각 API 완료 시 점등 */}
             <circle className="node-anim-1" cx="150" cy="240" r="9"
               fill="#FFFFFF" stroke={progress >= 10 ? '#00D27A' : '#E5E7EB'} strokeWidth="6"
               style={{ opacity: 1 }} />
@@ -137,7 +113,6 @@ function SplashScreen({ onFinish }) {
               style={{ opacity: 1 }} />
           </g>
 
-          {/* 로고 텍스트 */}
           <text x="200" y="345" fontFamily="'Pretendard', sans-serif"
             fontWeight="900" fontSize="52" letterSpacing="-2"
             textAnchor="middle" fill="#2B2D36">
@@ -152,9 +127,7 @@ function SplashScreen({ onFinish }) {
         </svg>
       </div>
 
-      {/* 게이지 바 영역 */}
       <div className="splash-gauge-wrapper">
-        {/* 전철 아이콘 */}
         <div className="splash-train-icon" style={{ left: `calc(${progress}% - 20px)` }}>
           <svg width="40" height="18" viewBox="0 0 52 21" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M4 5 Q4 1, 8 1 L34 1 Q36 1, 38 2 L44 4.5 Q48 6, 48 10 L48 18 L4 18 Q4 18, 4 5 Z" fill="#00D27A" />
@@ -174,7 +147,6 @@ function SplashScreen({ onFinish }) {
           </svg>
         </div>
 
-        {/* 게이지 트랙 */}
         <div className="splash-gauge-track">
           <div className="splash-gauge-fill" style={{ width: `${progress}%` }} />
           <div className="splash-rail-ties">
@@ -184,7 +156,6 @@ function SplashScreen({ onFinish }) {
           </div>
         </div>
 
-        {/* 로딩 상태 텍스트 */}
         <div className="splash-status-row">
           <span className="splash-status-text">
             {progress < 33

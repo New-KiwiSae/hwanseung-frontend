@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"; // ✅ 수정: useRef 추가
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiHeart, FiMessageCircle, FiMapPin } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
@@ -40,7 +40,7 @@ export default function ProductListPage() {
     const [imageErrorMap, setImageErrorMap] = useState({});
     const [categories, setCategories] = useState([]);
 
-    const observerTargetRef = useRef(null); // ✅ 추가: 무한스크롤 감지용 ref
+    const observerTargetRef = useRef(null);
 
 
     const categoryLabelMap = useMemo(() => {
@@ -100,7 +100,6 @@ export default function ProductListPage() {
         }
     }, [searchParams, categories]);
 
-    // ★ Header 검색 등 URL의 keyword 파라미터 동기화
     useEffect(() => {
         const kw = searchParams.get("keyword");
         if (kw !== null) {
@@ -262,7 +261,7 @@ export default function ProductListPage() {
             },
             {
                 root: null,
-                rootMargin: "0px 0px 200px 0px", // ✅ 추가: 미리 로드
+                rootMargin: "0px 0px 200px 0px",
                 threshold: 0,
             }
         );
@@ -273,7 +272,7 @@ export default function ProductListPage() {
             observer.unobserve(target);
             observer.disconnect();
         };
-    }, [loading, error, visibleCount, filteredProducts.length]); // ✅ 수정: scroll 이벤트 제거
+    }, [loading, error, visibleCount, filteredProducts.length]);
 
     return (
         <div className="product-list-page">
@@ -383,7 +382,6 @@ export default function ProductListPage() {
                                         <div className="product-thumb">
                                             {product.thumbnailUrl && !hasBrokenImage ? (
                                                 <img
-                                                    // src={`http://localhost:8080${product.thumbnailUrl}`}
                                                     src={`${product.thumbnailUrl}`}
                                                     alt={product.title}
                                                     onError={() => {
@@ -477,7 +475,7 @@ export default function ProductListPage() {
                             })}
                         </section>
 
-                        <div ref={observerTargetRef} className="product-list-observer" /> {/* ✅ 추가 */}
+                        <div ref={observerTargetRef} className="product-list-observer" />
                     </>
                 )}
             </div>

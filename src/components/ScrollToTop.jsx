@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-//스크롤 상단으로 이동
 const ScrollToTop = () => {
     const { pathname } = useLocation();
 

@@ -1,4 +1,3 @@
-/* 기존 auth-page-wrapper 스타일 유지 */
 .extra-info-container {
     background-color: var(--bg-color);
     display: flex;
@@ -13,7 +12,7 @@
     border-radius: 24px;
     box-shadow: var(--shadow-soft);
     padding: 50px 40px;
-    width: 480px; /* 기존 컨테이너의 한쪽 패널 사이즈와 유사하게 설정 */
+    width: 480px;
     max-width: 100%;
     text-align: center;
 }
@@ -36,7 +35,6 @@
     color: var(--accent-color);
 }
 
-/* 입력 그룹 스타일 */
 .extra-info-box .input-group {
     width: 100%;
     margin-bottom: 20px;
@@ -52,7 +50,6 @@
     color: var(--text-main);
 }
 
-/* 입력창 + 버튼 정렬 (연락처, 인증번호용) */
 .input-with-btn {
     display: flex;
     gap: 10px;
@@ -76,7 +73,6 @@
     box-shadow: 0 0 0 3px rgba(0, 210, 106, 0.1);
 }
 
-/* 인증번호 입력창 & 타이머 래퍼 */
 .sms-input-wrapper {
     position: relative;
     flex: 1;
@@ -84,7 +80,7 @@
 
 .sms-input-wrapper input {
     width: 100%;
-    padding-right: 60px; /* 타이머 공간 확보 */
+    padding-right: 60px;
 }
 
 .timer {
@@ -101,7 +97,6 @@
     color: #ff4d4f;
 }
 
-/* 버튼 스타일들 */
 .verify-request-btn, .verify-confirm-btn {
     padding: 14px 18px;
     min-width: 90px;
@@ -128,7 +123,6 @@
     cursor: default;
 }
 
-/* 최종 제출 버튼 */
 .submit-btn {
     width: 100%;
     padding: 16px;
@@ -156,7 +150,6 @@
     box-shadow: none;
 }
 
-/* 에러 메시지 */
 .error-message {
     color: #ff4d4f;
     font-size: 13px;
@@ -164,14 +157,12 @@
     text-align: center;
 }
 
-/* 비활성화 인풋 스타일 */
 input:disabled {
     background-color: #f5f5f5 !important;
     color: #999;
     cursor: not-allowed;
 }
 
-/* 애니메이션 효과 */
 .sms-verify-group {
     animation: slideDown 0.4s ease-out;
 }

@@ -32,7 +32,6 @@ const AdminManage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 관리자 생성 모달
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createForm, setCreateForm] = useState({
     username: '',
@@ -43,7 +42,6 @@ const AdminManage = () => {
   });
   const [createError, setCreateError] = useState('');
 
-  // 권한 수정 중인 행
   const [editingId, setEditingId] = useState(null);
   const [editRole, setEditRole] = useState('');
 
@@ -74,7 +72,6 @@ const AdminManage = () => {
     }
   }, []);
 
-  // ── 권한 수정 ──
   const handleEditClick = (admin) => {
     setEditingId(admin.id);
     setEditRole(admin.role);
@@ -101,7 +98,6 @@ const AdminManage = () => {
     }
   };
 
-  // ── 관리자 생성 ──
   const handleCreateChange = (e) => {
     const { name, value } = e.target;
     setCreateForm(prev => ({ ...prev, [name]: value }));
@@ -135,7 +131,6 @@ const AdminManage = () => {
     }
   };
 
-  // ── SUPER가 아니면 메시지만 표시, 테이블·버튼 전부 숨김 ──
   if (!isSuperAdmin) {
     return (
       <div className={styles.container}>
@@ -223,7 +218,6 @@ const AdminManage = () => {
         </table>
       )}
 
-      {/* ── 관리자 계정 생성 모달 ── */}
       {showCreateModal && (
         <div className={styles.overlay}>
           <div className={styles.modal}>

@@ -12,8 +12,8 @@ import ReportCreatePage from './pages/Report/ReportCreatePage.jsx';
 import ScrollToTop from "./components/ScrollToTop";
 import AuthPage from './pages/Auth/AuthPage.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
-import Purchase from './pages/MyPage/Purchase';
 import Wishlist from './pages/MyPage/Wishlist';
+import Payments from './pages/MyPage/Payments';
 import TrustScoreHistory from './pages/MyPage/TrustScoreHistory.jsx'; // 신규 임포트
 import './index.css';
 import SplashScreen from './components/SplashScreen';
@@ -69,13 +69,13 @@ function App() {
                 <main style={{ flexGrow: 1 }}>
                     <ScrollToTop />
                     <Routes>
-                        {/* [누구나 접근 가능] 로그인과 추가 정보 입력 페이지 */}
                         <Route path="/login" element={<AuthPage />} />
                         <Route path="/social-signup-extra" element={<SocialSignupExtra />} />
 
-                        {/* [PENDING 차단 구역] 이 안에 있는 모든 라우트는 StatusGuard를 거칩니다 */}
+                        <Route path="/" element={<MainPage />} />
+                        
                         <Route element={<StatusGuard />}>
-                            <Route path="/" element={<MainPage />} />
+                            
                             <Route path="/near-me" element={<NearMePage />} />
                             <Route path="/products" element={<ProductListPage />} />
                             <Route path="/products/:productId" element={<ProductDetailPage />} />
@@ -83,16 +83,6 @@ function App() {
                             <Route path="/products/:productId/edit" element={<ProductEditPage />} />
                             <Route path="/reports/create/:productId" element={<ReportCreatePage />} />
                             <Route path="/info" element={<InfoPage />} />
-
-                            {/* 마이페이지 그룹 */}
-                            <Route element={<Layout />}>
-                                <Route path="/mypage" element={<MyPage />} />
-                                <Route path="/sales" element={<Sales />} />
-                                <Route path="trust-score" element={<TrustScoreHistory />} />
-                                <Route path="/purchase" element={<Purchase />} />
-                                <Route path="/wishlist" element={<Wishlist />} />
-                            </Route>
-
 
                             <Route path="/admin" element={<AdminLayout />}>
                                 <Route index element={<AdminDashBoard />} />
@@ -105,7 +95,6 @@ function App() {
                                 <Route path="reports" element={<AdminReports />} />
                                 <Route path="/admin/admin-manage" element={<AdminManage />} />
                                 <Route path="chat" element={<AdminChatManager />} />
-                                {/* <Route path="chat" element={<AdminChatManage />} /> */}
                                 <Route path="announcements" element={<AdminAnnouncements />} />
                                 <Route path="inquiries" element={<AdminInquiries />} />
                             </Route>
@@ -113,14 +102,12 @@ function App() {
                             <Route element={<Layout />}>
                                 <Route path="/mypage" element={<MyPage />} />
                                 <Route path="/sales" element={<Sales />} />
-                                <Route path="/purchase" element={<Purchase />} />
+                                <Route path="/payments" element={<Payments />} />
                                 <Route path="/wishlist" element={<Wishlist />} />
-                                {/* 공지사항 상세 */}
+                                <Route path="trust-score" element={<TrustScoreHistory />} />
                                 <Route path="/notices/:id" element={<NoticeDetailPage handler={null} value={null} />} />
-                                {/* 공지사항 목록 */}
                                 <Route path="/notices" element={<NoticeListPage />} />
                                 <Route path="inquiries" element={<Inquiries />} />
-
                                 <Route path="/notifications" element={<NotificationListPage />} />
                             </Route>
 

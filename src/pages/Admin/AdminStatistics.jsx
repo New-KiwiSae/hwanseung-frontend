@@ -8,7 +8,6 @@ import {
     fetchReportStats,
 } from '../../api/StatisticsAPI';
 
-// 숫자 포맷 헬퍼
 const fmt = (v) => (v != null ? v.toLocaleString() : '-');
 const fmtWon = (v) => (v != null ? `${v.toLocaleString()}원` : '-');
 
@@ -18,7 +17,6 @@ function AdminStatistics() {
     const [errors, setErrors] = useState({});
     const [lastUpdated, setLastUpdated] = useState(null);
 
-    // 각 섹션 데이터
     const [userStats, setUserStats] = useState(null);
     const [txStats, setTxStats] = useState(null);
     const [productStats, setProductStats] = useState(null);
@@ -30,7 +28,6 @@ function AdminStatistics() {
 
         const newErrors = {};
 
-        // 각 API를 독립적으로 호출하여 하나가 실패해도 나머지는 표시
         const results = await Promise.allSettled([
             fetchUserStats(),
             fetchTransactionStats(),
@@ -66,7 +63,6 @@ function AdminStatistics() {
         return () => clearInterval(intervalId);
     }, [loadAllData]);
 
-    // 로딩 중 표시
     if (isLoading) {
         return (
             <div className={styles.statsContainer}>
@@ -80,11 +76,9 @@ function AdminStatistics() {
 
     const hasAnyError = Object.keys(errors).length > 0;
 
-    // 카테고리별 분포 - 최대값 기준 퍼센트 계산
     const categories = productStats?.categoryDistribution || [];
     const maxCategoryCount = Math.max(...categories.map(c => c.count), 1);
 
-    // 가격 분포 도넛 차트 conic-gradient 생성
     const priceRanges = productStats?.priceDistribution || [];
     const totalPriceCount = priceRanges.reduce((sum, r) => sum + r.count, 0) || 1;
     const priceColors = ['#00d68f', '#3b82f6', '#8b5cf6'];
@@ -99,15 +93,12 @@ function AdminStatistics() {
         ? { background: `conic-gradient(${conicStops.join(', ')})` }
         : { background: 'var(--toggle-color)' };
 
-    // 인기 검색어
     const keywords = searchStats?.popularKeywords || [];
 
-    // 바 차트 색상 순환
     const barFills = [styles.fillGreen, styles.fillBlue, styles.fillPurple, styles.fillOrange, styles.fillTeal, styles.fillPink, styles.fillRed, styles.fillYellow];
 
     return (
         <div className={styles.statsContainer}>
-            {/* 헤더 */}
             <div className={styles.pageHeader}>
                 <h2 className={styles.pageTitle}>통계</h2>
                 <button
@@ -120,7 +111,6 @@ function AdminStatistics() {
                 </button>
             </div>
 
-            {/* 에러 배너 */}
             {hasAnyError && (
                 <div className={styles.errorBanner}>
                     <i className="bx bx-error-circle" style={{ fontSize: 20 }}></i>
@@ -129,7 +119,6 @@ function AdminStatistics() {
             )}
 
 
-            {/* ====== 2. 사용자(User) 관련 통계 ====== */}
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>
                     <i className="bx bx-group"></i>
@@ -163,7 +152,6 @@ function AdminStatistics() {
                 )}
             </div>
 
-            {/* ====== 3. 거래(Transactions) 통계 ====== */}
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>
                     <i className="bx bx-transfer"></i>
@@ -203,7 +191,6 @@ function AdminStatistics() {
                 )}
             </div>
 
-            {/* ====== 4. 상품(Listings) 통계 ====== */}
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>
                     <i className="bx bx-package"></i>
@@ -213,7 +200,6 @@ function AdminStatistics() {
                     <SectionError message={errors.product} />
                 ) : (
                     <>
-                        {/* 상품 등록 수 (일/주/월) */}
                         <div className={styles.statsGrid} style={{ marginBottom: 20 }}>
                             <StatCard
                                 icon="bx bx-calendar-check"
@@ -245,7 +231,6 @@ function AdminStatistics() {
                         </div>
 
                         <div className={styles.twoColGrid}>
-                            {/* 카테고리별 상품 분포 */}
                             <div className={styles.panel}>
                                 <div className={styles.panelTitle}>
                                     <i className="bx bx-category"></i>
@@ -273,7 +258,6 @@ function AdminStatistics() {
                                 )}
                             </div>
 
-                            {/* 가격 분포 */}
                             <div className={styles.panel}>
                                 <div className={styles.panelTitle}>
                                     <i className="bx bx-won"></i>
@@ -308,7 +292,6 @@ function AdminStatistics() {
                 )}
             </div>
 
-            {/* ====== 5. 검색 & 탐색 행동 ====== */}
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>
                     <i className="bx bx-search-alt-2"></i>
@@ -318,7 +301,6 @@ function AdminStatistics() {
                     <SectionError message={errors.search} />
                 ) : (
                     <div className={styles.twoColGrid}>
-                        {/* 인기 검색어 */}
                         <div className={styles.panel}>
                             <div className={styles.panelTitle}>
                                 <i className="bx bx-trending-up"></i>
@@ -341,7 +323,6 @@ function AdminStatistics() {
                             )}
                         </div>
 
-                        {/* 찜(관심등록) 수 */}
                         <div className={styles.panel}>
                             <div className={styles.panelTitle}>
                                 <i className="bx bx-heart"></i>
@@ -360,7 +341,6 @@ function AdminStatistics() {
                 )}
             </div>
 
-            {/* ====== 6. 사기/신고/신뢰 관련 ====== */}
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>
                     <i className="bx bx-shield-quarter"></i>
@@ -404,7 +384,6 @@ function AdminStatistics() {
                 )}
             </div>
 
-            {/* 타임스탬프 */}
             {lastUpdated && (
                 <div className={styles.timestamp}>
                     <i className="bx bx-time-five"></i>
@@ -415,7 +394,6 @@ function AdminStatistics() {
     );
 }
 
-/* === 서브 컴포넌트 === */
 
 function StatCard({ icon, iconStyle, label, value, sub }) {
     return (

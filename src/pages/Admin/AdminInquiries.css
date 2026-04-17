@@ -1,11 +1,9 @@
-/* 메인 컬러: #1ABC9C (민트) */
 .faq-container {
     padding: 20px 60px;
     margin: 0;
     max-width: none;
 }
 
-/* 상단 헤더 */
 .faq-container .faq-header {
     display: flex;
     justify-content: space-between;
@@ -52,7 +50,6 @@
 .faq-container .faq-item {
     border: 1px solid #eee;
     border-radius: 8px;
-    /* margin-bottom: 10px; */
     overflow: hidden;
     width: 100%;
     background: white;
@@ -97,7 +94,6 @@
 }
 
 
-/* 빈 상태 */
 .container.faq-container .faq-list .empty {
     text-align: center;
     color: #aaa;
@@ -111,7 +107,6 @@
 }
 
 
-/* [추가] 페이징 */
 .faq-container .pagination {
     display: flex;
     justify-content: center;
@@ -173,7 +168,6 @@
 }
 
 
-/* 모달 배경 */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -187,7 +181,6 @@
     z-index: 1000;
 }
 
-/* 모달 컨텐츠 박스 */
 .faq-register-modal {
     background: white;
     width: 450px;
@@ -197,7 +190,6 @@
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
-/* 모달 헤더 */
 .faq-register-modal .modal-header {
     display: flex;
     justify-content: space-between;
@@ -256,7 +248,6 @@
     color: #fff;
 }
 
-/* 폼 스타일 */
 .faq-register-modal .form-group {
     margin-bottom: 20px;
 }
@@ -280,7 +271,7 @@
     border-radius: 8px;
     padding: 12px;
     font-size: 14px;
-    box-sizing: border-box; /* 패딩 포함 크기 조절 */
+    box-sizing: border-box;
 }
 
 .faq-register-modal textarea {
@@ -288,7 +279,6 @@
     resize: none;
 }
 
-/* 카테고리 체크박스 영역 */
 .faq-register-modal .category-selection {
     display: flex;
     gap: 20px;
@@ -309,7 +299,6 @@
 }
 
 
-/* 하단 버튼 영역 */
 .faq-register-modal .modal-footer {
     display: flex;
     justify-content: flex-end;
@@ -318,7 +307,6 @@
 }
 
 
-/* [추가] 반응형 페이징 */
 @media (max-width: 768px) {
     .faq-container .pagination button {
         padding: 6px 8px;

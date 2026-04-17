@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // 🚨 리액트 라우터의 Link 기능 임포트!
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const Footer = () => {
@@ -7,7 +7,6 @@ const Footer = () => {
     <footer className="site-footer">
       <div className="footer-main">
         <div className="footer-container">
-          {/* 상단: 로고 + 소셜 */}
           <div className="footer-top">
             <div className="footer-logo">
               <div className="footer-logo-icon">
@@ -17,7 +16,6 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* 링크 그리드 */}
           <div className="footer-links">
             <span>본 사이트는 팀 프로젝트 기반의 교육용 웹 애플리케이션입니다.<br/>
               상업적 목적이 아닌 학습과 포트폴리오 용도로 제작되었습니다.
@@ -32,7 +30,6 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* 하단 저작권 */}
       <div className="footer-bottom">
         <div className="footer-container">
           <span className="copyright">

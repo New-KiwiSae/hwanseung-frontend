@@ -154,7 +154,6 @@ export default function ProductCreatePage() {
     };
 
     useEffect(() => {
-        console.log("카카오 키:", import.meta.env.VITE_KAKAO_KEY);
         if (!window.kakao || !window.kakao.maps || !userInfo) return;
 
         window.kakao.maps.load(() => {

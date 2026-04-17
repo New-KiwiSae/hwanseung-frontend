@@ -15,7 +15,6 @@ export default function MyPageLayout() {
         }).catch(() => setLoading(false));
     }, []);
 
-    // 나의페이지 사이드바 반응형
     const sideBarhandler = () => {
         let classNameList = document.querySelector('.sidebar').classList;
         if(classNameList.length === 1 ) document.querySelector('.sidebar').classList.add('toggle');
@@ -28,16 +27,13 @@ export default function MyPageLayout() {
         <>
             <div className="mypage-body">
                 <div className="web-sidebar-layout">
-                    {/* 분리한 사이드바 호출 */}
                     <Sidebar userInfo={userInfo} />
 
-                    {/* 우측 메인 콘텐츠 영역 (App.js에서 설정한 Route들이 여기에 뜹니다) */}
                     <main className="main-viewport">
                         <Outlet context={{ userInfo }} />
                     </main>
                 </div>
                 
-                {/* 나의페이지 사이드바 반응형 */}
                 <div className='floatMyMenuIcon' onClick={sideBarhandler}><i className="fas fa-align-justify"></i></div>
             </div>
         </>

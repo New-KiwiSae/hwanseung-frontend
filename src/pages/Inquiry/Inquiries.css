@@ -1,9 +1,7 @@
-/* 메인 컬러: #1ABC9C (민트) */
 .inquiry-container {
     padding: 40px;
 }
 
-/* 상단 헤더 */
 .inquiry-container .inquiry-header {
     display: flex;
     justify-content: space-between;
@@ -101,7 +99,6 @@
     margin-left: auto;
 }
 
-/* 빈 상태 */
 .container.inquiry-container .inquiry-list .empty {
     text-align: center;
     color: #aaa;
@@ -115,7 +112,6 @@
 }
 
 
-/* [추가] 페이징 */
 .inquiry-container .pagination {
     display: flex;
     justify-content: center;
@@ -182,7 +178,6 @@
 }
 
 
-/* [추가] 반응형 페이징 */
 @media (max-width: 768px) {
     .inquiry-container .pagination button {
         padding: 6px 8px;

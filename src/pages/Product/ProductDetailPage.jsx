@@ -12,7 +12,6 @@ function formatPrice(price) {
     return Number(price || 0).toLocaleString();
 }
 
-// ✅ 추가: 작성일 표시용 함수
 function formatDate(dateString) {
     if (!dateString) return "-";
 
@@ -49,6 +48,10 @@ export default function ProductDetailPage() {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [imageErrorMap, setImageErrorMap] = useState({});
     const [categories, setCategories] = useState([]);
+
+    const [chatBuyers, setChatBuyers] = useState([]);
+    const [showReserveSelect, setShowReserveSelect] = useState(false);
+    const [selectedBuyerUsername, setSelectedBuyerUsername] = useState("");
 
     const categoryLabelMap = categories.reduce((acc, category) => {
         acc[category.key] = category.displayName;
@@ -152,11 +155,13 @@ export default function ProductDetailPage() {
                 setProduct(data);
                 setImageErrorMap({});
                 setSelectedImageIndex(0);
+                setSelectedBuyerUsername(data.buyerUsername || "");
+                setShowReserveSelect(false);
+                setChatBuyers([]);
 
                 await fetchLikeStatus();
             } catch (error) {
                 console.error("상품 상세 조회 실패:", error);
-
                 alert("삭제되었거나 존재하지 않는 상품입니다.");
                 navigate("/products", { replace: true });
             } finally {
@@ -167,21 +172,13 @@ export default function ProductDetailPage() {
         fetchProductDetail();
     }, [productId, navigate]);
 
-    // const currentUser = sessionStorage.getItem("username");
-
     const startChat = async () => {
-        // if (currentUser === product.sellerId) {
-        //     alert("본인이 등록한 상품에는 채팅을 걸 수 없습니다.");
-        //     return;
-        // }
         if (isSeller) {
             alert("본인이 등록한 상품에는 채팅을 걸 수 없습니다.");
             return;
         }
 
         const currentToken = sessionStorage.getItem("accessToken");
-
-        console.log("🔥 채팅할 때 쏘는 토큰:", currentToken);
 
         try {
             const res = await axios.post(
@@ -203,11 +200,8 @@ export default function ProductDetailPage() {
                 onConnect: () => {
                     const messageData = {
                         roomId: realRoomId,
-                        // sender: currentUser,
-                        // senderId: currentUser,
-                        // content: `${currentUser}님이 [${product.title}] 상품에 대해 채팅을 시작했습니다!`,
-                        sender: loginUserId, 
-                        senderId: loginUserId, 
+                        sender: loginUserId,
+                        senderId: loginUserId,
                         content: `${loginUserId}님이 [${product.title}] 상품에 대해 채팅을 시작했습니다!`,
                         receiverId: product.sellerId,
                     };
@@ -226,7 +220,6 @@ export default function ProductDetailPage() {
                 new CustomEvent("openTradeChat", {
                     detail: {
                         roomId: realRoomId,
-                        // buyerId: currentUser,
                         buyerId: loginUserId,
                         sellerId: product.sellerId,
                         itemName: product.title,
@@ -238,6 +231,12 @@ export default function ProductDetailPage() {
             alert("채팅방을 여는 데 실패했습니다. 로그인 후 이용 가능합니다.");
         }
     };
+
+    const selectedBuyerDisplayName =
+        chatBuyers.find((buyer) => buyer.username === selectedBuyerUsername)?.nickname || "";
+
+    const reservedBuyerDisplayName =
+        chatBuyers.find((buyer) => buyer.username === product?.buyerUsername)?.nickname || "";
 
     const handleLikeToggle = async () => {
         const token = sessionStorage.getItem("accessToken");
@@ -252,7 +251,6 @@ export default function ProductDetailPage() {
             alert("본인이 등록한 상품에는 찜할 수 없습니다.");
             return;
         }
-
 
         try {
             const response = await fetch(`/api/products/${productId}/like`, {
@@ -285,7 +283,6 @@ export default function ProductDetailPage() {
         }
     };
 
-    // ✏️수정: 신고 버튼 클릭 시 서버에 먼저 중복 신고 여부 확인
     const handleReport = async () => {
         const token = sessionStorage.getItem("accessToken");
 
@@ -364,7 +361,55 @@ export default function ProductDetailPage() {
         }
     };
 
+    const fetchChatBuyers = async () => {
+        try {
+            const token = sessionStorage.getItem("accessToken");
+
+            const response = await fetch(`/api/products/${productId}/chat-buyers`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const text = await response.text();
+            let result = [];
+
+            if (text) {
+                result = JSON.parse(text);
+            }
+
+            if (!response.ok) {
+                throw new Error("채팅 사용자 목록 조회 실패");
+            }
+
+            const buyerList = Array.isArray(result) ? result : [];
+
+            if (buyerList.length === 0) {
+                alert("아직 이 상품에 채팅을 건 사용자가 없습니다.");
+                return;
+            }
+
+            setChatBuyers(buyerList);
+            setShowReserveSelect(true);
+
+            if (!selectedBuyerUsername && buyerList.length === 1) {
+                setSelectedBuyerUsername(buyerList[0].username);
+            }
+        } catch (err) {
+            console.error("채팅 사용자 목록 조회 실패:", err);
+            alert(err.message || "채팅 사용자 목록을 불러오는 중 오류 발생");
+        }
+    };
+
     const handleSoldOut = async () => {
+        const finalBuyerUsername = selectedBuyerUsername || product?.buyerUsername;
+
+        if (!finalBuyerUsername) {
+            alert("판매완료할 구매자를 먼저 선택해주세요.");
+            return;
+        }
+
         const confirmed = window.confirm("판매완료 처리하시겠습니까?");
         if (!confirmed) return;
 
@@ -374,8 +419,12 @@ export default function ProductDetailPage() {
             const response = await fetch(`/api/products/${productId}/sold-out`, {
                 method: "PATCH",
                 headers: {
+                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
+                body: JSON.stringify({
+                    buyerUsername: finalBuyerUsername,
+                }),
             });
 
             const text = await response.text();
@@ -394,7 +443,10 @@ export default function ProductDetailPage() {
             setProduct((prev) => ({
                 ...prev,
                 saleStatus: "SOLD_OUT",
+                buyerUsername: finalBuyerUsername,
             }));
+
+            setShowReserveSelect(false);
         } catch (err) {
             console.error("판매완료 처리 실패:", err);
             alert(err.message || "판매완료 처리 중 오류 발생");
@@ -402,7 +454,17 @@ export default function ProductDetailPage() {
     };
 
     const handleReserve = async () => {
-        const confirmed = window.confirm("예약중 처리하시겠습니까?");
+        if (!showReserveSelect) {
+            await fetchChatBuyers();
+            return;
+        }
+
+        if (!selectedBuyerUsername) {
+            alert("예약자를 선택해주세요.");
+            return;
+        }
+
+        const confirmed = window.confirm("선택한 사용자로 예약중 처리하시겠습니까?");
         if (!confirmed) return;
 
         try {
@@ -411,8 +473,12 @@ export default function ProductDetailPage() {
             const response = await fetch(`/api/products/${productId}/reserved`, {
                 method: "PATCH",
                 headers: {
+                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
+                body: JSON.stringify({
+                    buyerUsername: selectedBuyerUsername,
+                }),
             });
 
             const text = await response.text();
@@ -431,7 +497,10 @@ export default function ProductDetailPage() {
             setProduct((prev) => ({
                 ...prev,
                 saleStatus: "RESERVED",
+                buyerUsername: selectedBuyerUsername,
             }));
+
+            setShowReserveSelect(false);
         } catch (err) {
             console.error("예약중 처리 실패:", err);
             alert(err.message || "예약중 처리 중 오류 발생");
@@ -468,7 +537,12 @@ export default function ProductDetailPage() {
             setProduct((prev) => ({
                 ...prev,
                 saleStatus: "SALE",
+                buyerUsername: null,
             }));
+
+            setSelectedBuyerUsername("");
+            setShowReserveSelect(false);
+            setChatBuyers([]);
         } catch (err) {
             console.error("예약해제 실패:", err);
             alert(err.message || "예약해제 중 오류 발생");
@@ -626,7 +700,6 @@ export default function ProductDetailPage() {
                                 <span className="value">{product.location}</span>
                             </div>
 
-                            {/* ✅ 추가: 거래지역 아래 작성일 */}
                             <div className="detail-info-item">
                                 <span className="label">작성일</span>
                                 <span className="value">{formatDate(product.createdAt)}</span>
@@ -650,6 +723,7 @@ export default function ProductDetailPage() {
                                 <span className="label">조회수</span>
                                 <span className="value">{product.viewCount}</span>
                             </div>
+
                         </div>
 
                         <div className="detail-action-buttons">
@@ -693,23 +767,58 @@ export default function ProductDetailPage() {
                         {canManageProduct && !isSoldOut && (
                             <div className="detail-owner-buttons">
                                 {canChangeSaleStatus && product.saleStatus === "SALE" && (
-                                    <button
-                                        type="button"
-                                        className="btn-reserved"
-                                        onClick={handleReserve}
-                                    >
-                                        예약중
-                                    </button>
+                                    <div className="reserve-inline-wrap">
+                                        {showReserveSelect ? (
+                                            <>
+                                                <select
+                                                    className="reserve-buyer-select"
+                                                    value={selectedBuyerUsername}
+                                                    onChange={(e) => setSelectedBuyerUsername(e.target.value)}
+                                                >
+                                                    <option value="">구매자 선택</option>
+                                                    {chatBuyers.map((buyer) => (
+                                                        <option key={buyer.username} value={buyer.username}>
+                                                            {buyer.nickname}
+                                                        </option>
+                                                    ))}
+                                                </select>
+
+                                                <button
+                                                    type="button"
+                                                    className="btn-reserved"
+                                                    onClick={handleReserve}
+                                                >
+                                                    예약확정
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                className="btn-reserved"
+                                                onClick={handleReserve}
+                                            >
+                                                예약중
+                                            </button>
+                                        )}
+                                    </div>
                                 )}
 
                                 {canChangeSaleStatus && product.saleStatus === "RESERVED" && (
-                                    <button
-                                        type="button"
-                                        className="btn-reserve-cancel"
-                                        onClick={handleReserveCancel}
-                                    >
-                                        예약해제
-                                    </button>
+                                    <div className="reserved-confirmed-wrap">
+                                        {reservedBuyerDisplayName && (
+                                            <span className="reserved-buyer-badge">
+                                                예약자: {reservedBuyerDisplayName}
+                                            </span>
+                                        )}
+
+                                        <button
+                                            type="button"
+                                            className="btn-reserve-cancel"
+                                            onClick={handleReserveCancel}
+                                        >
+                                            예약해제
+                                        </button>
+                                    </div>
                                 )}
 
                                 {canChangeSaleStatus && (

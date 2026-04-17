@@ -10,11 +10,10 @@ function AdminAnnouncements() {
         const [list, setList] = useState([]);
         const [error, setError] = useState(false);
         const navigate = useNavigate();
-        const [modalMode, setModalMode] = useState(null); // 'add' | 'edit' | 'delete' | 'detail'
+        const [modalMode, setModalMode] = useState(null);
         const [rowno, setRowno] = useState(null);
         const [no, setNo] = useState(0);
 
-        //추가 페이징 상태
         const [page, setPage] = useState(0);
         const [totalPages, setTotalPages] = useState(0);
 
@@ -26,24 +25,22 @@ function AdminAnnouncements() {
 
 
         useEffect(() => {
-            getNotices({ page: page, size: 10 }) //page 적용
+            getNotices({ page: page, size: 10 })
                 .then(res => {
                     setList(res.data.content);
                     setTotalPages(res.data.totalPages);
                 })
                 .catch(() => setError(true));
-        }, [no, modalMode, page]); //page 추가
+        }, [no, modalMode, page]);
 
 
 
-        //페이징 그룹 계산(5개씩)
         const pageGroup = Math.floor(page / 5);
         const startPage = pageGroup * 5;
         const endPage = Math.min(startPage + 5, totalPages);
 
 
 
-        // 추가 페이지 이동 함수
         const handlePageChange = (p) => {
             setPage(p);
         };
@@ -51,13 +48,11 @@ function AdminAnnouncements() {
         return (
             <div className="container adminNotice">
 
-                {/* 공지사항목록 메뉴 시작 */}
                 < div className="header" id='add'>
                     <h2 className="title">공지사항 관리</h2>
                     <button className="addButton" onClick={handlerModal}>+ 공지사항 등록</button>
                 </div>
 
-                {/* 에러 */}
                 {
                     error && (
                         <div className="errorBox">
@@ -66,14 +61,12 @@ function AdminAnnouncements() {
                     )
                 }
 
-                {/* 통계 */}
                 <div className="stats">
                     <span>전체 <strong>{list.length}</strong> 개</span>
                     <span>활성 <strong>{list.length}</strong> 개</span>
                     <span>등록 공지 <strong>{list.length}</strong> 개</span>
                 </div>
 
-                {/* 테이블 */}
                 <div className="tableCard">
                     <div className="tableHeader">
                         <div>순서</div>
@@ -101,7 +94,6 @@ function AdminAnnouncements() {
                     )}
                 </div>
 
-                {/* [추가] 페이징 UI */}
                 {list.length > 0 && (
                     <>
                         <div className="pagination">
@@ -125,18 +117,14 @@ function AdminAnnouncements() {
                     </>
                 )}
 
-                {/* 공지사항 등록 메뉴 시작 */}
                 {modalMode === 'add' && (<NoticeCreatePage handler={setModalMode} setNo={setNo} />)}
 
-                {/* 공지사항 상세 메뉴 시작 */}
                 {modalMode === 'detail' && (
                     <div className='notice-detail-page-wrap'>
                         <NoticeDetailPage handler={setModalMode} value={rowno} setNo={setNo} />
                     </div>
                 )}
 
-
-                {/* 공지사항 수정 메뉴 시작 */}
                 {modalMode === 'modi' && (
                     <div className='notice-detail-page-wrap'>
                         <NoticeModiPage handler={setModalMode} value={no} />

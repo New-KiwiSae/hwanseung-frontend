@@ -1,12 +1,7 @@
-/* ============================================
-   AdminCategories 전용 스타일
-   ============================================ */
-
 .container {
     padding: 20px 60px;
 }
 
-/* --- 헤더 --- */
 .pageHeader {
     display: flex;
     justify-content: space-between;
@@ -44,7 +39,6 @@
     font-size: 18px;
 }
 
-/* --- 에러 배너 --- */
 .errorBanner {
     display: flex;
     align-items: center;
@@ -65,7 +59,6 @@
     color: #fc8181;
 }
 
-/* --- 로딩 --- */
 .loadingWrap {
     display: flex;
     flex-direction: column;
@@ -88,7 +81,6 @@
     to { transform: rotate(360deg); }
 }
 
-/* --- 요약 바 --- */
 .summaryBar {
     display: flex;
     gap: 24px;
@@ -113,7 +105,6 @@
     font-weight: 700;
 }
 
-/* --- 카테고리 테이블 --- */
 .tableWrap {
     background: var(--sidebar-color);
     border-radius: 12px;
@@ -168,7 +159,6 @@
     border-bottom: none;
 }
 
-/* --- 순서 핸들 --- */
 .orderHandle {
     display: flex;
     align-items: center;
@@ -192,7 +182,6 @@
     justify-content: center;
 }
 
-/* --- 카테고리 이름 셀 --- */
 .categoryNameCell {
     display: flex;
     align-items: center;
@@ -229,7 +218,6 @@
     font-family: 'Consolas', 'Monaco', monospace;
 }
 
-/* --- 상태 토글 --- */
 .toggleWrap {
     display: flex;
     align-items: center;
@@ -275,7 +263,6 @@
     opacity: 0.6;
 }
 
-/* --- 상품 수 뱃지 --- */
 .countBadge {
     display: inline-flex;
     align-items: center;
@@ -293,7 +280,6 @@
     opacity: 0.5;
 }
 
-/* --- 액션 버튼들 --- */
 .actionBtns {
     display: flex;
     gap: 6px;
@@ -326,7 +312,6 @@
     color: #ef4444;
 }
 
-/* --- 빈 상태 --- */
 .emptyRow {
     text-align: center;
     padding: 60px 20px;
@@ -340,7 +325,6 @@
     margin-bottom: 12px;
 }
 
-/* --- 순서 변경 버튼 --- */
 .orderBtns {
     display: flex;
     flex-direction: column;
@@ -373,9 +357,6 @@
     cursor: not-allowed;
 }
 
-/* ============================================
-   모달 (추가/수정)
-   ============================================ */
 .modalOverlay {
     position: fixed;
     top: 0;
@@ -451,7 +432,6 @@
     opacity: 1;
 }
 
-/* --- 폼 --- */
 .modalBody {
     padding: 22px 26px 26px;
 }
@@ -503,7 +483,6 @@
     margin-top: 5px;
 }
 
-/* --- 이모지 선택 --- */
 .emojiPickerGrid {
     display: flex;
     flex-wrap: wrap;
@@ -536,7 +515,6 @@
     box-shadow: 0 0 0 2px rgba(0, 214, 143, 0.2);
 }
 
-/* --- 모달 액션 --- */
 .modalActions {
     display: flex;
     justify-content: flex-end;
@@ -584,7 +562,6 @@
     border-color: var(--text-color);
 }
 
-/* --- 삭제 확인 --- */
 .deleteWarning {
     display: flex;
     align-items: flex-start;
