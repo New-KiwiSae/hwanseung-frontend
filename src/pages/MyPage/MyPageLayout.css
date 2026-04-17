@@ -261,6 +261,22 @@
     display: none;
 }
 
+.next-level-info {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.next-level-info strong {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.next-level-info.max-level {
+    color: #ffd700;
+    font-weight: bold;
+}
+
 @media (max-width: 768px) {
     .sidebar {
         background: var(--white);
