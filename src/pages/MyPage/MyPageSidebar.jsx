@@ -15,7 +15,7 @@ export default function MyPageSidebar({ userInfo }) {
 
     const [balance, setBalance] = useState(0);
 
- 
+
     const getTrustLevel = (score) => {
         if (!score || score < 0) return 0;
         if (score >= 1500) return 6;
@@ -23,7 +23,7 @@ export default function MyPageSidebar({ userInfo }) {
         if (score >= 400) return 4;
         if (score >= 100) return 3;
         if (score >= 20) return 2;
-        return 1;                 
+        return 1;
     };
 
     useEffect(() => {
@@ -77,7 +77,7 @@ export default function MyPageSidebar({ userInfo }) {
                             </p>
                         ) : (
                             <p className="next-level-info max-level">최고 레벨에 도달했습니다!</p>
-                        )}<br/>
+                        )}<br />
                         <NavLink to="/mypage" className="edit-profile-btn-link">
                             <button className="edit-profile-btn">
                                 내정보 보기
@@ -101,14 +101,17 @@ export default function MyPageSidebar({ userInfo }) {
                 </NavLink>
 
                 <NavLink to="/payments" className={({ isActive }) => (isActive ? 'active' : '')}>
-                <NavLink to="/trust-score" className={({ isActive }) => (isActive ? 'active' : '')}>
                     <button>
                         <i className="fas fa-box-open"></i>  구매 내역
+                    </button>
+                </NavLink>
+
+                <NavLink to="/trust-score" className={({ isActive }) => (isActive ? 'active' : '')}>
+                    <button>
                         <i className="fas fa-shield-alt"></i> 신뢰도 레벨 내역
                     </button>
                 </NavLink>
 
-                </NavLink>
 
                 <NavLink to="/wishlist" className={({ isActive }) => (isActive ? 'active' : '')}>
                     <button>
