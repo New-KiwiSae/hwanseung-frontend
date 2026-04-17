@@ -71,8 +71,10 @@ function App() {
                         <Route path="/login" element={<AuthPage />} />
                         <Route path="/social-signup-extra" element={<SocialSignupExtra />} />
 
+                        <Route path="/" element={<MainPage />} />
+                        
                         <Route element={<StatusGuard />}>
-                            <Route path="/" element={<MainPage />} />
+                            
                             <Route path="/near-me" element={<NearMePage />} />
                             <Route path="/products" element={<ProductListPage />} />
                             <Route path="/products/:productId" element={<ProductDetailPage />} />
