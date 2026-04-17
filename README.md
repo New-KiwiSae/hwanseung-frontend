@@ -17,7 +17,7 @@ Google 소셜 로그인, 카카오 지도 기반 내 근처 거래, 아임포트
 | 구분 | 링크 |
 |---|---|
 | 배포 서버 | [https://hsmarket.duckdns.org](https://hsmarket.duckdns.org) |
-| 백엔드 저장소 | [Backend Repository](#) |
+| 백엔드 저장소 | [Backend Repository](https://github.com/effortdev/hwanseung-backend) |
 
 <br>
 
