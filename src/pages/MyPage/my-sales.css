@@ -126,3 +126,36 @@
     background-color: #f4f6f8;
     color: #a0a0a0;
 }
+
+@media screen and (max-width: 600px) {
+    .sales-list-item {
+        display: flex;
+        flex-wrap: wrap;
+        border: 1px solid #eeeeee;
+        border-radius: 16px;
+        padding: 20px;
+        cursor: pointer;
+        align-items: center;
+        background: var(--white, #ffffff);
+        transition: all 0.2s ease;
+    }
+
+    .sales-item-info {
+        flex-basis: 100%;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+    .sales-item-thumb {
+        flex-basis: 100%;
+        width: 100%;
+        height: 150px;
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+
+    .sales-item-status{
+        width:100%;
+    }
+
+}

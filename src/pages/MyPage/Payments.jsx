@@ -128,14 +128,14 @@ export default function Payments() {
                                     <div className="sales-item-price">{product.price.toLocaleString()}원</div>
                                 </div>
 
-                                <div>
-                                    {product.payStatus ? (
-                                        <span className="sales-status-badge sold-out">결제완료</span>
-                                    ) : (
-                                        <span className="sales-status-badge selling">결제하기</span>
-                                    )}
+                                <div className='sales-item-status'>
+                                {product.payStatus ? (
+                                    <span className="sales-status-badge sold-out">결제완료</span>
+                                        ) : (
+                                    <span className="sales-status-badge selling">결제하기</span>
+                                )}
                                     <span className={`sales-status-badge ${product.saleStatus === 'SOLD_OUT' ? 'sold-out' : 'selling'}`}>
-                                        {product.saleStatus === 'SOLD_OUT' ? '구매완료' : '예약중'}
+                                            {product.saleStatus === 'SOLD_OUT' ? '구매완료' : '예약중'}
                                     </span>
                                 </div>
                             </div>
